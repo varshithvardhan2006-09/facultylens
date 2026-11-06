@@ -295,6 +295,8 @@ def _init_runtime() -> None:
         settings = get_settings()
         os.environ.setdefault("HF_HOME", str(settings.hf_home_path))
         os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+        # Otherwise each load online fetches a second, unused copy of the weights (about 3 GB).
+        os.environ.setdefault("DISABLE_SAFETENSORS_CONVERSION", "true")
         import torch
 
         torch.set_num_threads(settings.torch_num_threads)
