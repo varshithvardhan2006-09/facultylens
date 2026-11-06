@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (report prose reads better unwrapped)
 """NAAC Criterion 1.4 report: the same content blocks rendered to PDF (fpdf2) and DOCX.
 
 `blocks(data)` turns the report data into an ordered list of headings, paragraphs, tables

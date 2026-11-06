@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (fixture data reads better unwrapped)
 """NAAC report rendering: both files open, say the same things, and mark drafts."""
 
 import io

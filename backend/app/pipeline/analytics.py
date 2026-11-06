@@ -105,7 +105,7 @@ def combine(stats_list: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _top(stats: dict[str, Any]) -> tuple[dict | None, dict | None]:
     strengths, gaps = choose_aspects(stats, need_evidence=False)
-    pick = lambda rows: {"aspect": rows[0]["aspect"], "label": rows[0]["label"]} if rows else None
+    pick = lambda rows: {"aspect": rows[0]["aspect"], "label": rows[0]["label"]} if rows else None  # noqa: E731
     return pick(strengths), pick(gaps)
 
 
@@ -219,7 +219,7 @@ def lexicon_rates(texts: list[str]) -> dict[str, Any]:
     n = len(texts)
     ability = sum(bool(ABILITY_RE.search(t)) for t in texts)
     warmth = sum(bool(WARMTH_RE.search(t)) for t in texts)
-    per = lambda c: round(1000 * c / n, 1) if n else None
+    per = lambda c: round(1000 * c / n, 1) if n else None  # noqa: E731
     return {
         "answers": n,
         "ability": ability,

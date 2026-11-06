@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (Markdown table rows in report_md read better unwrapped)
 """The evaluation (SPEC §8): `python -m ml.evaluate [--finetune] [--skip-summaries]`.
 
 Writes ml/results/evaluation.json (read by the admin Evaluation page), PNG charts and

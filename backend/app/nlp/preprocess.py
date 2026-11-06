@@ -18,45 +18,10 @@ _PUNCT_RUN = re.compile(r"([!?])\1+|\.{4,}")
 _ELONGATED = {"soo": "so", "noo": "no", "yess": "yes", "okk": "ok", "hii": "hi", "verry": "very"}
 _QUOTES = str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-"})
 
-_CORE_STOPWORDS = [
-    "a",
-    "an",
-    "the",
-    "is",
-    "are",
-    "was",
-    "were",
-    "be",
-    "been",
-    "i",
-    "you",
-    "he",
-    "she",
-    "it",
-    "we",
-    "they",
-    "this",
-    "that",
-    "and",
-    "or",
-    "but",
-    "not",
-    "to",
-    "of",
-    "in",
-    "on",
-    "for",
-    "with",
-    "at",
-    "by",
-    "from",
-    "as",
-    "very",
-    "so",
-    "too",
-    "more",
-    "most",
-]
+_CORE_STOPWORDS = (
+    "a an the is are was were be been i you he she it we they this that and or but not to of "
+    "in on for with at by from as very so too more most"
+).split()
 
 
 def _fix_elongation(match: re.Match) -> str:

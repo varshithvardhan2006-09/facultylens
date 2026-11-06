@@ -15,15 +15,15 @@ os.environ["ANALYSIS_ON_SUBMIT"] = "false"  # no background model runs during te
 os.environ["GROQ_API_KEY"] = ""
 os.environ["S2_API_KEY"] = ""
 
-from httpx import ASGITransport, AsyncClient
+from httpx import ASGITransport, AsyncClient  # noqa: E402
 
-from app import db
-from app.auth.security import hash_password
-from app.config import get_settings
-from app.limiter import limiter
-from app.main import create_app
-from app.routers.auth import reset_login_failures
-from app.utils import now
+from app import db  # noqa: E402
+from app.auth.security import hash_password  # noqa: E402
+from app.config import get_settings  # noqa: E402
+from app.limiter import limiter  # noqa: E402
+from app.main import create_app  # noqa: E402
+from app.routers.auth import reset_login_failures  # noqa: E402
+from app.utils import now  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
 ROLL_NUMBERS = ["2451-24-733-001", "2451-24-733-002", "2451-24-733-003", "2451-24-733-004"]
