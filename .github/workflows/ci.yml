@@ -12,6 +12,11 @@ jobs:
       mongo:
         image: mongo:8
         ports: ["27017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.runCommand({ping:1}).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
     env:
       JWT_SECRET: ci-only-jwt-secret-that-is-long-enough-for-tests
       STUDENT_HASH_SALT: ci-only-student-hash-salt-long-enough-for-tests
@@ -26,9 +31,20 @@ jobs:
       - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: pip install -r requirements-dev.txt
       - run: python -m spacy download en_core_web_sm
+      - run: python -m nltk.downloader punkt_tab stopwords wordnet omw-1.4 vader_lexicon
+      - name: Check that MongoDB answers
+        run: |
+          python -c "
+          from pymongo import MongoClient
+          try:
+              print(MongoClient('mongodb://127.0.0.1:27017', serverSelectionTimeoutMS=15000).admin.command('ping'))
+          except Exception as exc:
+              print(f'::error::MongoDB ping failed: {type(exc).__name__}: {str(exc)[:300]}')
+              raise
+          "
       - run: ruff check .
       - run: ruff format --check .
-      - run: pytest -q -m "not slow and not network" --cov=app --cov-fail-under=70
+      - run: pytest -q -rs -m "not slow and not network" --cov=app --cov-fail-under=70
 
   frontend:
     runs-on: ubuntu-latest

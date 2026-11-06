@@ -40,7 +40,11 @@ async def mongo():
     """Live local MongoDB test database, emptied before and after; skipped if not running."""
     await db.close_client()
     if not await db.ping():
-        pytest.skip("MongoDB not reachable on MONGODB_URI")
+        message = "MongoDB not reachable on MONGODB_URI"
+        # On a laptop a skip is friendly; in CI it would hide most of the suite.
+        if os.environ.get("CI"):
+            pytest.fail(message)
+        pytest.skip(message)
     database = db.get_db()
     await db.get_client().drop_database(database.name)
     await db.ensure_indexes(database)
