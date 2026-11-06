@@ -84,7 +84,7 @@ function PulseIcon() {
 
 function Brand({ institution }) {
   return (
-    <div className="flex items-center gap-2.5">
+    <div className="flex min-w-0 items-center gap-2.5">
       <Mark size={28} />
       <div className="min-w-0 leading-tight">
         <div className="text-section font-bold tracking-[-0.01em]">FacultyLens</div>
@@ -282,7 +282,7 @@ export function AppShell() {
             <Brand institution={institution} />
             <button
               type="button"
-              className="btn h-11 w-11 px-0 text-on-board hover:bg-board-2"
+              className="btn h-11 w-11 shrink-0 px-0 text-on-board hover:bg-board-2"
               aria-label="Close menu"
               onClick={() => setSheetOpen(false)}
             >
@@ -310,7 +310,7 @@ export function AppShell() {
       <main
         id="main"
         tabIndex={-1}
-        className="min-w-0 px-4 pt-6 pb-16 outline-none md:px-[var(--pad)] md:pt-8"
+        className="min-w-0 overflow-x-clip px-4 pt-6 pb-16 outline-none md:px-[var(--pad)] md:pt-8"
       >
         <Outlet />
       </main>
