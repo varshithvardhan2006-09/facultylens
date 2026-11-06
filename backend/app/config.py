@@ -8,6 +8,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BACKEND_DIR = Path(__file__).resolve().parent.parent
+MIN_SECRET_LENGTH = 32
 
 
 class Settings(BaseSettings):
@@ -77,7 +78,11 @@ class Settings(BaseSettings):
     def placeholder_secrets(self) -> list[str]:
         """Secrets still at a shipped placeholder; anyone could forge logins or undo anonymity."""
         secrets = {"JWT_SECRET": self.jwt_secret, "STUDENT_HASH_SALT": self.student_hash_salt}
-        return [name for name, value in secrets.items() if value.startswith("change-me")]
+        return [
+            name
+            for name, value in secrets.items()
+            if value.startswith("change-me") or len(value) < MIN_SECRET_LENGTH
+        ]
 
     @property
     def llm_configured(self) -> bool:

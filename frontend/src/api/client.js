@@ -38,9 +38,13 @@ export function refreshSession() {
         accessToken = res.data.access_token;
         return res.data;
       })
-      .catch(() => {
-        accessToken = null;
-        return null;
+      .catch((err) => {
+        // Only a refused session means signed out; a restart or lost network is not that.
+        if (err.response?.status === 401) {
+          accessToken = null;
+          return null;
+        }
+        throw err;
       })
       .finally(() => {
         refreshing = null;
@@ -60,7 +64,12 @@ api.interceptors.response.use(
     const { config, response } = error;
     if (!response || !config) throw error;
     if (response.status === 401 && !config._skipAuthRetry && !config._retried) {
-      const session = await refreshSession();
+      let session;
+      try {
+        session = await refreshSession();
+      } catch {
+        throw error; // the server is unreachable: keep the session and the page's input
+      }
       if (session) {
         config._retried = true;
         return api(config);
@@ -85,7 +94,15 @@ export function errorMessage(error, fallback = "Something went wrong. Try again.
   if (typeof detail === "string") return detail;
   if (detail?.message) return detail.message;
   if (Array.isArray(detail) && detail.length) {
-    return detail.map((d) => d.msg?.replace(/^Value error, /, "")).join(" ");
+    return detail
+      .map((d) => {
+        const message = d.msg?.replace(/^Value error, /, "");
+        const field = d.loc?.at(-1);
+        return typeof field === "string" && field !== "body" && d.type !== "value_error"
+          ? `${field.replaceAll("_", " ")}: ${message}`
+          : message;
+      })
+      .join(" ");
   }
   if (error.response.status === 429) return "Too many attempts. Wait a minute and try again.";
   return fallback;

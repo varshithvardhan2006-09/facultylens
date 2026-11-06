@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.feedback_spec import MAX_TEXT
+from app.utils import CONTROL_CHARS
 
 Term = Literal["odd", "even"]
 FormType = Literal["teaching", "curriculum"]
@@ -18,6 +19,11 @@ class CycleIn(BaseModel):
     term: Term
     opens_at: datetime
     closes_at: datetime
+
+    @field_validator("opens_at", "closes_at")
+    @classmethod
+    def _with_timezone(cls, v: datetime) -> datetime:
+        return v if v.tzinfo else v.replace(tzinfo=UTC)
 
     @model_validator(mode="after")
     def _dates(self):
@@ -77,6 +83,7 @@ class CycleBrief(BaseModel):
     id: str
     name: str
     status: CycleStatus
+    opens_at: datetime
     closes_at: datetime
 
 
@@ -127,7 +134,7 @@ class ResponseIn(BaseModel):
     def _texts(cls, v: dict[str, str | None]) -> dict[str, str | None]:
         out = {}
         for key, value in v.items():
-            text = " ".join((value or "").split())
+            text = " ".join(CONTROL_CHARS.sub("", value or "").split())
             if len(text) > MAX_TEXT:
                 raise ValueError(f"Keep each answer under {MAX_TEXT} characters.")
             out[key] = text or None

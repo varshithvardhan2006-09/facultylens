@@ -6,6 +6,7 @@ every page, is always available to the admin.
 """
 
 import asyncio
+import re
 import uuid
 from typing import Annotated, Any, Literal
 
@@ -23,7 +24,7 @@ from app.services import naac_charts, naac_render
 from app.services.audit import record
 from app.services.forms_data import form_rows, response_counts
 from app.services.naac_data import report_data
-from app.utils import now, oid, to_jsonable
+from app.utils import CONTROL_CHARS, now, oid, to_jsonable
 
 router = APIRouter(prefix="/reports/naac", tags=["reports"])
 Leads = Annotated[User, Depends(require_roles("admin", "hod"))]
@@ -35,6 +36,17 @@ async def _cycle(db: Db, cycle: str) -> dict[str, Any]:
     if not doc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Cycle not found")
     return doc
+
+
+def _without_control_chars(value: Any) -> Any:
+    """Older comments may still hold characters that a Word file can't store."""
+    if isinstance(value, str):
+        return CONTROL_CHARS.sub("", value)
+    if isinstance(value, dict):
+        return {k: _without_control_chars(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_without_control_chars(v) for v in value]
+    return value
 
 
 def _scope(user: User) -> dict[str, Any]:
@@ -260,7 +272,12 @@ async def action_evidence(cycle: str, action_id: str, db: Db, user: Leads) -> li
 async def report_status(cycle: str, db: Db, user: Leads) -> dict:
     """What still stands between this cycle and a final export."""
     doc = await _cycle(db, cycle)
-    form_ids = await db.forms.distinct("_id", {"cycle_id": doc["_id"]})
+    form_query: dict[str, Any] = {"cycle_id": doc["_id"]}
+    if user["role"] != "admin":  # a HoD's checklist covers their own department
+        form_query["course_id"] = {
+            "$in": await db.courses.distinct("_id", {"department_id": user.get("department_id")})
+        }
+    form_ids = await db.forms.distinct("_id", form_query)
     responses = await db.responses.count_documents({"form_id": {"$in": form_ids}})
     response_ids = await db.responses.distinct("_id", {"form_id": {"$in": form_ids}})
     analysed = await db.analyses.count_documents(
@@ -293,7 +310,7 @@ async def _export(cycle: str, fmt: str, draft: bool, db: Db, admin: User) -> Res
                 if total
                 else "Draft the Action Taken Report first.",
             )
-    data = await report_data(db, doc)
+    data = _without_control_chars(await report_data(db, doc))
 
     def build() -> bytes:
         charts = naac_charts.all_charts(data)
@@ -301,7 +318,9 @@ async def _export(cycle: str, fmt: str, draft: bool, db: Db, admin: User) -> Res
         return render(data, charts, draft)
 
     content = await asyncio.to_thread(build)
-    name = f"NAAC-1.4-{doc['name'].replace(' ', '-')}{'-DRAFT' if draft else ''}.{fmt}"
+    # Headers hold Latin-1 only, and a cycle may be called "2026–27 Odd Sem".
+    cycle_name = re.sub(r"[^A-Za-z0-9._-]+", "-", doc["name"]).strip("-")
+    name = f"NAAC-1.4-{cycle_name}{'-DRAFT' if draft else ''}.{fmt}"
     media = (
         "application/pdf"
         if fmt == "pdf"

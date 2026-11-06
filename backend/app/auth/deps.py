@@ -8,7 +8,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pymongo.asynchronous.database import AsyncDatabase
 
-from app.auth.security import decode_access_token
+from app.auth.security import decode_access_token, password_stamp
 from app.db import get_db
 from app.utils import oid
 
@@ -44,6 +44,8 @@ async def get_user_allow_pw_change(
     user = await db.users.find_one({"_id": user_id})
     if not user or not user.get("is_active", True):
         raise _unauthorized("Account not active")
+    if payload.get("pwd", 0) != password_stamp(user):
+        raise _unauthorized("Session expired")
     return user
 
 

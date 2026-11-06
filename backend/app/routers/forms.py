@@ -16,7 +16,7 @@ from app.schemas.feedback import FormOut, MyForm, ResponseIn
 from app.services.anonymity import student_form_hash
 from app.services.audit import record
 from app.services.forms_data import course_brief, cycle_brief, lookups, response_counts
-from app.utils import now, oid
+from app.utils import anon_id, now, oid
 
 router = APIRouter(prefix="/forms", tags=["forms"])
 Student = Annotated[User, Depends(require_roles("student"))]
@@ -91,9 +91,11 @@ def _staff_can_see(user: User, form: dict, course: dict) -> bool:
         return True
     if user["role"] == "hod" and course.get("department_id") == user.get("department_id"):
         return True
-    return user["role"] in ("faculty", "hod") and (
-        form.get("faculty_id") == user["_id"] or user["_id"] in course.get("faculty_ids", [])
-    )
+    if user["role"] not in ("faculty", "hod"):
+        return False
+    if form.get("type") == "teaching":  # a co-teacher's form is that teacher's own
+        return form.get("faculty_id") == user["_id"]
+    return user["_id"] in course.get("faculty_ids", [])
 
 
 @router.get("/{form_id}", response_model=FormOut)
@@ -150,12 +152,12 @@ async def submit_response(form_id: str, body: ResponseIn, db: Db, student: Stude
         "is_synthetic": False,
     }
     try:
-        inserted = await db.responses.insert_one(doc)
+        inserted = await db.responses.insert_one({"_id": anon_id(), **doc})
     except DuplicateKeyError:
         raise HTTPException(
             status.HTTP_409_CONFLICT, "You've already submitted this form."
         ) from None
     # No student id in the audit trail either: only that a form received a response.
-    await record(db, None, "form.response", form_id)
+    await record(db, None, "form.response", form_id, date_only=True)
     jobs.submit_auto(inserted.inserted_id)  # analysed in the background (SPEC §3 step 4)
     return {"status": "recorded"}

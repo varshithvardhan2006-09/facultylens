@@ -100,6 +100,8 @@ async def list_versions(faculty_id: str, db: Db, user: Staff) -> list[dict]:
 
 
 async def _draft(db: Db, target: dict[str, Any], version: int) -> dict[str, Any]:
+    if not 0 < version < 2**31:  # MongoDB can't even look up a number beyond 64 bits
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "That version doesn't exist.")
     doc = await db.profile_versions.find_one({"user_id": target["_id"], "version": version})
     if not doc:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Version not found")

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
 import { api, errorMessage } from "../../api/client";
 import { CredentialsNotice } from "../../components/CredentialsNotice";
@@ -22,6 +22,7 @@ export function UsersPage() {
   const departments = useDepartments();
   const [filters, setFilters] = useState({ q: "", role: "", department_id: "", inactive: false });
   const [page, setPage] = useState(1);
+  const resetting = useRef(false);
   const [data, setData] = useState(null);
   const [loadError, setLoadError] = useState(null);
   const [panel, setPanel] = useState(null); // "add" | "bulk" | {edit: user}
@@ -42,7 +43,13 @@ export function UsersPage() {
       () => {
         api
           .get("/users", { params })
-          .then((res) => alive && (setData(res.data), setLoadError(null)))
+          .then((res) => {
+            if (!alive) return;
+            // Removing the last row of the last page leaves nothing here: step back a page.
+            if (res.data.items.length === 0 && page > 1) setPage((p) => p - 1);
+            setData(res.data);
+            setLoadError(null);
+          })
           .catch((err) => alive && setLoadError(errorMessage(err)));
       },
       filters.q ? 250 : 0,
@@ -60,6 +67,13 @@ export function UsersPage() {
   };
 
   async function resetPassword(u) {
+    if (resetting.current) return;
+    const notice = credentials?.length
+      ? " The temporary passwords on screen will disappear, so save them first."
+      : "";
+    const question = `Reset the password for ${u.name}? Their current password stops working.`;
+    if (!window.confirm(question + notice)) return;
+    resetting.current = true;
     setRowError(null);
     try {
       const res = await api.post(`/users/${u.id}/reset-password`);
@@ -69,6 +83,8 @@ export function UsersPage() {
       reload();
     } catch (err) {
       setRowError(errorMessage(err));
+    } finally {
+      resetting.current = false;
     }
   }
 
@@ -161,6 +177,7 @@ export function UsersPage() {
       {panel?.edit && (
         <Panel title={`Edit ${panel.edit.name}`}>
           <UserForm
+            key={panel.edit.id}
             departments={departments.list}
             user={panel.edit}
             onCancel={() => setPanel(null)}

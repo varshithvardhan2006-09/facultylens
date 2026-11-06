@@ -1,6 +1,8 @@
 /** Minimal CSV writer (RFC 4180 quoting) and a browser download helper. */
 function cell(value) {
-  const text = value === null || value === undefined ? "" : String(value);
+  const raw = value === null || value === undefined ? "" : String(value);
+  // A spreadsheet would run a cell starting with one of these as a formula.
+  const text = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw;
   return /[",\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 

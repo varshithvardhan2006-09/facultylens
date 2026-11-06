@@ -36,7 +36,10 @@ export function BulkAdd({ onCreated, onCancel }) {
     const form = new FormData();
     form.append("file", new Blob([text], { type: "text/csv" }), fileName || "users.csv");
     try {
-      const res = await api.post(`/users/bulk${dryRun ? "?dry_run=true" : ""}`, form);
+      // Creating accounts hashes one password per row, so a large file takes minutes.
+      const res = await api.post(`/users/bulk${dryRun ? "?dry_run=true" : ""}`, form, {
+        timeout: dryRun ? 30000 : 600000,
+      });
       if (dryRun) setChecked(res.data);
       else onCreated(res.data.credentials);
     } catch (err) {

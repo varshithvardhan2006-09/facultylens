@@ -12,6 +12,7 @@ from app.auth.deps import Db, User, require_roles
 from app.config import get_settings
 from app.nlp import registry
 from app.pipeline.aggregate import effective_field
+from app.routers.overview import _hod_forms, _sees_feedback
 from app.schemas.feedback import FormStats
 from app.services.forms_data import course_brief, cycle_brief, lookups, response_counts
 from app.utils import oid
@@ -69,16 +70,7 @@ async def faculty_feedback(
     target = await db.users.find_one({"_id": oid(faculty_id, "Faculty member")})
     if not target or target["role"] not in ("faculty", "hod"):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Faculty member not found")
-    allowed = (
-        user["role"] == "admin"
-        or user["_id"] == target["_id"]
-        or (
-            user["role"] == "hod"
-            and target.get("department_id")
-            and target.get("department_id") == user.get("department_id")
-        )
-    )
-    if not allowed:
+    if not await _sees_feedback(db, user, target):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "You can't see this feedback.")
 
     query = {"faculty_id": target["_id"], "type": "teaching"}
@@ -87,6 +79,9 @@ async def faculty_feedback(
     if course:
         query["course_id"] = oid(course, "Course")
     forms = await db.forms.find(query).to_list()
+    scope = await _hod_forms(db, user, target)
+    if scope:
+        forms = [f for f in forms if f["course_id"] in scope["course_id"]["$in"]]
     cycles, courses, _ = await lookups(db, forms)
     counts = await response_counts(db, [f["_id"] for f in forms])
     minimum = get_settings().min_responses_for_display

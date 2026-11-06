@@ -173,6 +173,7 @@ export function CycleDetailPage() {
             <span className="skeleton h-4 w-72" />
           )}
         </PageHeader>
+        {cycle && <FormError>{error}</FormError>}
       </div>
 
       {cycle && cycle.counts && cycle.counts.eligible > 0 && (
@@ -187,7 +188,10 @@ export function CycleDetailPage() {
           cycle={cycle}
           onChanged={(c) => {
             setCycle(c);
-            feedbackApi.cycleForms(cycleId).then(setForms);
+            feedbackApi
+              .cycleForms(cycleId)
+              .then(setForms)
+              .catch((err) => setError(errorMessage(err)));
           }}
         />
       )}

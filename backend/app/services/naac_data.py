@@ -106,7 +106,10 @@ async def report_data(db, cycle: dict[str, Any]) -> dict[str, Any]:
         for c in course_rows:
             c["teaching_rate"] = _rate(c["teaching_responses"], c["teaching_eligible"])
 
-        combined = analytics.combine([f["stats"] for f in usable_t]) if usable_t else None
+        # One teacher's scores can't be published as "the department" (SPEC Phase 7).
+        identifiable = len({f.get("faculty_id") for f in usable_t}) < atr.MIN_TEACHERS
+        pooled = [] if identifiable else usable_t
+        combined = analytics.combine([f["stats"] for f in pooled]) if pooled else None
         gaps = atr.teaching_issues(dept, mine, minimum)
         curriculum_stats = [f["stats"] for f in usable_c]
         curriculum_sentiment = {
@@ -140,7 +143,7 @@ async def report_data(db, cycle: dict[str, Any]) -> dict[str, Any]:
                 }
                 if combined
                 else {},
-                "strengths": _strengths(usable_t),
+                "strengths": _strengths(pooled),
                 "gaps": [
                     {
                         "aspect": g["key"],

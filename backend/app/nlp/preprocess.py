@@ -8,6 +8,8 @@ import re
 import unicodedata
 from functools import lru_cache
 
+from app.utils import CONTROL_CHARS
+
 _SPACES = re.compile(r"[ \t ]+")
 _NEWLINES = re.compile(r"\s*\n\s*")
 _LONG_RUN = re.compile(r"([A-Za-z])\1{2,}")
@@ -50,7 +52,7 @@ def normalise(text: str | None) -> str:
     """NFKC, straight quotes, single spaces, kept newlines, 'sooo' -> 'so', '!!!' -> '!'."""
     if not text:
         return ""
-    text = unicodedata.normalize("NFKC", text).translate(_QUOTES)
+    text = CONTROL_CHARS.sub("", unicodedata.normalize("NFKC", text)).translate(_QUOTES)
     text = _NEWLINES.sub("\n", text.strip())
     text = _SPACES.sub(" ", text)
     text = _LONG_RUN.sub(_fix_elongation, text)

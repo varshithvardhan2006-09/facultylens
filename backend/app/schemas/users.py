@@ -131,6 +131,13 @@ class UserUpdate(BaseModel):
     is_active: bool | None = None
     annotator: Annotator | None = None
 
+    @model_validator(mode="after")
+    def _required_stay_set(self):
+        for name in ("name", "role", "is_active"):
+            if name in self.model_fields_set and getattr(self, name) is None:
+                raise ValueError(f"{name} can't be empty.")
+        return self
+
     @field_validator("email")
     @classmethod
     def _lower(cls, v):

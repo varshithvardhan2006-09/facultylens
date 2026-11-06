@@ -11,6 +11,7 @@ def cycle_brief(cycle: dict[str, Any]) -> dict[str, Any]:
         "id": str(cycle["_id"]),
         "name": cycle["name"],
         "status": cycle["status"],
+        "opens_at": cycle["opens_at"],
         "closes_at": cycle["closes_at"],
     }
 

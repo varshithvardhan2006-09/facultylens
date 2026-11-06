@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, model_validator
 
+from app.auth.security import MAX_PASSWORD_BYTES
 from app.schemas.users import UserOut
 
 
@@ -21,6 +22,8 @@ class ChangePasswordIn(BaseModel):
 
     @model_validator(mode="after")
     def _differs(self):
+        if len(self.new_password.encode()) > MAX_PASSWORD_BYTES:
+            raise ValueError("That password is too long. Use a shorter one.")
         if self.new_password == self.current_password:
             raise ValueError("The new password must be different from the current one.")
         return self

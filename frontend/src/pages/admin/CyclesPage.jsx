@@ -45,6 +45,10 @@ function NewCycle({ onCancel }) {
 
   async function submit(event) {
     event.preventDefault();
+    if (!form.opens_at || !form.closes_at) {
+      setError("Choose both the opening and the closing date.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {

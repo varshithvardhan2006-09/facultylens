@@ -165,7 +165,8 @@ export function FacultyPage() {
     };
   }, [facultyId, params, reload]);
 
-  const reviewLink = routeId ? `/admin/faculty/${facultyId}/profile/review` : "/profile/review";
+  const reviewLink =
+    routeId && routeId !== me.id ? `/admin/faculty/${facultyId}/profile/review` : "/profile/review";
 
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-6">

@@ -119,9 +119,17 @@ async def restore(folder: str, replace: bool = False) -> int:
             file=sys.stderr,
         )
         return 1
-    for name in counts:
+    # Read everything first: a missing or damaged file must not leave a half-emptied database.
+    try:
+        backup = {
+            name: json_util.loads(await asyncio.to_thread(_read, src / f"{name}.json"))
+            for name in counts
+        }
+    except (OSError, ValueError) as exc:
+        print(f"The backup can't be read, so nothing was changed: {exc}", file=sys.stderr)
+        return 1
+    for name, docs in backup.items():
         await database[name].drop()
-        docs = json_util.loads(await asyncio.to_thread(_read, src / f"{name}.json"))
         if docs:
             await database[name].insert_many(docs, ordered=False)
     await db.ensure_indexes(database)

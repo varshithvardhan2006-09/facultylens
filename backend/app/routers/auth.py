@@ -56,6 +56,9 @@ async def _issue(db: Db, response: Response, user: User) -> TokenOut:
     return TokenOut(access_token=access, expires_in=expires_in, user=user_out(user))
 
 
+REUSE_GRACE = timedelta(seconds=10)
+
+
 def _clear_cookie(response: Response) -> None:
     response.delete_cookie(get_settings().refresh_cookie_name, path="/api/auth")
 
@@ -78,7 +81,8 @@ async def login(request: Request, response: Response, body: LoginIn, db: Db) -> 
     query = (
         {"email": username.lower()} if "@" in username else {"roll_no": normalise_roll_no(username)}
     )
-    user = await db.users.find_one(query)
+    # A blank username must not match the first account that has no roll number.
+    user = await db.users.find_one(query) if username else None
     ok = await verify_password_async(body.password, user.get("password_hash") if user else None)
     if not user or not ok or not user.get("is_active", True):
         raise _bad_login()
@@ -103,10 +107,17 @@ async def refresh(request: Request, response: Response, db: Db) -> TokenOut | Re
     )
     if doc is None:
         reused = await db.refresh_tokens.find_one({"jti_hash": token_hash, "revoked": True})
-        if reused:
-            # A rotated token came back: assume it was stolen and end every session of this user.
+        rotated = (reused or {}).get("rotated_at")
+        if rotated and now() - rotated <= REUSE_GRACE:
+            # Two tabs opened together both send the same token: that isn't theft.
+            user = await db.users.find_one({"_id": reused["user_id"]})
+            if user and user.get("is_active", True):
+                return await _issue(db, response, user)
+        elif rotated:
+            # A rotated token came back later: assume it was stolen and end every session.
             await db.refresh_tokens.update_many(
-                {"user_id": reused["user_id"]}, {"$set": {"revoked": True}}
+                {"user_id": reused["user_id"]},
+                {"$set": {"revoked": True}, "$unset": {"rotated_at": ""}},
             )
         return _session_ended("Session expired")
     user = await db.users.find_one({"_id": doc["user_id"]})
@@ -147,7 +158,9 @@ async def change_password(
             }
         },
     )
-    await db.refresh_tokens.update_many({"user_id": user["_id"]}, {"$set": {"revoked": True}})
+    await db.refresh_tokens.update_many(
+        {"user_id": user["_id"]}, {"$set": {"revoked": True}, "$unset": {"rotated_at": ""}}
+    )
     await record(db, user, "auth.change_password", str(user["_id"]))
     user = await db.users.find_one({"_id": user["_id"]})
     return await _issue(db, response, user)

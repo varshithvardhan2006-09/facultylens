@@ -1,5 +1,7 @@
 """Small shared helpers: ObjectId parsing, document serialisation, UTC time."""
 
+import re
+import secrets
 from datetime import UTC, datetime
 from typing import Any
 
@@ -7,9 +9,22 @@ from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException, status
 
+# Control characters have no place in text, and Word files can't hold them.
+CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
 
 def now() -> datetime:
     return datetime.now(UTC)
+
+
+def today() -> datetime:
+    """Midnight UTC: for records that must not reveal when a student submitted."""
+    return now().replace(hour=0, minute=0, second=0, microsecond=0)
+
+
+def anon_id() -> ObjectId:
+    """A random id. A normal ObjectId embeds its creation time, which would undo anonymity."""
+    return ObjectId(secrets.token_bytes(12))
 
 
 def oid(value: str, what: str = "Item") -> ObjectId:

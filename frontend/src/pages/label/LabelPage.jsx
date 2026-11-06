@@ -69,7 +69,7 @@ function LabelTab() {
       className="grid items-start gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
       onSubmit={(e) => {
         e.preventDefault();
-        if (value.sentiment && !busy) save();
+        if (value.sentiment && !busy && !next.refreshing) save();
       }}
     >
       <div className="flex flex-col gap-6 lg:sticky lg:top-8">
@@ -119,7 +119,7 @@ function LabelTab() {
                   key={reason}
                   type="button"
                   className="btn btn-secondary h-8 px-3 text-small"
-                  disabled={busy}
+                  disabled={busy || next.refreshing}
                   onClick={() => save({ skip_reason: reason })}
                 >
                   {label}

@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import db
+from app.auth.deps import get_current_user
 from app.config import BACKEND_DIR
 from app.main import create_app
 from app.nlp import registry
@@ -42,6 +43,7 @@ def test_health_503_when_mongo_down(client, monkeypatch):
 
 
 def test_health_models_lists_every_task_without_loading(client):
+    client.app.dependency_overrides[get_current_user] = lambda: {"_id": "a", "role": "admin"}
     r = client.get("/api/health/models")
     assert r.status_code == 200
     body = r.json()

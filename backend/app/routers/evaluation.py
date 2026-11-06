@@ -16,7 +16,6 @@ from app.utils import now
 
 router = APIRouter(tags=["evaluation"])
 RESULTS_FILE = Path(__file__).resolve().parents[2] / "ml" / "results" / "evaluation.json"
-SURVEY_QUESTIONS = ("usefulness", "accuracy", "fairness", "actionability")
 Teacher = Annotated[User, Depends(require_roles("faculty", "hod"))]
 
 

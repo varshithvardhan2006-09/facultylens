@@ -65,6 +65,26 @@ async def _ready(client, world):
             }
         },
     )
+    # A second teacher: a department row may not rest on one person (SPEC Phase 7).
+    form = sync.forms.find_one({"_id": ObjectId(form_id)})
+    other = sync.users.insert_one(
+        {"name": "Second Teacher", "role": "faculty", "department_id": world["cse"]}
+    ).inserted_id
+    second = sync.forms.insert_one(
+        {k: v for k, v in form.items() if k != "_id"} | {"faculty_id": other}
+    ).inserted_id
+    aggregate = sync.aggregates.find_one({"form_id": ObjectId(form_id)})
+    sync.aggregates.insert_one(
+        {k: v for k, v in aggregate.items() if k != "_id"}
+        | {"form_id": second, "faculty_id": other}
+    )
+    response = sync.responses.find_one({"form_id": ObjectId(form_id)})
+    copy = sync.responses.insert_one(
+        {k: v for k, v in response.items() if k != "_id"} | {"form_id": second}
+    ).inserted_id
+    sync.analyses.insert_one(
+        {k: v for k, v in analysis.items() if k != "_id"} | {"form_id": second, "response_id": copy}
+    )
     return cycle
 
 
@@ -78,7 +98,7 @@ async def test_draft_edit_approve_and_scope(client, analysed_world):
     assert drafted["added"] >= 1 and drafted["replaced"] == 0
     rows = (await client.get(f"{base}/actions", headers=h["hod"])).json()
     pace = next(r for r in rows if r["key"] == "pace")
-    assert pace["status"] == "draft" and "1 of 1 CSE course" in pace["issue"]
+    assert pace["status"] == "draft" and "2 of 2 CSE course" in pace["issue"]
     assert pace["responsible"].startswith("HoD, ") and "examples" not in pace
     assert (await client.get(f"{base}/actions", headers=h["hod_ece"])).json() == []
 
@@ -103,7 +123,7 @@ async def test_draft_edit_approve_and_scope(client, analysed_world):
     assert again["kept"] >= 1 and again["added"] == 0
 
     evidence = (await client.get(f"{url}/evidence", headers=h["hod"])).json()
-    assert [e["text"] for e in evidence] == ["Clear. Call [PHONE]."]
+    assert {e["text"] for e in evidence} == {"Clear. Call [PHONE]."}
     assert (await client.get(f"{url}/evidence", headers=h["hod_ece"])).status_code == 403
 
     added = await client.post(

@@ -71,7 +71,7 @@ export function ResolveTab() {
       className="flex flex-col gap-6"
       onSubmit={(e) => {
         e.preventDefault();
-        if (current.sentiment && !busy) save();
+        if (current.sentiment && !busy && !next.refreshing) save();
       }}
     >
       <p className="m-0 text-small text-muted">

@@ -1,4 +1,3 @@
-import { Reveal } from "../../components/Reveal";
 import { useCallback, useEffect, useState } from "react";
 import { FIELD_LABELS, MODERATION_CHANGED, analysisApi } from "../../api/analysis";
 import { errorMessage } from "../../api/client";
@@ -75,8 +74,7 @@ function QueueItem({ item, index, onDecided }) {
   }
 
   return (
-    <Reveal
-      as="li"
+    <li
       className={`flex flex-col gap-3 transition-[opacity,transform] duration-150 ease-in ${
         leaving ? "-translate-y-2 scale-[0.97] opacity-0" : ""
       }`}
@@ -196,7 +194,7 @@ function QueueItem({ item, index, onDecided }) {
           {error && <FormError>{error}</FormError>}
         </div>
       )}
-    </Reveal>
+    </li>
   );
 }
 
@@ -226,12 +224,17 @@ export function ModerationPage() {
   }, [tab, kind, version]);
 
   function decided(id) {
-    setQueue((q) => ({
-      ...q,
-      items: q.items.filter((i) => i.id !== id),
-      total: q.total - 1,
-      pending: q.pending - 1,
-    }));
+    // The list may be reloading by now, if the tab or filter changed meanwhile.
+    setQueue((q) =>
+      q
+        ? {
+            ...q,
+            items: q.items.filter((i) => i.id !== id),
+            total: q.total - 1,
+            pending: q.pending - 1,
+          }
+        : q,
+    );
   }
 
   const tabs = [

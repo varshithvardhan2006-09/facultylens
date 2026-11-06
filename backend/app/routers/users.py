@@ -11,7 +11,7 @@ from typing import Annotated, Any
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from pydantic import ValidationError
-from pymongo.errors import DuplicateKeyError
+from pymongo.errors import BulkWriteError, DuplicateKeyError
 
 from app.auth.deps import AdminUser, Db, User, require_roles
 from app.auth.security import generate_temp_password, hash_password_async
@@ -82,7 +82,7 @@ async def list_users(
     department_id: str | None = None,
     q: Annotated[str | None, Query(max_length=80)] = None,
     include_inactive: bool = False,
-    page: Annotated[int, Query(ge=1)] = 1,
+    page: Annotated[int, Query(ge=1, le=100000)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> UserPage:
     query: dict[str, Any] = {}
@@ -150,9 +150,15 @@ def _parse_csv(raw: bytes) -> list[dict[str, Any]]:
             f"(missing {', '.join(sorted(missing))}).",
         )
     rows = []
-    for raw_row in reader:
-        row = {(k or "").strip().lower(): (v or "").strip() for k, v in raw_row.items()}
-        rows.append({k: v for k, v in row.items() if k in CSV_COLUMNS and v != ""})
+    try:
+        for raw_row in reader:
+            # Extra columns arrive under the key None, as a list: they aren't ours.
+            row = {k.strip().lower(): (v or "").strip() for k, v in raw_row.items() if k}
+            rows.append({k: v for k, v in row.items() if k in CSV_COLUMNS and v != ""})
+    except csv.Error:
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_CONTENT, "That CSV file can't be read."
+        ) from None
     return rows
 
 
@@ -278,8 +284,9 @@ async def bulk_create(request: Request, db: Db, admin: AdminUser, dry_run: bool 
         )
     try:
         await db.users.insert_many(docs, ordered=True)
-    except DuplicateKeyError as exc:  # a race with another admin; report rather than half-insert
-        raise conflict(_duplicate_message(exc)) from None
+    except BulkWriteError:  # a race with another admin: undo, so no password is lost half-way
+        await db.users.delete_many({"_id": {"$in": [d["_id"] for d in docs if "_id" in d]}})
+        raise conflict("Someone added one of these users just now. Nothing was added.") from None
     await record(db, admin, "user.bulk_create", None, {"count": len(docs)})
     return {"created": len(docs), "credentials": [c.model_dump() for c in credentials]}
 
@@ -337,7 +344,7 @@ async def update_user(user_id: str, body: UserUpdate, db: Db, admin: AdminUser) 
             raise conflict(_duplicate_message(exc)) from None
         if changes.get("is_active") is False:
             await db.refresh_tokens.update_many(
-                {"user_id": user["_id"]}, {"$set": {"revoked": True}}
+                {"user_id": user["_id"]}, {"$set": {"revoked": True}, "$unset": {"rotated_at": ""}}
             )
         await record(db, admin, "user.update", user_id, {"fields": sorted(changes)})
     return admin_out(await db.users.find_one({"_id": user["_id"]}))
@@ -350,7 +357,9 @@ async def deactivate_user(user_id: str, db: Db, admin: AdminUser) -> UserAdminOu
     if user["_id"] == admin["_id"]:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "You can't deactivate your own account.")
     await db.users.update_one({"_id": user["_id"]}, {"$set": {"is_active": False}})
-    await db.refresh_tokens.update_many({"user_id": user["_id"]}, {"$set": {"revoked": True}})
+    await db.refresh_tokens.update_many(
+        {"user_id": user["_id"]}, {"$set": {"revoked": True}, "$unset": {"rotated_at": ""}}
+    )
     await record(db, admin, "user.deactivate", user_id)
     return admin_out(await db.users.find_one({"_id": user["_id"]}))
 
@@ -363,6 +372,8 @@ async def reset_password(user_id: str, db: Db, admin: AdminUser) -> dict:
         {"_id": user["_id"]},
         {"$set": {"password_hash": await hash_password_async(temp), "must_change_pw": True}},
     )
-    await db.refresh_tokens.update_many({"user_id": user["_id"]}, {"$set": {"revoked": True}})
+    await db.refresh_tokens.update_many(
+        {"user_id": user["_id"]}, {"$set": {"revoked": True}, "$unset": {"rotated_at": ""}}
+    )
     await record(db, admin, "user.reset_password", user_id)
     return {"temp_password": temp}

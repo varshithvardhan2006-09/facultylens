@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 
 from app import db
 from app.auth.deps import AdminUser, Db
+from app.config import get_settings
 from app.nlp import registry
 from app.pipeline import jobs, summaries
 from app.pipeline.aggregate import recompute_form
@@ -166,7 +167,7 @@ async def moderation_queue(
                         "sentiment": s.get("sentiment"),
                     }
                     for s in field["sentences"]
-                    if s["toxicity"] >= 0.4
+                    if s["toxicity"] >= get_settings().tox_review
                 ],
                 "decision": e.get("decision"),
                 "edited_text": (field.get("moderation") or {}).get("text"),

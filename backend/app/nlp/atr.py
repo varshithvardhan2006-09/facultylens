@@ -27,6 +27,7 @@ log = logging.getLogger("facultylens.atr")
 
 MAX_EVIDENCE = 12
 MIN_COURSES = 2  # an issue must come up in this many of a department's courses
+MIN_TEACHERS = 2  # with fewer, "the department" would really mean one person
 LOW_CURRICULUM_RATING = 3.0
 DEFAULT_TIMELINE = "Before the next feedback cycle"
 
@@ -61,10 +62,11 @@ def teaching_issues(dept: dict[str, Any], forms: list[dict[str, Any]], minimum: 
             row["evidence"] += [e["id"] for e in negative]
             row["examples"] += [e["text"] for e in negative]
     rows = []
-    # One course would point at one teacher in a published, department-level report.
-    min_courses = MIN_COURSES if len(usable) >= MIN_COURSES else 1
+    # One course or one teacher would point at a person in a published, department-level report.
+    if len({f.get("faculty_id") for f in usable}) < MIN_TEACHERS:
+        return rows
     for key, r in sorted(found.items(), key=lambda kv: (-kv[1]["courses"], -kv[1]["mentions"])):
-        if r["courses"] < min_courses:
+        if r["courses"] < MIN_COURSES:
             continue
         label = ASPECT_LABELS[key]
         rows.append(

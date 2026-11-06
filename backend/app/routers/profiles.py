@@ -291,12 +291,23 @@ def _accept_into(profile: dict[str, Any], entry: dict[str, Any], override: dict 
     profile.setdefault(section, []).append(item)
 
 
+# ProfileDataIn's limits: the profile must stay valid, or the editor can't load it any more.
+SECTION_LIMITS = {
+    name: next(
+        m.max_length for m in ProfileDataIn.model_fields[name].metadata if hasattr(m, "max_length")
+    )
+    for name in ("interests", "qualifications", "experience", "publications", "achievements")
+}
+
+
 async def _decide(
     db: Db, user: User, faculty_id: str, accept: list[str], reject: list[str], overrides=None
 ):
     target = await _faculty(db, user, faculty_id, write=True)
     profile = await _profile(db, target["_id"])
     pending = {p["id"]: p for p in profile.get("pending_imports", [])}
+    accept = list(dict.fromkeys(accept))
+    reject = [i for i in dict.fromkeys(reject) if i not in accept]
     unknown = [i for i in [*accept, *reject] if i not in pending]
     if unknown:
         raise HTTPException(
@@ -305,6 +316,12 @@ async def _decide(
     rejected_keys = list(profile.get("rejected_keys", []))
     for item_id in accept:
         _accept_into(profile, pending.pop(item_id), (overrides or {}).get(item_id))
+    for section, limit in SECTION_LIMITS.items():
+        if len(profile.get(section, [])) > limit:
+            raise HTTPException(
+                status.HTTP_422_UNPROCESSABLE_CONTENT,
+                f"That would put more than {limit} {section} on the profile. Accept fewer.",
+            )
     for item_id in reject:
         rejected_keys.append(pending.pop(item_id)["key"])
     changes = {

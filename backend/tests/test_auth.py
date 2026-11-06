@@ -73,7 +73,10 @@ async def test_refresh_rotates_and_detects_reuse(client, mongo):
     assert r.status_code == 200 and r.json()["access_token"]
     second = client.cookies.get("fl_refresh")
     assert second and second != first
-    # Replaying the rotated token fails and revokes every session of that user.
+    # Replaying the rotated token later fails and revokes every session of that user.
+    await mongo.refresh_tokens.update_many(
+        {"rotated_at": {"$exists": True}}, {"$set": {"rotated_at": now() - timedelta(minutes=1)}}
+    )
     client.cookies.clear()
     client.cookies.set("fl_refresh", first)
     r = await client.post("/api/auth/refresh")

@@ -148,7 +148,19 @@ export function InsightsPage() {
           </button>
         </div>
       )}
-      {!loaded && !state.error && (
+      {!department && !departments.loading && (
+        <section className="card p-[var(--card-pad)]">
+          <h2 className="m-0 text-section font-medium">
+            {departments.error ? "Couldn't load the departments" : "No departments yet"}
+          </h2>
+          <p className="m-0 mt-1 text-body text-muted">
+            {departments.error
+              ? errorMessage(departments.error)
+              : "Add a department first, and its insights appear here."}
+          </p>
+        </section>
+      )}
+      {!loaded && !state.error && (department || departments.loading) && (
         <div className="flex flex-col gap-[var(--gap)]" aria-busy="true">
           <span className="skeleton h-28 w-full" />
           <span className="skeleton h-72 w-full" />

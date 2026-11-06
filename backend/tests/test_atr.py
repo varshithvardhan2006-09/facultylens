@@ -25,6 +25,7 @@ def aspect(pos, neg, mean, tag):
 def teaching(tag, responses=10, pace=(1, 6), clarity=(8, 1)):
     return {
         "form_id": tag,
+        "faculty_id": tag,
         "type": "teaching",
         "department_id": "d1",
         "responses": responses,
@@ -75,7 +76,7 @@ def test_curriculum_issues_low_items_and_critical_comments():
 
 
 def test_draft_uses_templates_without_an_llm():
-    rows = atr.draft([CSE], [teaching("a"), curriculum("k")], minimum=5)
+    rows = atr.draft([CSE], [teaching("a"), teaching("b"), curriculum("k")], minimum=5)
     assert {(r["kind"], r["key"]) for r in rows} == {
         ("teaching", "pace"),
         ("curriculum", "lab_adequacy"),
@@ -105,7 +106,7 @@ def test_llm_actions_are_matched_by_row_id(monkeypatch):
         ), {"engine": "groq:m"}
 
     monkeypatch.setattr(atr.llm, "complete_json", fake)
-    rows = atr.draft([CSE], [teaching("a"), curriculum("k")], minimum=5)
+    rows = atr.draft([CSE], [teaching("a"), teaching("b"), curriculum("k")], minimum=5)
     assert rows[0]["action"] == "Share a weekly plan and pause for questions."
     assert rows[0]["source"] == "groq:m" and rows[0]["timeline"] == "Next semester"
     assert all(r["source"] == "template" for r in rows[1:])  # no LLM answer: template kept
@@ -166,4 +167,4 @@ def test_merge_keeps_edited_and_approved_rows():
 def test_an_issue_from_one_course_is_not_a_department_row():
     forms = [teaching("a"), teaching("b", pace=(5, 1)), teaching("c", pace=(5, 1))]
     assert atr.teaching_issues(CSE, forms, minimum=5) == []  # 1 of 3 would single out a teacher
-    assert [r["key"] for r in atr.teaching_issues(CSE, [teaching("a")], minimum=5)] == ["pace"]
+    assert atr.teaching_issues(CSE, [teaching("a")], minimum=5) == []  # one course, one teacher

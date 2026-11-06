@@ -8,7 +8,9 @@ export const analysisApi = {
   summaries: (cycle) =>
     api.post("/analysis/summaries", null, { params: { cycle } }).then((r) => r.data),
   queue: (params) => api.get("/moderation/queue", { params }).then((r) => r.data),
-  decide: (id, body) => api.post(`/moderation/${id}/decision`, body).then((r) => r.data),
+  // A decision also rewrites the course summary, which can wait on the LLM.
+  decide: (id, body) =>
+    api.post(`/moderation/${id}/decision`, body, { timeout: 90000 }).then((r) => r.data),
 };
 
 /** Fired after a moderation decision so the nav count refreshes without a reload. */

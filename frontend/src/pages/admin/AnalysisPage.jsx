@@ -280,9 +280,11 @@ export function AnalysisPage() {
   const activeId = active && ACTIVE.includes(active.status) ? active.id : null;
   useEffect(() => {
     if (!activeId) return undefined;
+    let alive = true;
     const poll = setInterval(async () => {
       try {
         const job = await analysisApi.status(activeId);
+        if (!alive) return; // the page moved on to another cycle while this was in flight
         setActive(job);
         if (!ACTIVE.includes(job.status)) refresh();
       } catch {
@@ -291,6 +293,7 @@ export function AnalysisPage() {
     }, 2000);
     const tick = setInterval(() => setNow(Date.now()), 1000);
     return () => {
+      alive = false;
       clearInterval(poll);
       clearInterval(tick);
     };

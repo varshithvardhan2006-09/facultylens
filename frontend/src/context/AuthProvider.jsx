@@ -19,11 +19,13 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     let alive = true;
-    refreshSession().then((data) => {
-      if (!alive) return;
-      if (data) accept(data);
-      else signOutLocally();
-    });
+    refreshSession()
+      .then((data) => {
+        if (!alive) return;
+        if (data) accept(data);
+        else signOutLocally();
+      })
+      .catch(() => alive && signOutLocally()); // API unreachable: the sign-in page explains it
     setAuthHandlers({
       onSessionLost: signOutLocally,
       onPasswordChangeRequired: () =>
@@ -45,6 +47,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(async () => {
     try {
       await api.post("/auth/logout", null, { _skipAuthRetry: true });
+    } catch {
+      // Signing out here still has to work when the server can't be reached.
     } finally {
       signOutLocally();
     }

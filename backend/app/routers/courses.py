@@ -163,30 +163,33 @@ async def enrol(course_id: str, body: EnrolIn, db: Db, admin: AdminUser) -> Enro
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Course not found")
 
     wanted = sorted(set(body.add_roll_numbers) | set(body.remove_roll_numbers))
-    students = {
-        s["roll_no"]: s["_id"]
-        async for s in db.users.find(
-            {"roll_no": {"$in": wanted}, "role": "student", "is_active": {"$ne": False}},
-            {"roll_no": 1},
-        )
-    }
-    unknown = [r for r in wanted if r not in students]
+    found_students = await db.users.find(
+        {"roll_no": {"$in": wanted}, "role": "student"}, {"roll_no": 1, "is_active": 1}
+    ).to_list()
+    students = {s["roll_no"]: s["_id"] for s in found_students}
+    # A deactivated student can't join a course, but must still be removable from one.
+    active = {s["roll_no"] for s in found_students if s.get("is_active", True)}
+    addable = set(body.add_roll_numbers) & active
+    removable = set(body.remove_roll_numbers) & set(students)
+    unknown = [r for r in wanted if r not in addable | removable]
     update: dict[str, Any] = {}
-    add = [students[r] for r in body.add_roll_numbers if r in students]
-    remove = [students[r] for r in body.remove_roll_numbers if r in students]
+    add = [students[r] for r in body.add_roll_numbers if r in addable]
+    remove = [students[r] for r in body.remove_roll_numbers if r in removable]
     if add:
         update["$addToSet"] = {"student_ids": {"$each": add}}
 
     if body.faculty_ids is not None:
         faculty_ids = [oid(f, "Faculty member") for f in dict.fromkeys(body.faculty_ids)]
+        # Someone already assigned may have left since; only new names must be active.
+        joining = [f for f in faculty_ids if f not in course.get("faculty_ids", [])]
         found = await db.users.count_documents(
             {
-                "_id": {"$in": faculty_ids},
+                "_id": {"$in": joining},
                 "role": {"$in": TEACHING_ROLES},
                 "is_active": {"$ne": False},
             }
         )
-        if found != len(faculty_ids):
+        if found != len(joining):
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_CONTENT,
                 "Every assigned teacher must be an active faculty member or HoD.",

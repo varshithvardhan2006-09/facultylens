@@ -24,7 +24,7 @@ from app.config import get_settings
 from app.nlp import registry
 from app.pipeline import summaries
 from app.pipeline.aggregate import recompute_form
-from app.utils import now
+from app.utils import anon_id, now, today
 
 log = logging.getLogger("facultylens.jobs")
 
@@ -101,7 +101,8 @@ def _queue_entries(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         "label": f["toxicity"]["label"],
                         "status": "pending",
                         "is_synthetic": doc.get("is_synthetic", False),
-                        "created_at": now(),
+                        "created_at": today(),  # the day only: see analyze_batch
+                        "_id": anon_id(),
                     }
                 )
     return entries
@@ -152,7 +153,7 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
         for i in range(0, total, batch_size):
             ids = todo[i : i + batch_size]
             responses = list(sync_db.responses.find({"_id": {"$in": ids}}))
-            docs = analyze_batch(_items(sync_db, responses))
+            docs = [{"_id": anon_id(), **d} for d in analyze_batch(_items(sync_db, responses))]
             try:
                 result = sync_db.analyses.insert_many(docs, ordered=False)
                 for doc, _id in zip(docs, result.inserted_ids, strict=True):

@@ -4,7 +4,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -40,8 +40,8 @@ async def lifespan(app: FastAPI):
     placeholders = get_settings().placeholder_secrets
     if placeholders:
         raise RuntimeError(
-            f"Set {' and '.join(placeholders)} in backend/.env to long random strings before "
-            "starting FacultyLens."
+            f"Set {' and '.join(placeholders)} in backend/.env to random strings of 32+ "
+            "characters before starting FacultyLens."
         )
     if await db.ping():
         await db.ensure_indexes()
@@ -61,12 +61,24 @@ def create_app() -> FastAPI:
     app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+    @app.middleware("http")
+    async def security_headers(request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        if request.url.path.startswith("/api/"):  # tokens, feedback and reports aren't for caches
+            response.headers["Cache-Control"] = "no-store"
+        return response
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[settings.frontend_origin],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
+        expose_headers=["Content-Disposition"],  # the report's file name
     )
     for module in (
         health,

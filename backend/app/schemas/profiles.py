@@ -50,7 +50,7 @@ class Publication(_Item):
     type: PubType = "other"
     doi: str | None = Field(default=None, max_length=200)
     authors: list[str] = Field(default_factory=list, max_length=50)
-    citations: int | None = Field(default=None, ge=0)
+    citations: int | None = Field(default=None, ge=0, le=10_000_000)
     tldr: str | None = Field(default=None, max_length=600)
     url: str | None = Field(default=None, max_length=500)
     s2_paper_id: str | None = Field(default=None, max_length=60)

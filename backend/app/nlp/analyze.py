@@ -8,7 +8,7 @@ Output: one `analyses` document per item (see SPEC §9), keyed by response_id + 
 from typing import Any
 
 from app.nlp import aspects, pii, preprocess, registry, scoring
-from app.utils import now
+from app.utils import today
 
 EMOTIONS = ("anger", "disgust", "fear", "joy", "neutral", "sadness", "surprise")
 
@@ -20,6 +20,17 @@ def _round(probs: dict[str, float], keys=None) -> dict[str, float]:
 def _predict(task: str, texts: list[str]) -> list[dict[str, float]]:
     """Run a model only when there is text: a ratings-only response must not load anything."""
     return registry.get(task).predict(texts) if texts else []
+
+
+WINDOW_CHARS = 800
+WINDOW_OVERLAP = 100
+
+
+def _windows(text: str) -> list[str]:
+    if len(text) <= WINDOW_CHARS:
+        return [text]
+    step = WINDOW_CHARS - WINDOW_OVERLAP
+    return [text[i : i + WINDOW_CHARS] for i in range(0, len(text) - WINDOW_OVERLAP, step)]
 
 
 def analyze_batch(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -50,8 +61,17 @@ def analyze_batch(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     sentence_texts = [s["text"] for s in sentences]
 
     # 3. Moderation on each sentence.
-    for s, probs in zip(sentences, _predict("toxicity", sentence_texts), strict=True):
-        s["toxicity"] = scoring.toxicity_score(probs)
+    # The classifier reads 256 tokens at most, so a long sentence is scored in overlapping
+    # windows: abuse at the end of a long answer must not slip past the check.
+    windows = [(i, w) for i, text in enumerate(sentence_texts) for w in _windows(text)]
+    best: dict[int, tuple[float, str]] = {}
+    window_scores = _predict("toxicity", [w for _, w in windows])
+    for (i, _), probs in zip(windows, window_scores, strict=True):
+        score = scoring.toxicity_score(probs)
+        if i not in best or score[0] > best[i][0]:
+            best[i] = score
+    for i, s in enumerate(sentences):
+        s["toxicity"] = best[i]
 
     # 4. Sentiment for whole answers and for each sentence (one call).
     sentiment = _predict("sentiment", field_texts + sentence_texts)
@@ -143,7 +163,8 @@ def analyze_batch(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
                 if "review" in statuses
                 else "visible",
                 "is_synthetic": item.get("is_synthetic", False),
-                "analysed_at": now(),
+                # Analysis runs right after a submission, so keep the day only.
+                "analysed_at": today(),
             }
         )
     return docs

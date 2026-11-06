@@ -60,7 +60,7 @@ ENDPOINTS = [
     ),
     ("PATCH", "/api/courses/{course}", {"admin"}, {"name": "Compiler Design Lab"}),
     ("POST", "/api/courses/{course}/enrol", {"admin"}, {"add_roll_numbers": []}),
-    ("GET", "/api/health/models", ANY | {"anon"}, None),
+    ("GET", "/api/health/models", {"admin"}, None),
     # Profiles: {user} is the CSE faculty member; the world's HoD is in the same department.
     ("GET", "/api/faculty/{user}/profile-data", {"admin", "hod", "faculty"}, None),
     ("PUT", "/api/faculty/{user}/profile-data", OWNER, {"designation": "Professor"}),

@@ -6,6 +6,7 @@ import psutil
 from fastapi import APIRouter, Response, status
 
 from app import db
+from app.auth.deps import AdminUser
 from app.config import get_settings
 from app.nlp import llm, registry
 
@@ -31,7 +32,7 @@ async def health(response: Response) -> dict:
 
 
 @router.get("/models")
-async def models() -> dict:
+async def models(_: AdminUser) -> dict:
     settings = get_settings()
     proc = psutil.Process(os.getpid())
     rows = registry.status()

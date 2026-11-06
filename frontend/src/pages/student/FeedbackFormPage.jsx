@@ -181,7 +181,8 @@ export function FeedbackFormPage() {
   if (done) return <ThankYou form={form} />;
 
   const course = form.course;
-  const closed = form.cycle.status !== "open";
+  const notOpenYet = new Date(form.cycle.opens_at) > new Date();
+  const closed = form.cycle.status !== "open" || new Date(form.cycle.closes_at) < new Date();
 
   return (
     <div className="mx-auto flex max-w-[880px] flex-col gap-8">
@@ -216,6 +217,10 @@ export function FeedbackFormPage() {
       ) : closed ? (
         <p className="card m-0 p-[var(--card-pad)] text-body text-muted">
           This feedback cycle is closed.
+        </p>
+      ) : notOpenYet ? (
+        <p className="card m-0 p-[var(--card-pad)] text-body text-muted">
+          This feedback cycle opens on {formatDate(form.cycle.opens_at)}.
         </p>
       ) : (
         <form onSubmit={submit} noValidate className="flex flex-col gap-[var(--gap)]">

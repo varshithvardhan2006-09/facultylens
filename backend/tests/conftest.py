@@ -6,7 +6,7 @@ import pytest
 os.environ["MONGODB_DB"] = "facultylens_test"
 os.environ["BCRYPT_ROUNDS"] = "4"
 os.environ["JWT_SECRET"] = "test-only-jwt-secret-long-enough-to-sign-with"
-os.environ["STUDENT_HASH_SALT"] = "test-only-student-hash-salt"
+os.environ["STUDENT_HASH_SALT"] = "test-only-student-hash-salt-long-enough"
 os.environ["ANALYSIS_ON_SUBMIT"] = "false"  # no background model runs during tests
 # Never call a live API or spend a real quota from tests, whatever keys .env holds; tests that
 # need an LLM answer mock llm.complete_json.

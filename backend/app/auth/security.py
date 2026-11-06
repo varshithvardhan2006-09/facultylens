@@ -19,6 +19,15 @@ ALGORITHM = "HS256"
 _TEMP_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
 
 
+MAX_PASSWORD_BYTES = 72  # bcrypt's limit
+
+
+def password_stamp(user: dict[str, Any]) -> int:
+    """Changes whenever the password does, so older access tokens stop working."""
+    changed = user.get("password_changed_at")
+    return int(changed.timestamp()) if changed else 0
+
+
 @lru_cache
 def _hasher(rounds: int) -> PasswordHash:
     return PasswordHash((BcryptHasher(rounds=rounds),))
@@ -29,6 +38,10 @@ def hash_password(password: str) -> str:
 
 
 def verify_password(password: str, password_hash: str | None) -> bool:
+    if len(password.encode()) > MAX_PASSWORD_BYTES:
+        # bcrypt refuses these outright, and no stored password can be this long.
+        password_hash = None
+        password = password[:8]
     if not password_hash:
         # Still spend a hash so unknown usernames take as long as wrong passwords.
         _hasher(get_settings().bcrypt_rounds).hash(password)
@@ -60,6 +73,7 @@ def create_access_token(user: dict[str, Any]) -> tuple[str, int]:
         "dept": str(user["department_id"]) if user.get("department_id") else None,
         "mcp": bool(user.get("must_change_pw")),
         "type": "access",
+        "pwd": password_stamp(user),
         "iat": issued,
         "exp": issued + timedelta(seconds=expires_in),
     }

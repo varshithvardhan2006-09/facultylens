@@ -67,7 +67,7 @@ export function ChangePasswordPage() {
           label="New password"
           hint={`At least ${MIN_LENGTH} characters. A short phrase is easier to remember.`}
           error={
-            (touched || form.next.length >= MIN_LENGTH) && tooShort
+            (touched || form.next.length > 0) && tooShort
               ? `Use at least ${MIN_LENGTH} characters.`
               : sameAsOld
                 ? "Choose a password different from the current one."

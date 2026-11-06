@@ -37,7 +37,8 @@ export async function blobError(err, fallback) {
   const data = err?.response?.data;
   if (data instanceof Blob) {
     try {
-      return JSON.parse(await data.text()).detail ?? fallback;
+      const detail = JSON.parse(await data.text()).detail;
+      return (typeof detail === "string" ? detail : detail?.message) ?? fallback;
     } catch {
       return fallback;
     }

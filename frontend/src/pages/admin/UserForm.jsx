@@ -37,7 +37,7 @@ export function UserForm({ departments, user, onSaved, onCancel }) {
       role: form.role,
       email: isStudent ? form.email.trim() || null : form.email.trim(),
       roll_no: isStudent ? form.roll_no.trim() : null,
-      department_id: needsDept ? form.department_id || null : form.department_id || null,
+      department_id: form.department_id || null,
       gender: hasGender ? form.gender || null : null,
       ...(editing && { annotator: isStudent ? null : form.annotator || null }),
     };

@@ -4,7 +4,7 @@ from typing import Any
 
 from pymongo.asynchronous.database import AsyncDatabase
 
-from app.utils import now
+from app.utils import now, today
 
 
 async def record(
@@ -13,6 +13,7 @@ async def record(
     action: str,
     target: str | None = None,
     details: dict[str, Any] | None = None,
+    date_only: bool = False,
 ) -> None:
     await db.audit_log.insert_one(
         {
@@ -21,6 +22,6 @@ async def record(
             "action": action,
             "target": target,
             "details": details or {},
-            "at": now(),
+            "at": today() if date_only else now(),
         }
     )
