@@ -313,7 +313,8 @@ async def _export(cycle: str, fmt: str, draft: bool, db: Db, admin: User) -> Res
     data = _without_control_chars(await report_data(db, doc))
 
     def build() -> bytes:
-        charts = naac_charts.all_charts(data)
+        with naac_charts.LOCK:
+            charts = naac_charts.all_charts(data)
         render = naac_render.render_pdf if fmt == "pdf" else naac_render.render_docx
         return render(data, charts, draft)
 

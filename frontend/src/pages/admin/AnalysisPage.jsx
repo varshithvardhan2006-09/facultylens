@@ -377,7 +377,7 @@ export function AnalysisPage() {
                 ))}
               </Select>
             ) : (
-              <span className="skeleton h-10 w-full" />
+              !cycles.error && <span className="skeleton h-10 w-full" />
             )
           }
         </Field>
@@ -396,7 +396,7 @@ export function AnalysisPage() {
       )}
       <FormError>{error}</FormError>
 
-      {cycleId && (
+      {cycleId && (summary || !error) && (
         <>
           <Coverage
             summary={

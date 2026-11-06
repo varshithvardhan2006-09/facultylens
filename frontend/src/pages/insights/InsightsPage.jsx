@@ -130,6 +130,7 @@ export function InsightsPage() {
         </div>
         <Tabs
           label="View"
+          panelId="insights-panel"
           tabs={tabs}
           value={tab}
           onChange={(k) => set({ tab: k === "overview" ? "" : k })}
@@ -174,16 +175,23 @@ export function InsightsPage() {
           </p>
         </section>
       )}
-      {loaded && data?.cycle && tab === "overview" && <OverviewTab data={data} />}
-      {loaded && data?.cycle && tab === "bias" && state.bias && (
-        <BiasTab panel={state.bias} sarcasm={state.sarcasm} />
-      )}
-      {loaded && data?.cycle && tab === "actions" && (
-        <ActionsTab
-          cycleId={data.cycle.id}
-          department={{ id: data.department.id, name: data.department.name }}
-        />
-      )}
+      <div
+        id="insights-panel"
+        role="tabpanel"
+        aria-labelledby={`insights-panel-tab-${tab}`}
+        className="flex flex-col gap-[var(--gap)]"
+      >
+        {loaded && data?.cycle && tab === "overview" && <OverviewTab data={data} />}
+        {loaded && data?.cycle && tab === "bias" && state.bias && (
+          <BiasTab panel={state.bias} sarcasm={state.sarcasm} />
+        )}
+        {loaded && data?.cycle && tab === "actions" && (
+          <ActionsTab
+            cycleId={data.cycle.id}
+            department={{ id: data.department.id, name: data.department.name }}
+          />
+        )}
+      </div>
     </div>
   );
 }

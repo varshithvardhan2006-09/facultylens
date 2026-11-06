@@ -38,8 +38,13 @@ function useCycleProgress(user) {
       const byCourse = {};
       if (user.role === "hod") {
         for (const f of await feedbackApi.cycleForms(cycle.id)) {
-          if (f.type === "teaching" && !byCourse[f.course.id]) {
-            byCourse[f.course.id] = { responses: f.responses, eligible: f.eligible };
+          if (f.type === "teaching") {
+            // An offering with several teachers has one form each: count them all.
+            const seen = byCourse[f.course.id] ?? { responses: 0, eligible: 0 };
+            byCourse[f.course.id] = {
+              responses: seen.responses + f.responses,
+              eligible: seen.eligible + f.eligible,
+            };
           }
         }
       }

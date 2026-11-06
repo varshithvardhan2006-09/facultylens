@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { insightsApi, signed } from "../../api/insights";
+import { useAuth } from "../../context/auth";
 
 /**
  * A teacher's offerings in one cycle side by side, shown only when there is more than one.
  * Choosing a row opens that course below.
  */
 export function AcrossCourses({ facultyId, cycleId, selectedCourseId, onPick }) {
+  const { user: me } = useAuth();
   const [state, setState] = useState({ key: null, data: null });
   const key = `${facultyId}|${cycleId}`;
 
@@ -28,7 +30,7 @@ export function AcrossCourses({ facultyId, cycleId, selectedCourseId, onPick }) 
     <section aria-labelledby="across-h" className="card overflow-hidden">
       <div className="border-b border-rule px-[var(--card-pad)] py-3">
         <h2 id="across-h" className="m-0 text-section font-medium">
-          Across your courses
+          {me.id === facultyId ? "Across your courses" : "Across their courses"}
         </h2>
       </div>
       <div className="overflow-x-auto">

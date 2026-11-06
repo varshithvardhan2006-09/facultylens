@@ -1,19 +1,10 @@
 import { Bar, BarChart, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { pct } from "../../api/insights";
+import { EMOTIONS, pct } from "../../api/insights";
 
 const GROUPS = [
   ["female", "Women", "var(--group-1)"],
   ["male", "Men", "var(--group-2)"],
 ];
-const EMOTIONS = {
-  joy: "Joy",
-  neutral: "Neutral",
-  surprise: "Surprise",
-  sadness: "Sadness",
-  anger: "Anger",
-  fear: "Fear",
-  disgust: "Disgust",
-};
 
 function Caveat({ text }) {
   return (

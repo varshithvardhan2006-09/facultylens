@@ -91,6 +91,7 @@ def _queue_entries(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for doc in docs:
         for f in doc["fields"]:
             if f["moderation_status"] in ("hidden", "review"):
+                decided = f.get("moderation")
                 entries.append(
                     {
                         "analysis_id": doc["_id"],
@@ -99,13 +100,44 @@ def _queue_entries(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
                         "kind": f["moderation_status"],
                         "score": f["toxicity"]["max"],
                         "label": f["toxicity"]["label"],
-                        "status": "pending",
+                        "status": "decided" if decided else "pending",
+                        **(
+                            {
+                                "decision": decided["decision"],
+                                "decided_by": decided.get("by"),
+                                "decided_at": decided.get("at"),
+                            }
+                            if decided
+                            else {}
+                        ),
                         "is_synthetic": doc.get("is_synthetic", False),
                         "created_at": today(),  # the day only: see analyze_batch
                         "_id": anon_id(),
                     }
                 )
     return entries
+
+
+def _carry_decisions(sync_db, docs: list[dict[str, Any]]) -> None:
+    """A person's moderation decision still holds when the models change and answers are redone."""
+    earlier = sync_db.analyses.find(
+        {
+            "response_id": {"$in": [d["response_id"] for d in docs]},
+            "fields.moderation": {"$exists": True},
+        },
+        {"response_id": 1, "fields.field": 1, "fields.moderation": 1},
+    )
+    decisions = {
+        (a["response_id"], f["field"]): f["moderation"]
+        for a in earlier
+        for f in a["fields"]
+        if f.get("moderation")
+    }
+    for doc in docs:
+        for f in doc["fields"]:
+            decision = decisions.get((doc["response_id"], f["field"]))
+            if decision:
+                f["moderation"] = decision
 
 
 # --------------------------------------------------------------------------- running
@@ -154,6 +186,7 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
             ids = todo[i : i + batch_size]
             responses = list(sync_db.responses.find({"_id": {"$in": ids}}))
             docs = [{"_id": anon_id(), **d} for d in analyze_batch(_items(sync_db, responses))]
+            _carry_decisions(sync_db, docs)
             try:
                 result = sync_db.analyses.insert_many(docs, ordered=False)
                 for doc, _id in zip(docs, result.inserted_ids, strict=True):
@@ -242,17 +275,38 @@ def _run_summaries(sync_db, job: dict[str, Any], version: str, started: float) -
     return {**job, **final, "total": len(forms)}
 
 
+def _mark_failed(job_id: ObjectId | None) -> None:
+    """Never leave a job showing as running, or the cycle could not be analysed again."""
+    if job_id is None:
+        return
+    db.get_sync_db().analysis_jobs.update_one(
+        {"_id": job_id, "status": {"$in": ["queued", "running"]}},
+        {
+            "$set": {
+                "status": "failed",
+                "error": "The analysis worker stopped",
+                "finished_at": now(),
+            }
+        },
+    )
+
+
 def _loop() -> None:
     while True:
         job_id = _queue.get()
-        if job_id is None:
-            with _auto_lock:
-                ids = list(_auto)
-                _auto.clear()
-            if not ids:
-                continue
-            job_id = create_job_sync({"kind": "auto", "response_ids": ids})
-        run_job(job_id)
+        try:
+            if job_id is None:
+                with _auto_lock:
+                    ids = list(_auto)
+                    _auto.clear()
+                if not ids:
+                    continue
+                job_id = create_job_sync({"kind": "auto", "response_ids": ids})
+            run_job(job_id)
+        except Exception:  # e.g. the database went away: the next job must still run
+            log.exception("analysis worker recovered from an error (job %s)", job_id)
+            with contextlib.suppress(Exception):
+                _mark_failed(job_id)
 
 
 def _ensure_worker() -> None:

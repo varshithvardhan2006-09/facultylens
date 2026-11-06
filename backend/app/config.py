@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     # Who students and staff write to about their data (shown on the privacy notice).
     privacy_contact: str = "the IQAC office"
     frontend_origin: str = "http://localhost:5173"
+    api_docs: bool = True  # /docs and /openapi.json; set false on a public deployment
     jwt_secret: str = Field(default="change-me", min_length=8)
     jwt_access_minutes: int = 60
     jwt_refresh_days: int = 7

@@ -13,5 +13,15 @@ export const insightsApi = {
     api.get(`/analytics/faculty/${id}`, { params: clean({ cycle }) }).then((r) => r.data),
 };
 
+export const EMOTIONS = {
+  joy: "Joy",
+  neutral: "Neutral",
+  surprise: "Surprise",
+  sadness: "Sadness",
+  anger: "Anger",
+  fear: "Fear",
+  disgust: "Disgust",
+};
+
 export const pct = (v) => (v == null ? "–" : `${Math.round(v * 100)}%`);
 export const signed = (v) => (v == null ? "–" : v > 0 ? `+${v.toFixed(2)}` : v.toFixed(2));

@@ -12,7 +12,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.auth.deps import AdminUser, Db, User, require_roles
-from app.utils import now
+from app.utils import now, upsert_one
 
 router = APIRouter(tags=["evaluation"])
 RESULTS_FILE = Path(__file__).resolve().parents[2] / "ml" / "results" / "evaluation.json"
@@ -59,10 +59,10 @@ async def answer_survey(body: SurveyIn, db: Db, user: Teacher) -> dict[str, Any]
         "comment": body.comment or None,
         "updated_at": now(),
     }
-    await db.survey_responses.update_one(
+    await upsert_one(
+        db.survey_responses,
         {"faculty_id": user["_id"]},
         {"$set": doc, "$setOnInsert": {"created_at": now()}},
-        upsert=True,
     )
     return _survey_out(doc)
 

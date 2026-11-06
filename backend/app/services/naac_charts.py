@@ -6,6 +6,7 @@ the bars. Light theme only: the report is printed and read as a document.
 """
 
 import io
+import threading
 from typing import Any
 
 from app.feedback_spec import ASPECT_KEYS, ASPECT_LABELS, CURRICULUM_KEYS, CURRICULUM_LABELS
@@ -19,6 +20,7 @@ MAIN = "#1d5fbf"
 INK = "#16181b"
 MUTED = "#535960"
 DPI = 200
+LOCK = threading.Lock()  # pyplot isn't thread-safe, and two exports may run together
 
 
 def _plt():

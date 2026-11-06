@@ -1,3 +1,4 @@
+import { currentAcademicYear } from "../../lib/academicYear";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { errorMessage } from "../../api/client";
@@ -9,11 +10,6 @@ import { RateBar } from "../../components/RateBar";
 import { useAsync } from "../../hooks/useAsync";
 
 const loadCycles = () => feedbackApi.cycles();
-
-function currentAcademicYear(date = new Date()) {
-  const start = date.getMonth() >= 5 ? date.getFullYear() : date.getFullYear() - 1;
-  return `${start}-${String((start + 1) % 100).padStart(2, "0")}`;
-}
 
 function toLocalInput(date) {
   const pad = (n) => String(n).padStart(2, "0");

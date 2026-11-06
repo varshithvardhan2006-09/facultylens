@@ -26,7 +26,7 @@ export function MyFormsPage() {
   return (
     <div className="mx-auto flex max-w-[960px] flex-col gap-8">
       <PageHeader title="Feedback forms">
-        {forms.data == null ? (
+        {forms.error && forms.data == null ? null : forms.data == null ? (
           <span className="skeleton h-4 w-80 max-w-full" />
         ) : list.length === 0 ? (
           "No feedback forms are open for your courses right now."

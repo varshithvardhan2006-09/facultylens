@@ -48,9 +48,11 @@ function loadStatus(health, models) {
 function finding(health, models) {
   if (health.error)
     return "The browser could not reach /api. Start the API with uvicorn on port 8000, then retry.";
-  if (!health.data || !models.data) return null;
+  if (!health.data) return null;
   if (health.data.mongo !== "ok")
     return "The API is up but MongoDB did not answer a ping at the configured address. Start the MongoDB service, then retry.";
+  if (models.error) return "The API is up, but the model status couldn't be read. Retry.";
+  if (!models.data) return null;
   const { loaded_count, models: rows } = models.data;
   const llm = health.data.llm_configured
     ? "Summaries and profiles use Groq."
@@ -103,7 +105,8 @@ function ServiceStrip({ health, models }) {
           >
             <dt className="text-small text-muted">{c.label}</dt>
             <dd className="m-0 text-lead font-medium">
-              {c.value ?? (health.error ? <Dash /> : <span className="skeleton h-6 w-32" />)}
+              {c.value ??
+                (health.error || models.error ? <Dash /> : <span className="skeleton h-6 w-32" />)}
             </dd>
           </div>
         ))}

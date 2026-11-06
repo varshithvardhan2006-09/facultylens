@@ -49,6 +49,7 @@ export function ReviewPanel({ facultyId, pending, onDecided }) {
   const [tab, setTab] = useState(present[0]?.[0]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [skipped, setSkipped] = useState([]);
   const current = present.some(([k]) => k === tab) ? tab : present[0]?.[0];
   const items = pending.filter((p) => p.kind === current);
 
@@ -56,7 +57,9 @@ export function ReviewPanel({ facultyId, pending, onDecided }) {
     setBusy(true);
     setError(null);
     try {
-      onDecided(await profilesApi.decide(facultyId, accept, reject));
+      const saved = await profilesApi.decide(facultyId, accept, reject);
+      setSkipped(saved.skipped_imports ?? []);
+      onDecided(saved);
     } catch (err) {
       setError(errorMessage(err, "Couldn't save your decision. Try again."));
     } finally {
@@ -130,6 +133,16 @@ export function ReviewPanel({ facultyId, pending, onDecided }) {
       {error && (
         <div className="px-[var(--card-pad)] pt-3">
           <FormError>{error}</FormError>
+        </div>
+      )}
+      {skipped.length > 0 && (
+        <div className="px-[var(--card-pad)] pt-3 text-small">
+          <p className="m-0 font-medium">These stayed here because they need fixing first:</p>
+          <ul className="m-0 mt-1 pl-4 text-muted">
+            {skipped.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
         </div>
       )}
       <ul className="m-0 max-h-[520px] list-none overflow-auto p-0" role="tabpanel">

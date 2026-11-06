@@ -309,7 +309,8 @@ _ACTIVITY_CLAIMS = re.compile(
     r"\b(?:curricul\w*|syllabus|mentor\w*|supervis\w*|advis(?:es|ed|ing|or|ors)\b|committees?\b|"
     r"coordinat\w*|consult\w*|collaborat\w*|outreach|funded|funding|accredit\w*|"
     r"administrat\w*|leadership|pioneer\w*|renowned|acclaimed|distinguished|"
-    r"internationally|nationally)"
+    r"internationally|nationally|excellen\w*|commitment|committed|dedicat\w*|outstanding|"
+    r"exemplary|passion\w*)"
     r"(?:\s+(?:development|design|planning|work|of\s+students))?",
     re.I,
 )

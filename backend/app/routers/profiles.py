@@ -32,7 +32,7 @@ from app.services.profile_items import (
     item_key,
     new_id,
 )
-from app.utils import now, oid
+from app.utils import now, oid, upsert_one
 
 router = APIRouter(prefix="/faculty", tags=["profiles"])
 Staff = Annotated[User, Depends(require_roles("admin", "hod", "faculty"))]
@@ -110,10 +110,10 @@ async def _out(db: Db, viewer: User, target: dict[str, Any], profile: dict[str, 
 
 
 async def _save(db: Db, user_id, changes: dict[str, Any]) -> dict[str, Any]:
-    await db.faculty_profiles.update_one(
+    await upsert_one(
+        db.faculty_profiles,
         {"user_id": user_id},
         {"$set": {**changes, "updated_at": now()}, "$setOnInsert": {"created_at": now()}},
-        upsert=True,
     )
     return await _profile(db, user_id)
 
@@ -301,7 +301,13 @@ SECTION_LIMITS = {
 
 
 async def _decide(
-    db: Db, user: User, faculty_id: str, accept: list[str], reject: list[str], overrides=None
+    db: Db,
+    user: User,
+    faculty_id: str,
+    accept: list[str],
+    reject: list[str],
+    overrides=None,
+    skip_invalid: bool = False,
 ):
     target = await _faculty(db, user, faculty_id, write=True)
     profile = await _profile(db, target["_id"])
@@ -314,8 +320,18 @@ async def _decide(
             status.HTTP_404_NOT_FOUND, "That imported item is no longer waiting for review."
         )
     rejected_keys = list(profile.get("rejected_keys", []))
+    skipped: list[str] = []
     for item_id in accept:
-        _accept_into(profile, pending.pop(item_id), (overrides or {}).get(item_id))
+        entry = pending[item_id]
+        try:
+            _accept_into(profile, entry, (overrides or {}).get(item_id))
+        except HTTPException as exc:
+            if not skip_invalid:
+                raise
+            data = entry.get("data") or {}
+            skipped.append(f"{data.get('title') or data.get('tag') or item_id}: {exc.detail}")
+            continue
+        del pending[item_id]
     for section, limit in SECTION_LIMITS.items():
         if len(profile.get(section, [])) > limit:
             raise HTTPException(
@@ -336,9 +352,10 @@ async def _decide(
         user,
         "profile.review_imports",
         faculty_id,
-        {"accepted": len(accept), "rejected": len(reject)},
+        {"accepted": len(accept) - len(skipped), "rejected": len(reject)},
     )
-    return await _out(db, user, target, saved)
+    out = await _out(db, user, target, saved)
+    return out.model_copy(update={"skipped_imports": skipped})
 
 
 @router.post("/{faculty_id}/imports/{item_id}/accept", response_model=ProfileDataOut)
@@ -360,4 +377,6 @@ async def bulk_decide(faculty_id: str, body: BulkDecisionIn, db: Db, user: Staff
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT, "An item can't be both accepted and rejected."
         )
-    return await _decide(db, user, faculty_id, list(body.accept), list(body.reject))
+    return await _decide(
+        db, user, faculty_id, list(body.accept), list(body.reject), skip_invalid=True
+    )

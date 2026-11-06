@@ -10,13 +10,14 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field
+from pymongo.errors import DuplicateKeyError
 
 from app.auth.deps import Db, User, require_roles
 from app.limiter import limiter
 from app.nlp import profile_gen
 from app.routers.profiles import _faculty, _profile
 from app.services.audit import record
-from app.utils import now, oid, to_jsonable
+from app.utils import conflict, now, oid, to_jsonable
 
 router = APIRouter(prefix="/faculty", tags=["profiles"])
 Staff = Annotated[User, Depends(require_roles("admin", "hod", "faculty"))]
@@ -87,7 +88,10 @@ async def generate_profile(request: Request, faculty_id: str, db: Db, user: Staf
         "created_by": user["_id"],
         "created_at": now(),
     }
-    doc["_id"] = (await db.profile_versions.insert_one(doc)).inserted_id
+    try:
+        doc["_id"] = (await db.profile_versions.insert_one(doc)).inserted_id
+    except DuplicateKeyError:
+        raise conflict("A newer draft was just created. Reload to see it.") from None
     await record(db, user, "profile.generate", faculty_id, {"version": doc["version"]})
     return _version_out(doc)
 
@@ -133,12 +137,13 @@ async def approve_version(faculty_id: str, version: int, db: Db, user: Staff) ->
             status.HTTP_403_FORBIDDEN, "Only the faculty member can approve their own profile."
         )
     doc = await _draft(db, target, version)
-    await db.profile_versions.update_many(
-        {"user_id": target["_id"], "status": "approved"},
-        {"$set": {"status": "superseded", "superseded_at": now()}},
-    )
+    # In this order there is never a moment with no approved profile, and only one remains.
     await db.profile_versions.update_one(
         {"_id": doc["_id"]}, {"$set": {"status": "approved", "approved_at": now()}}
+    )
+    await db.profile_versions.update_many(
+        {"user_id": target["_id"], "status": "approved", "_id": {"$ne": doc["_id"]}},
+        {"$set": {"status": "superseded", "superseded_at": now()}},
     )
     await record(db, user, "profile.approve", faculty_id, {"version": version})
     return _version_out(await db.profile_versions.find_one({"_id": doc["_id"]}))

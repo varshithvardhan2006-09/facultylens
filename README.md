@@ -131,7 +131,7 @@ Open http://localhost:5173. The dev server proxies `/api` to `127.0.0.1:8000`; s
 2. Open **Analysis** and press **Analyse waiting responses**. The first batch loads the models (about 45 s); the whole cycle takes about 3 minutes on a 4-core CPU.
 3. Sign in as each role (below), or follow [`docs/DEMO.md`](docs/DEMO.md).
 
-For a real deployment, serve the app over HTTPS, set `COOKIE_SECURE=true` and `FRONTEND_ORIGIN` to the site's address in `.env`, skip the seed, and create the first IQAC admin. It prints a temporary password once:
+For a real deployment, serve the app over HTTPS, serve the frontend and API from the same site (the sign-in cookie is same-site only), set `COOKIE_SECURE=true`, `API_DOCS=false` and `FRONTEND_ORIGIN` in `.env`, run one uvicorn worker with `--no-access-log` (access logs record IP addresses beside form submissions), skip the seed, and create the first IQAC admin. It prints a temporary password once:
 
 ```bash
 python -m app.cli create-admin --email iqac@yourcollege.ac.in --name "IQAC Coordinator"

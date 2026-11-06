@@ -58,7 +58,14 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
-    app = FastAPI(title=settings.app_name, version=settings.app_version, lifespan=lifespan)
+    app = FastAPI(
+        title=settings.app_name,
+        version=settings.app_version,
+        lifespan=lifespan,
+        docs_url="/docs" if settings.api_docs else None,
+        redoc_url="/redoc" if settings.api_docs else None,
+        openapi_url="/openapi.json" if settings.api_docs else None,
+    )
     app.state.limiter = limiter
     app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 

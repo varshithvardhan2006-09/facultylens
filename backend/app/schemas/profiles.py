@@ -155,6 +155,7 @@ class ProfileDataOut(ProfileDataIn):
     import_log: dict[str, ImportLog] = Field(default_factory=dict)
     updated_at: datetime | None = None
     can_edit: bool = False
+    skipped_imports: list[str] = Field(default_factory=list)  # bulk accept: left for review
 
 
 class OrcidImportIn(BaseModel):

@@ -51,6 +51,20 @@ async def analysis_summary(database: Db, _admin: AdminUser, cycle: str) -> dict:
     }
 
 
+async def _start_job(database: Db, doc: dict[str, Any]) -> dict[str, Any]:
+    """Queue a job, unless another request for this cycle got in first."""
+    doc["_id"] = (await database.analysis_jobs.insert_one(doc)).inserted_id
+    first = await database.analysis_jobs.find_one(
+        {"cycle_id": doc["cycle_id"], "status": {"$in": ["queued", "running"]}},
+        sort=[("created_at", 1), ("_id", 1)],
+    )
+    if first and first["_id"] != doc["_id"]:
+        await database.analysis_jobs.delete_one({"_id": doc["_id"]})
+        return first
+    jobs.enqueue(doc["_id"])
+    return doc
+
+
 @router.post("/analysis/run", status_code=status.HTTP_202_ACCEPTED)
 async def run_analysis(database: Db, admin: AdminUser, cycle: str) -> dict:
     cycle_id = oid(cycle, "Cycle")
@@ -70,8 +84,7 @@ async def run_analysis(database: Db, admin: AdminUser, cycle: str) -> dict:
         "requested_by": admin["_id"],
         "created_at": now(),
     }
-    doc["_id"] = (await database.analysis_jobs.insert_one(doc)).inserted_id
-    jobs.enqueue(doc["_id"])
+    doc = await _start_job(database, doc)
     await record(database, admin, "analysis.run", cycle)
     return _job_out(doc)
 
@@ -257,7 +270,6 @@ async def regenerate_summaries(database: Db, admin: AdminUser, cycle: str) -> di
         "requested_by": admin["_id"],
         "created_at": now(),
     }
-    doc["_id"] = (await database.analysis_jobs.insert_one(doc)).inserted_id
-    jobs.enqueue(doc["_id"])
+    doc = await _start_job(database, doc)
     await record(database, admin, "analysis.summaries", cycle)
     return _job_out(doc)

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
 import { feedbackApi, formatDate } from "../../api/feedback";
+import { useUnsavedWarning } from "../../hooks/useUnsavedWarning";
 import { FormError } from "../../components/forms";
 import { LikertScale } from "../../components/LikertScale";
 
@@ -125,15 +126,7 @@ export function FeedbackFormPage() {
   const missing = likert.filter((q) => !ratings[q.key]);
   const started = Object.keys(ratings).length > 0 || Object.values(texts).some(Boolean);
 
-  useEffect(() => {
-    if (!started || done) return undefined;
-    const warn = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [started, done]);
+  useUnsavedWarning(started && !done);
 
   async function submit(event) {
     event.preventDefault();

@@ -2,7 +2,7 @@
  * Page-level tabs as a row of pills on the wall; the current one wears the highlighter.
  * `tabs` is [[key, label, count?]]. Arrow keys move between tabs.
  */
-export function Tabs({ label, tabs, value, onChange, className = "" }) {
+export function Tabs({ label, tabs, value, onChange, panelId, className = "" }) {
   function onKeyDown(event) {
     const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
     if (!step) return;
@@ -26,6 +26,8 @@ export function Tabs({ label, tabs, value, onChange, className = "" }) {
             data-tab={key}
             type="button"
             role="tab"
+            id={panelId ? `${panelId}-tab-${key}` : undefined}
+            aria-controls={panelId && active ? panelId : undefined}
             aria-selected={active}
             tabIndex={active ? 0 : -1}
             onKeyDown={onKeyDown}

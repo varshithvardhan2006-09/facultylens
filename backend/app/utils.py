@@ -8,9 +8,18 @@ from typing import Any
 from bson import ObjectId
 from bson.errors import InvalidId
 from fastapi import HTTPException, status
+from pymongo.errors import DuplicateKeyError
 
 # Control characters have no place in text, and Word files can't hold them.
 CONTROL_CHARS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
+
+async def upsert_one(collection, query: dict, update: dict) -> None:
+    """An upsert that two requests may race on: the loser finds the row and updates it."""
+    try:
+        await collection.update_one(query, update, upsert=True)
+    except DuplicateKeyError:
+        await collection.update_one(query, update)
 
 
 def now() -> datetime:

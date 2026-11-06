@@ -1,5 +1,6 @@
 """Login, refresh (rotating, httpOnly cookie), logout, change password, me."""
 
+import time
 from datetime import timedelta
 from typing import Annotated, Any
 
@@ -57,6 +58,24 @@ async def _issue(db: Db, response: Response, user: User) -> TokenOut:
 
 
 REUSE_GRACE = timedelta(seconds=10)
+# The IP limit can't stop guessing from many addresses, so wrong passwords count per account.
+MAX_FAILURES = 10
+FAILURE_WINDOW = 900  # seconds
+_failures: dict[str, list[float]] = {}
+
+
+def _recent_failures(username: str) -> list[float]:
+    cutoff = time.monotonic() - FAILURE_WINDOW
+    recent = [t for t in _failures.get(username, []) if t > cutoff]
+    if recent:
+        _failures[username] = recent
+    else:
+        _failures.pop(username, None)
+    return recent
+
+
+def reset_login_failures() -> None:
+    _failures.clear()
 
 
 def _clear_cookie(response: Response) -> None:
@@ -78,6 +97,12 @@ def _bad_login() -> HTTPException:
 @limiter.limit(lambda: get_settings().login_rate_limit)
 async def login(request: Request, response: Response, body: LoginIn, db: Db) -> TokenOut:
     username = body.username.strip()
+    account = username.lower()
+    if len(_recent_failures(account)) >= MAX_FAILURES:
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Too many wrong passwords for this account. Wait 15 minutes and try again.",
+        )
     query = (
         {"email": username.lower()} if "@" in username else {"roll_no": normalise_roll_no(username)}
     )
@@ -85,7 +110,11 @@ async def login(request: Request, response: Response, body: LoginIn, db: Db) -> 
     user = await db.users.find_one(query) if username else None
     ok = await verify_password_async(body.password, user.get("password_hash") if user else None)
     if not user or not ok or not user.get("is_active", True):
+        if len(_failures) > 10000:  # guessed names must not grow this for ever
+            _failures.clear()
+        _failures.setdefault(account, []).append(time.monotonic())
         raise _bad_login()
+    _failures.pop(account, None)
     await db.users.update_one({"_id": user["_id"]}, {"$set": {"last_login_at": now()}})
     return await _issue(db, response, user)
 

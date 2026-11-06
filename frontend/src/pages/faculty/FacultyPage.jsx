@@ -125,7 +125,10 @@ function Feedback({ data, facultyId, onPick, onEvidence }) {
                 ids: sel.sarcastic_ids.slice(0, 40),
                 tone: "neutral",
                 kicker: `${sel.course.code} · Section ${sel.course.section}`,
-                title: "Answers that may be sarcastic",
+                title:
+                  sel.sarcastic_ids.length > 40
+                    ? `Answers that may be sarcastic (first 40 of ${sel.sarcastic_ids.length})`
+                    : "Answers that may be sarcastic",
               })
             }
           />

@@ -8,6 +8,7 @@ import { Field, FormError, TextArea, TextInput } from "../../components/forms";
 import { PageHeader } from "../../components/PageHeader";
 import { TagInput } from "../../components/TagInput";
 import { useAuth } from "../../context/auth";
+import { confirmDiscard, useUnsavedWarning } from "../../hooks/useUnsavedWarning";
 
 const STATUS = {
   draft: ["pill-warning", "Draft"],
@@ -144,11 +145,13 @@ export function ProfileReviewPage() {
     editable &&
     form &&
     JSON.stringify(toPayload(form)) !== JSON.stringify(toPayload(toForm(current.fields)));
+  useUnsavedWarning(Boolean(dirty));
   const cited = useMemo(() => new Set(Object.values(current?.sources ?? {}).flat()), [current]);
   const valid = form && form.headline.trim() && form.bio_short.trim() && form.bio_long.trim();
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
   async function act(kind) {
+    if (kind === "generate" && !confirmDiscard(dirty)) return;
     setBusy(kind);
     setError(null);
     try {

@@ -246,7 +246,12 @@ export function ActionTable({
   onEvidence,
   onAdd,
 }) {
-  const groups = departments
+  // Rows must show even if the department list failed to load.
+  const known = new Set(departments.map((d) => d.id));
+  const unlisted = [...new Set(rows.map((r) => r.department_id))]
+    .filter((id) => !known.has(id))
+    .map((id) => ({ id, name: "Department" }));
+  const groups = [...departments, ...unlisted]
     .map((d) => ({ ...d, rows: rows.filter((r) => r.department_id === d.id) }))
     .filter((g) => g.rows.length > 0 || onAdd);
   if (groups.length === 0) {

@@ -12,6 +12,7 @@ function PublishPanel({ cycle, onChanged }) {
   const [preview, setPreview] = useState(null);
   const [error, setError] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [published, setPublished] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -22,13 +23,14 @@ function PublishPanel({ cycle, onChanged }) {
     return () => {
       alive = false;
     };
-  }, [cycle.id, cycle.status]);
+  }, [cycle.id, cycle.status, published]);
 
   async function publish() {
     setBusy(true);
     setError(null);
     try {
       onChanged(await feedbackApi.publish(cycle.id));
+      setPublished((n) => n + 1);
     } catch (err) {
       setError(errorMessage(err, "Couldn't publish."));
     } finally {

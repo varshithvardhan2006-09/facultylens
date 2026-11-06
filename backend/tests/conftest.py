@@ -20,6 +20,7 @@ from app.auth.security import hash_password  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.limiter import limiter  # noqa: E402
 from app.main import create_app  # noqa: E402
+from app.routers.auth import reset_login_failures  # noqa: E402
 from app.utils import now  # noqa: E402
 
 PASSWORD = "correct-horse-battery"
@@ -29,6 +30,7 @@ ROLL_NUMBERS = ["2451-24-733-001", "2451-24-733-002", "2451-24-733-003", "2451-2
 @pytest.fixture(autouse=True)
 def _fresh_settings():
     get_settings.cache_clear()
+    reset_login_failures()
     yield
     get_settings.cache_clear()
 

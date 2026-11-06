@@ -1,7 +1,7 @@
 /*
  * FacultyLens design tokens: the "Affinity Wall". See docs/DESIGN.md for the reasoning.
  * Student comments are paper notes on a pale sage wall, clustered under the teaching aspect
- * they talk about. Sentiment lives on each note's left edge (teal praise, coral criticism,
+ * they talk about. Sentiment colours each note's paper (teal praise, coral criticism,
  * grey neutral) and always comes with words. The deep board green carries headers and the
  * rail; highlighter yellow is reserved for "where you are".
  *
@@ -41,9 +41,7 @@
   --highlight-ink: #16201e;
   --tape: #f4e7b8;
   --chart-main: #0f7f6c;
-  --chart-ink: #16201e;
   --chart-muted: #8c9895;
-  --grid: #dfe6e3;
   --sent-positive: #0f7f6c;
   --sent-neutral: #8c9592;
   --sent-negative: #cf4b29;
@@ -92,7 +90,6 @@
 
   /* Motion: strong ease-out, short. The one authored moment is notes settling on the wall. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --dur-press: 140ms;
   --dur-ui: 180ms;
   --dur-sheet: 240ms;
@@ -132,9 +129,7 @@
     --highlight-ink: #16201e;
     --tape: #5b5338;
     --chart-main: #3fbfa2;
-    --chart-ink: #eef4f1;
     --chart-muted: #7d8e88;
-    --grid: #26332f;
     --sent-positive: #3fbfa2;
     --sent-neutral: #9aa5a1;
     --sent-negative: #f07a57;
@@ -187,9 +182,7 @@
   --highlight-ink: #16201e;
   --tape: #5b5338;
   --chart-main: #3fbfa2;
-  --chart-ink: #eef4f1;
   --chart-muted: #7d8e88;
-  --grid: #26332f;
   --sent-positive: #3fbfa2;
   --sent-neutral: #9aa5a1;
   --sent-negative: #f07a57;

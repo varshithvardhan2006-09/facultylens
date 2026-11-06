@@ -7,6 +7,7 @@ import { Field, FormError, TextInput } from "../../components/forms";
 import { PageHeader, Panel } from "../../components/PageHeader";
 import { TagInput } from "../../components/TagInput";
 import { useAuth } from "../../context/auth";
+import { useUnsavedWarning } from "../../hooks/useUnsavedWarning";
 import { ImportPanel } from "./ImportPanel";
 import { PublicationsEditor } from "./PublicationsEditor";
 import { ReviewPanel } from "./ReviewPanel";
@@ -93,15 +94,15 @@ export function ProfileEditorPage() {
 
   const dirty = useMemo(() => form && JSON.stringify(toPayload(form)) !== saved, [form, saved]);
 
+  useUnsavedWarning(dirty);
+
+  // Wait for the link to be fully typed: every request tells the photo's host someone is here.
+  const [previewUrl, setPreviewUrl] = useState("");
+  const typedPhoto = form?.photo_url ?? "";
   useEffect(() => {
-    if (!dirty) return undefined;
-    const warn = (e) => {
-      e.preventDefault();
-      e.returnValue = "";
-    };
-    window.addEventListener("beforeunload", warn);
-    return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+    const timer = setTimeout(() => setPreviewUrl(typedPhoto), 800);
+    return () => clearTimeout(timer);
+  }, [typedPhoto]);
 
   const set = (key) => (value) => {
     setJustSaved(false);
@@ -280,9 +281,9 @@ export function ProfileEditorPage() {
                   {(a) => (
                     <div className="flex items-center gap-3">
                       <div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-active text-small font-medium text-muted">
-                        {form.photo_url?.startsWith("https://") ? (
+                        {previewUrl.startsWith("https://") ? (
                           <img
-                            src={form.photo_url}
+                            src={previewUrl}
                             alt={`${u.name}, preview`}
                             referrerPolicy="no-referrer"
                             className="size-full object-cover"

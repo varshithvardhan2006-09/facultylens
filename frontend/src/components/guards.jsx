@@ -12,13 +12,15 @@ function SessionCheck() {
 
 /** Signed-in users only; a temporary password must be changed before anything else. */
 export function RequireAuth() {
-  const { status, user } = useAuth();
+  const { status, user, signedOutOnPurpose } = useAuth();
   const location = useLocation();
   if (status === "loading") return <SessionCheck />;
   if (status === "signedOut") {
     // Visitors to the front door get the landing page; anywhere else goes to sign-in.
     if (location.pathname === "/") return <LandingPage />;
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    // After signing out, the next person must not land on the previous user's page.
+    const from = signedOutOnPurpose ? undefined : { from: location.pathname };
+    return <Navigate to="/login" replace state={from} />;
   }
   if (user.must_change_pw) return <Navigate to="/change-password" replace />;
   return <Outlet />;

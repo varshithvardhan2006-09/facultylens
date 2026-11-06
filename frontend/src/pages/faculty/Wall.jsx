@@ -262,7 +262,7 @@ export function Wall({ facultyId, insights, onEvidence }) {
                   ids: allIds,
                   tone,
                   toneFromItem: true,
-                  kicker: `Teaching aspect · ${a.mentions} mentions`,
+                  kicker: `Teaching aspect · ${allIds.length} of ${a.mentions} mentions shown`,
                   title: a.label,
                 })
               }

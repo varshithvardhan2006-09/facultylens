@@ -4,12 +4,7 @@ import { api, errorMessage } from "../../api/client";
 import { Field, FormError, Select, TextInput } from "../../components/forms";
 import { PageHeader, Panel } from "../../components/PageHeader";
 import { useDepartments } from "../../hooks/useDepartments";
-
-/** "2026-27" for dates from June onwards (Indian academic years start in June/July). */
-function currentAcademicYear(date = new Date()) {
-  const start = date.getMonth() >= 5 ? date.getFullYear() : date.getFullYear() - 1;
-  return `${start}-${String((start + 1) % 100).padStart(2, "0")}`;
-}
+import { currentAcademicYear } from "../../lib/academicYear";
 
 function NewOffering({ departments, onCancel }) {
   const navigate = useNavigate();
@@ -113,23 +108,27 @@ export function CoursesPage() {
   const [error, setError] = useState(null);
   const [version, setVersion] = useState(0);
 
+  const [seenYears, setSeenYears] = useState([]);
+
   useEffect(() => {
     let alive = true;
     const params = Object.fromEntries(Object.entries(filters).filter(([, v]) => v));
     api
       .get("/courses", { params })
-      .then((res) => alive && (setCourses(res.data), setError(null)))
+      .then((res) => {
+        if (!alive) return;
+        setCourses(res.data);
+        setError(null);
+        // Remember every year seen, so filtering doesn't remove the other years from the list.
+        setSeenYears((y) => [...new Set([...y, ...res.data.map((c) => c.academic_year)])]);
+      })
       .catch((err) => alive && setError(errorMessage(err)));
     return () => {
       alive = false;
     };
   }, [filters, version]);
 
-  const years = [
-    ...new Set([currentAcademicYear(), ...(courses ?? []).map((c) => c.academic_year)]),
-  ]
-    .sort()
-    .reverse();
+  const years = [...new Set([currentAcademicYear(), ...seenYears])].sort().reverse();
   const setFilter = (key) => (e) => setFilters((f) => ({ ...f, [key]: e.target.value }));
   const filtered = Object.values(filters).some(Boolean);
 

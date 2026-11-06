@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from app.auth.deps import CurrentUser, Db, User
 from app.feedback_spec import ASPECT_KEYS
 from app.services import agreement
-from app.utils import now, oid
+from app.utils import now, oid, upsert_one
 
 router = APIRouter(prefix="/labels", tags=["evaluation"])
 
@@ -139,8 +139,8 @@ async def save_label(body: LabelIn, db: Db, user: Annotator) -> dict[str, Any]:
         "skip_reason": body.skip_reason,
         "at": now(),
     }
-    await db.labels.update_one(
-        {"item_id": item["_id"], "annotator_id": user["_id"]}, {"$set": doc}, upsert=True
+    await upsert_one(
+        db.labels, {"item_id": item["_id"], "annotator_id": user["_id"]}, {"$set": doc}
     )
     return {"saved": True}
 

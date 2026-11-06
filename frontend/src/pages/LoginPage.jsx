@@ -33,7 +33,8 @@ export function LoginPage() {
   const [busy, setBusy] = useState(false);
 
   if (status === "signedIn") {
-    return <Navigate to={user.must_change_pw ? "/change-password" : "/"} replace />;
+    const home = location.state?.from || "/";
+    return <Navigate to={user.must_change_pw ? "/change-password" : home} replace />;
   }
 
   async function submit(event) {

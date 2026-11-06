@@ -1,6 +1,7 @@
 import { CountUp } from "../../components/CountUp";
 import { ArrowLeftIcon, ArrowRightIcon } from "../../components/icons";
 import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { EMOTIONS, pct, signed } from "../../api/insights";
 import { engineLabel } from "../../api/profiles";
 
 const SENT = ["negative", "neutral", "positive"];
@@ -16,18 +17,6 @@ const AGREEMENT = {
   disagrees: ["pill-warning", "Disagree"],
   too_few: ["pill-neutral", "Too few"],
 };
-const EMOTIONS = {
-  joy: "Joy",
-  neutral: "Neutral",
-  surprise: "Surprise",
-  sadness: "Sadness",
-  anger: "Anger",
-  fear: "Fear",
-  disgust: "Disgust",
-};
-
-const pct = (v) => `${Math.round(v * 100)}%`;
-const signed = (v) => (v > 0 ? `+${v.toFixed(2)}` : v.toFixed(2));
 
 export function Legend() {
   return (

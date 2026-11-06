@@ -12,9 +12,9 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const signOutLocally = useCallback(() => {
+  const signOutLocally = useCallback((onPurpose = false) => {
     setAccessToken(null);
-    setState({ status: "signedOut", user: null });
+    setState({ status: "signedOut", user: null, signedOutOnPurpose: onPurpose === true });
   }, []);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
     } catch {
       // Signing out here still has to work when the server can't be reached.
     } finally {
-      signOutLocally();
+      signOutLocally(true);
     }
   }, [signOutLocally]);
 

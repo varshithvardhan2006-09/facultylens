@@ -70,12 +70,10 @@ CURRICULUM_ITEMS: Final = [
 
 CURRICULUM_TEXTS: Final = [("comment", "Any comments on the syllabus or curriculum?")]
 
-LIKERT_LABELS: Final = {1: "Poor", 2: "Fair", 3: "Good", 4: "Very good", 5: "Excellent"}
 MAX_TEXT: Final = 2000
 
 ASPECT_KEYS: Final = [a[0] for a in TEACHING_ASPECTS]
 ASPECT_LABELS: Final = {a[0]: a[1] for a in TEACHING_ASPECTS}
-ASPECT_LEXICON: Final = {a[0]: a[3] for a in TEACHING_ASPECTS}
 
 # Templated next steps for the no-LLM summary (and the NAAC action-taken draft later).
 SUGGESTED_ACTIONS: Final = {

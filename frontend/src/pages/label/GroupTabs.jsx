@@ -205,7 +205,7 @@ export function GroundingTab() {
                 </span>
               </div>
               {bullet.evidence.length ? (
-                <ul className="m-0 flex list-none flex-col gap-1.5 border-l-2 border-rule p-0 pl-3">
+                <ul className="m-0 flex list-none flex-col gap-1.5 p-0 pl-3">
                   {bullet.evidence.map((quote, j) => (
                     <li key={j} className="text-body text-muted">
                       &ldquo;{quote}&rdquo;
