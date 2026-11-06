@@ -4,14 +4,14 @@ A walkthrough in role order: student, faculty, HoD, then the IQAC admin. Each st
 
 ## Before the demo (10–15 minutes, once)
 
-1. MongoDB is running on `127.0.0.1:27017`, and the backend venv is set up (README, Quick start).
+1. MongoDB is running on `127.0.0.1:27017`, and the backend venv is set up (README, Getting started).
 2. In `backend`, load the demo data:
 
    ```bash
    python -m app.seed
    ```
 
-3. Start the API and the frontend (README, Quick start). Sign in as the admin (`iqac@demo.facultylens.in`).
+3. Start the API and the frontend (README, Getting started). Sign in as the admin (`iqac@demo.facultylens.in`).
 4. Prepare the analysis and the report:
    - **Analysis**, then **Analyse waiting responses**. This takes about 3 minutes and loads every model.
    - **NAAC report**, then **Draft action items**.
