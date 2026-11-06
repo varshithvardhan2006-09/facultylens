@@ -317,10 +317,6 @@ def unload(task: str) -> None:
     _loaded.pop(task, None)
 
 
-def is_loaded(task: str) -> bool:
-    return task in _loaded
-
-
 def status() -> list[dict[str, Any]]:
     """Per-model status for /health/models. Never loads anything."""
     rows = []

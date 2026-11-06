@@ -18,26 +18,45 @@ _PUNCT_RUN = re.compile(r"([!?])\1+|\.{4,}")
 _ELONGATED = {"soo": "so", "noo": "no", "yess": "yes", "okk": "ok", "hii": "hi", "verry": "very"}
 _QUOTES = str.maketrans({"‘": "'", "’": "'", "“": '"', "”": '"', "–": "-", "—": "-"})
 
-_CORE_STOPWORDS = (
-    "a an the is are was were be been i you he she it we they this that and or but not to of "
-    "in on for with at by from as very so too more most"
-).split()
-
-CONTRACTIONS = {
-    "can't": "cannot",
-    "won't": "will not",
-    "n't": " not",
-    "'re": " are",
-    "'ll": " will",
-    "'ve": " have",
-    "'m": " am",
-    "'d": " would",
-    "it's": "it is",
-    "that's": "that is",
-    "there's": "there is",
-    "he's": "he is",
-    "she's": "she is",
-}
+_CORE_STOPWORDS = [
+    "a",
+    "an",
+    "the",
+    "is",
+    "are",
+    "was",
+    "were",
+    "be",
+    "been",
+    "i",
+    "you",
+    "he",
+    "she",
+    "it",
+    "we",
+    "they",
+    "this",
+    "that",
+    "and",
+    "or",
+    "but",
+    "not",
+    "to",
+    "of",
+    "in",
+    "on",
+    "for",
+    "with",
+    "at",
+    "by",
+    "from",
+    "as",
+    "very",
+    "so",
+    "too",
+    "more",
+    "most",
+]
 
 
 def _fix_elongation(match: re.Match) -> str:
@@ -62,16 +81,7 @@ def normalise(text: str | None) -> str:
         text,
         flags=re.IGNORECASE,
     )
-    text = _PUNCT_RUN.sub(lambda m: m.group(1) or "...", text)
-    return text
-
-
-def expand_contractions(text: str) -> str:
-    """For the TF-IDF baseline only."""
-    out = text
-    for short in sorted(CONTRACTIONS, key=len, reverse=True):
-        out = re.sub(re.escape(short), CONTRACTIONS[short], out, flags=re.IGNORECASE)
-    return out
+    return _PUNCT_RUN.sub(lambda m: m.group(1) or "...", text)
 
 
 @lru_cache

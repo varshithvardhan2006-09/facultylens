@@ -218,7 +218,7 @@ def test_generate_accepts_a_clean_llm_draft(facts, monkeypatch):
 
 
 def test_generate_without_llm_is_the_template(facts):
-    fields, meta = profile_gen.generate(facts)  # no GROQ_API_KEY in tests
+    _fields, meta = profile_gen.generate(facts)  # no GROQ_API_KEY in tests
     assert meta["engine"] == "template" and "rejected" not in meta
 
 

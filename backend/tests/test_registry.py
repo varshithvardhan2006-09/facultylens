@@ -48,7 +48,6 @@ def test_model_id_follows_ml_mode(monkeypatch):
 def test_get_loads_lazily_once(monkeypatch):
     FakeModel.instances = 0
     monkeypatch.setitem(registry._WRAPPERS, "classifier", FakeModel)
-    assert not registry.is_loaded("sentiment")
     first = registry.get("sentiment")
     second = registry.get("sentiment")
     assert first is second and FakeModel.instances == 1

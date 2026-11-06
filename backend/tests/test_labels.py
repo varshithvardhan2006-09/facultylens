@@ -121,7 +121,7 @@ async def test_disagreement_resolution_and_gold(client, mongo, world):
 
 async def test_reference_summaries_and_grounding(client, mongo, world):
     ids = await _items(mongo)
-    admin, faculty, _ = await _team(mongo, client, world)
+    _admin, faculty, _ = await _team(mongo, client, world)
     from bson import ObjectId
 
     group = await mongo.eval_groups.insert_one(

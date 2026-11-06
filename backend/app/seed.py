@@ -1,4 +1,3 @@
-# ruff: noqa: E501  (sentence banks and fixture rows read better unwrapped)
 """Synthetic demo data: `python -m app.seed [--reset] [--force]`.
 
 Everything created here carries `is_synthetic: true` and is excluded from evaluation (SPEC §8).

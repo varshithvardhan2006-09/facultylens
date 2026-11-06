@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
-import { errorMessage } from "../../api/client";
+import { api, errorMessage } from "../../api/client";
 import { insightsApi } from "../../api/insights";
 import { FormError, Select } from "../../components/forms";
 import { Tabs } from "../../components/Tabs";
 import { PageHeader } from "../../components/PageHeader";
 import { useAuth } from "../../context/auth";
+import { useAsync } from "../../hooks/useAsync";
 import { useDepartments } from "../../hooks/useDepartments";
 import { BiasTab } from "./BiasTab";
 import { ActionsTab } from "./ActionsTab";
 import { OverviewTab } from "./OverviewTab";
+
+const loadCourses = () => api.get("/courses").then((r) => r.data);
 
 const TABS = [
   ["overview", "Overview"],
@@ -25,6 +28,7 @@ export function InsightsPage() {
   const { user } = useAuth();
   const departments = useDepartments();
   const [params, setParams] = useSearchParams();
+  const courses = useAsync(loadCourses);
   const requested = params.get("tab");
   // "Action taken" is the HoD's place to approve their rows; the admin uses the NAAC report page.
   const tabs = user.role === "hod" ? TABS : TABS.slice(0, 2);
@@ -33,7 +37,14 @@ export function InsightsPage() {
   const department =
     user.role === "hod"
       ? user.department_id
-      : (params.get("department") ?? departments.list[0]?.id);
+      : (params.get("department") ??
+        (courses.loading
+          ? undefined
+          : // Open on a department with something to show, not simply the first by name.
+            (
+              departments.list.find((d) => courses.data?.some((c) => c.department_id === d.id)) ??
+              departments.list[0]
+            )?.id));
   const [state, setState] = useState({
     key: null,
     overview: null,
@@ -149,7 +160,7 @@ export function InsightsPage() {
           </button>
         </div>
       )}
-      {!department && !departments.loading && (
+      {!department && !departments.loading && !courses.loading && (
         <section className="card p-[var(--card-pad)]">
           <h2 className="m-0 text-section font-medium">
             {departments.error ? "Couldn't load the departments" : "No departments yet"}
@@ -161,7 +172,7 @@ export function InsightsPage() {
           </p>
         </section>
       )}
-      {!loaded && !state.error && (department || departments.loading) && (
+      {!loaded && !state.error && (department || departments.loading || courses.loading) && (
         <div className="flex flex-col gap-[var(--gap)]" aria-busy="true">
           <span className="skeleton h-28 w-full" />
           <span className="skeleton h-72 w-full" />

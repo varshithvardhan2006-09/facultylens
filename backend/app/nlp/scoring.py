@@ -37,11 +37,6 @@ def sentiment_label(probs: dict[str, float]) -> str:
     return max(("negative", "neutral", "positive"), key=lambda k: probs.get(k, 0.0))
 
 
-def polarity_value(probs: dict[str, float]) -> float:
-    """-1 .. 1: P(positive) - P(negative). Used for agreement with Likert ratings."""
-    return round(probs.get("positive", 0.0) - probs.get("negative", 0.0), 4)
-
-
 def sarcasm_flag(irony: float, sentiment: str) -> bool:
     """SPEC §5 step 8: a positive-sounding answer the irony model thinks is ironic."""
     return irony >= get_settings().sarc_flag and sentiment == "positive"

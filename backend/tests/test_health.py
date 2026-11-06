@@ -73,7 +73,7 @@ def test_importing_main_loads_no_ml_library():
         "if m in sys.modules]; print(bad); sys.exit(1 if bad else 0)"
     )
     proc = subprocess.run(
-        [sys.executable, "-c", code], capture_output=True, text=True, cwd=BACKEND_DIR
+        [sys.executable, "-c", code], capture_output=True, text=True, cwd=BACKEND_DIR, check=False
     )
     assert proc.returncode == 0, proc.stdout + proc.stderr
 

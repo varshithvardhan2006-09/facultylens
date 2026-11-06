@@ -20,12 +20,6 @@ def test_normalise(raw, clean):
     assert preprocess.normalise(raw) == clean
 
 
-def test_contractions_for_baseline_only():
-    assert preprocess.expand_contractions("Can't explain, won't stop, it's late") == (
-        "cannot explain, will not stop, it is late"
-    )
-
-
 @pytest.mark.parametrize(
     ("text", "lang"),
     [
@@ -90,7 +84,6 @@ def test_moderation_thresholds(score, status):
 def test_sentiment_and_sarcasm_rules():
     probs = {"negative": 0.1, "neutral": 0.2, "positive": 0.7}
     assert scoring.sentiment_label(probs) == "positive"
-    assert scoring.polarity_value(probs) == 0.6
     assert scoring.sarcasm_flag(0.97, "positive") is True
     assert scoring.sarcasm_flag(0.9, "positive") is False  # tweet-trained model: calibrated at 0.95
     assert scoring.sarcasm_flag(0.97, "negative") is False

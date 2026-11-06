@@ -1,4 +1,3 @@
-# ruff: noqa: E501  (request bodies read better unwrapped)
 """NAAC report endpoints: drafting, who may edit and approve, the export gate, no raw text."""
 
 import io

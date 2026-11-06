@@ -18,7 +18,7 @@ const AGREEMENT = {
   too_few: ["pill-neutral", "Too few"],
 };
 
-export function Legend() {
+function Legend() {
   return (
     <ul className="m-0 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 text-small text-muted">
       {SENT.map((s) => (
