@@ -64,35 +64,17 @@ Open that folder in the Claude desktop app (Code tab). From here, Claude can do 
 
 ---
 
-## Part 3. Claude setup (rules and notes)
+## Part 3. Claude setup
 
-1. **Install your global rules.** `docs/claude/USER_CLAUDE.md` is an exact copy of the
-   `~/.claude/CLAUDE.md` from the old laptop: the web design house rules, which apply to every project,
-   and the graphify trigger. Copy it into place:
-
-   In PowerShell:
-
-   ```powershell
-   New-Item -ItemType Directory -Force "$env:USERPROFILE\.claude" | Out-Null
-   ```
-
-   ```powershell
-   Copy-Item docs\claude\USER_CLAUDE.md "$env:USERPROFILE\.claude\CLAUDE.md"
-   ```
-
-   If `%USERPROFILE%\.claude\CLAUDE.md` already exists, Claude should **merge** the two files rather than
-   overwrite.
-2. **Project rules** are already in the repo: `CLAUDE.md` (working rules) and `docs/SPEC.md`
+1. **Project rules** are already in the repo: `CLAUDE.md` (working rules) and `docs/SPEC.md`
    (requirements).
-3. **Project memory:** `docs/claude/PROJECT_NOTES.md` holds where the project stands, the decisions
-   already made, and what is left. Claude reads it at the start of every session on the new laptop.
-4. **Tool connections:**
+2. **Tool connections:**
    - `.mcp.json` is in the repo: Context7 (library docs), Playwright (browser testing) and MongoDB. They
      start through `npx`, so Node must be installed.
    - Hugging Face, Figma and Canva connections need you to sign in from the app (`/mcp`).
-5. **Design skills** used on this project (impeccable, design-taste-frontend, emil-design-eng,
+3. **Design skills** used on this project (impeccable, design-taste-frontend, emil-design-eng,
    frontend-design, dataviz) come with the Claude app, so check they are listed.
-6. **graphify** (optional, the knowledge-graph tool):
+4. **graphify** (optional, the knowledge-graph tool):
 
    ```bash
    py -3.13 -m pip install --user uv
@@ -255,22 +237,19 @@ the Kokoro voice setup, the music, then `npm run render:promo` and `npm run rend
 
 Follow Parts 3 to 7 in order. Mark each step done only after its check passes. Specifically:
 
-1. **Read first:** `CLAUDE.md`, `docs/SPEC.md`, `docs/claude/PROJECT_NOTES.md`, then this file.
+1. **Read first:** `CLAUDE.md`, `docs/SPEC.md`, then this file.
 2. **Check the tools from Part 1** (`py -3.13 --version`, `node --version`, `git --version`, and that the
    `MongoDB` Windows service is running). Report anything missing and give the user the download page;
    do not install system software silently.
-3. **Rules:** install `docs/claude/USER_CLAUDE.md` as `~/.claude/CLAUDE.md`, merging if a file exists.
-   Tell the user what changed.
-4. **Stop and ask the user:**
+3. **Stop and ask the user:**
    - for the `.env` file and the backup folder (Part 0);
    - to paste any key or password themselves (open the file in their editor);
    - for every GitHub, Atlas, Hugging Face or Figma sign-in.
 
    Never type secrets, never print `.env`, never commit it.
-5. **Long steps** (pip installs, the model download, the test suite) run in the background.
-6. **If a step fails:**
+4. **Long steps** (pip installs, the model download, the test suite) run in the background.
+5. **If a step fails:**
    - read the error, fix the cause, and retry;
    - Windows quirks: use `py -3.13` if `python` is not found, and run one command per line in PowerShell;
    - if MongoDB is not reachable, start the `MongoDB` service.
-7. **Finish with Part 7** and report the real results (test count, build, what the app showed). Then
-   continue with "What is left" in `docs/claude/PROJECT_NOTES.md` when the user asks.
+6. **Finish with Part 7** and report the real results (test count, build, what the app showed).

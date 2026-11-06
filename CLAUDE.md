@@ -54,7 +54,7 @@ facultylens/
 │   │   ├── nlp/         # preprocess, sentiment, aspects, summarize, moderation, emotion, sarcasm, bias, profile_gen, llm, registry
 │   │   ├── services/    # orcid.py, semantic_scholar.py, naac_report.py
 │   │   └── pipeline/    # background analysis jobs
-│   ├── ml/              # baseline.py, evaluate.py, label_tool/, data/, results/
+│   ├── ml/              # baseline.py, evaluate.py, data/, results/
 │   ├── tests/
 │   ├── requirements.txt
 │   └── .env.example
@@ -97,4 +97,4 @@ facultylens/
 12. Keep `postman/FacultyLens.postman_collection.json` updated with every endpoint.
 13. Commit after each working step with a clear message. Never force-push.
 14. Be honest in reports and the README: report real metrics from `ml/results/`, never made-up numbers.
-15. On a new machine, or when no project memory is available, also read `docs/claude/PROJECT_NOTES.md` (project status and settled decisions) and follow `SETUP_NEW_LAPTOP.md` to set the project up. The user's global web design house rules are in `docs/claude/USER_CLAUDE.md`.
+15. On a new machine, follow `SETUP_NEW_LAPTOP.md` to set the project up.
