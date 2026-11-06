@@ -7,6 +7,7 @@ the public dataset; the app's own comments (already redacted and moderated) go t
 annotators only.
 """
 
+import asyncio
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -170,7 +171,8 @@ async def progress(db: Db, user: Viewer) -> dict[str, Any]:
             }
             for p in people
         ],
-        "agreement": agreement.agreement(labels),
+        # The first call imports scikit-learn, which takes a moment.
+        "agreement": await asyncio.to_thread(agreement.agreement, labels),
         "gold": len(agreement.gold(labels, adjudications)),
         "disagreements": len(agreement.disagreements(labels, adjudications)),
         "groups": {

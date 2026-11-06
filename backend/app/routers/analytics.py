@@ -5,6 +5,7 @@ teacher, their HoD and admins. Everything reads stored aggregates, summaries and
 redacted answers, and respects MIN_RESPONSES_FOR_DISPLAY per form.
 """
 
+import asyncio
 from typing import Annotated, Any
 
 from bson import ObjectId
@@ -191,8 +192,11 @@ async def bias(
             }
         )
     settings = get_settings()
-    panel = analytics.bias_panel(
-        people, settings.bias_min_group_faculty, settings.bias_min_group_answers
+    panel = await asyncio.to_thread(  # the first call imports scipy, which takes a moment
+        analytics.bias_panel,
+        people,
+        settings.bias_min_group_faculty,
+        settings.bias_min_group_answers,
     )
     head.pop("cycles", None)
     return to_jsonable({**head, **panel})

@@ -359,3 +359,8 @@ async def test_bulk_accept_keeps_going_past_a_bad_item(client, world):
     assert "Compilers" in body["interests"]
     assert [p["id"] for p in body["pending_imports"]] == ["bad"]
     assert "No year allowed" in body["skipped_imports"][0]
+
+
+def test_tests_never_use_a_cloud_database():
+    assert "mongodb+srv" not in get_settings().mongodb_uri
+    assert get_settings().mongodb_db == "facultylens_test"

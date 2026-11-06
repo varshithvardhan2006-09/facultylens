@@ -308,7 +308,7 @@ ruff check .
 - **The fast suite** needs MongoDB. It uses a separate `facultylens_test` database and drops it afterwards. It includes:
   - a role matrix that calls every endpoint as each role and checks the 401/403 answers;
   - a test that every endpoint has a Postman request.
-- **Coverage of `app/`** is 89% (590 tests; the target is 70%).
+- **Coverage of `app/`** is 89% (591 tests; the target is 70%).
 - **`pytest -m slow`** loads every real model. **`pytest -m network`** imports two real public ORCID records.
 - **Frontend:** in `frontend`, run `npm run lint` and `npm run build`.
 - **Postman:** [`postman/FacultyLens.postman_collection.json`](postman/FacultyLens.postman_collection.json) has a request for every endpoint. Set `baseUrl`, sign in with the first request, and the rest reuse the token.

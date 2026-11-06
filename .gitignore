@@ -37,8 +37,7 @@ desktop.ini
 
 # Design-skill working files
 .taste-skill/
-.impeccable/review/
-.impeccable/mocks/
+.impeccable/
 
 # Raw public datasets (real names inside); only the import script and results are committed
 backend/ml/data/rmp/

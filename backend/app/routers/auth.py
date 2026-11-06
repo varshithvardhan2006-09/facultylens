@@ -23,7 +23,6 @@ from app.services.audit import record
 from app.utils import now, to_jsonable
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-REFRESH_DAYS_FALLBACK = 7
 
 
 def user_out(user: dict[str, Any]) -> UserOut:
@@ -34,7 +33,7 @@ async def _issue(db: Db, response: Response, user: User) -> TokenOut:
     """Create an access token and a fresh refresh token (stored hashed, sent as a cookie)."""
     settings = get_settings()
     token, token_hash = new_refresh_token()
-    days = settings.jwt_refresh_days or REFRESH_DAYS_FALLBACK
+    days = settings.jwt_refresh_days
     await db.refresh_tokens.insert_one(
         {
             "jti_hash": token_hash,

@@ -63,15 +63,12 @@ def generate_temp_password(length: int = 12) -> str:
 
 
 def create_access_token(user: dict[str, Any]) -> tuple[str, int]:
-    """Return (token, expires_in_seconds). Claims are hints; the user is reloaded per request."""
+    """Return (token, expires_in_seconds). The user is reloaded on every request."""
     settings = get_settings()
     issued = now()
     expires_in = settings.jwt_access_minutes * 60
     payload = {
         "sub": str(user["_id"]),
-        "role": user["role"],
-        "dept": str(user["department_id"]) if user.get("department_id") else None,
-        "mcp": bool(user.get("must_change_pw")),
         "type": "access",
         "pwd": password_stamp(user),
         "iat": issued,
