@@ -1,0 +1,108 @@
+{
+  "measured_at": "2026-10-19T18:53:11+00:00",
+  "ml_mode": "light",
+  "model_version": "light-r1-912bb0b3",
+  "torch_num_threads": 6,
+  "nlp_batch_size": 16,
+  "machine": {
+    "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+    "physical_cores": 6,
+    "logical_cores": 12,
+    "ram_gb": 15.3,
+    "os": "Windows 11",
+    "python": "3.13.3",
+    "torch": "2.14.1+cpu"
+  },
+  "baseline_rss_mb": 37.8,
+  "all_loaded_rss_mb": 3897.1,
+  "models": [
+    {
+      "task": "sentiment",
+      "model_id": "cardiffnlp/twitter-roberta-base-sentiment-latest",
+      "load_s": 14.02,
+      "rss_increase_mb": 741.1,
+      "unit": "per comment",
+      "batch_ms_per_comment": 12.2,
+      "single_p95_ms": 43.6,
+      "sample": "negative (0.84)",
+      "status": "ok"
+    },
+    {
+      "task": "embeddings",
+      "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+      "load_s": 4.56,
+      "rss_increase_mb": 127.6,
+      "unit": "per comment",
+      "batch_ms_per_comment": 1.9,
+      "single_p95_ms": 9.9,
+      "sample": "dim=384",
+      "status": "ok"
+    },
+    {
+      "task": "absa",
+      "model_id": "yangheng/deberta-v3-base-absa-v1.1",
+      "load_s": 2.21,
+      "rss_increase_mb": 822.1,
+      "unit": "per comment",
+      "batch_ms_per_comment": 24.9,
+      "single_p95_ms": 110.6,
+      "sample": "pace -> negative (0.99)",
+      "status": "ok"
+    },
+    {
+      "task": "toxicity",
+      "model_id": "unitary/unbiased-toxic-roberta",
+      "load_s": 1.34,
+      "rss_increase_mb": 341.1,
+      "unit": "per comment",
+      "batch_ms_per_comment": 12.3,
+      "single_p95_ms": 43.8,
+      "sample": "toxicity (0.00)",
+      "status": "ok"
+    },
+    {
+      "task": "emotion",
+      "model_id": "j-hartmann/emotion-english-distilroberta-base",
+      "load_s": 1.32,
+      "rss_increase_mb": 164.6,
+      "unit": "per comment",
+      "batch_ms_per_comment": 6.4,
+      "single_p95_ms": 24.0,
+      "sample": "neutral (0.48)",
+      "status": "ok"
+    },
+    {
+      "task": "irony",
+      "model_id": "cardiffnlp/twitter-roberta-base-irony",
+      "load_s": 1.33,
+      "rss_increase_mb": 334.9,
+      "unit": "per comment",
+      "batch_ms_per_comment": 11.6,
+      "single_p95_ms": 46.8,
+      "sample": "non_irony (0.76)",
+      "status": "ok"
+    },
+    {
+      "task": "summarizer",
+      "model_id": "sshleifer/distilbart-cnn-12-6",
+      "load_s": 2.64,
+      "rss_increase_mb": 1178.5,
+      "unit": "per summary of 16 comments",
+      "batch_ms_per_comment": 1255.3,
+      "single_p95_ms": 1275.3,
+      "sample": "Sir explains every concept clearly and gives real-world examples from industry . Madam is always on time and completes the syllabus well before exams .",
+      "status": "ok"
+    },
+    {
+      "task": "ner",
+      "model_id": "en_core_web_sm",
+      "load_s": 1.2,
+      "rss_increase_mb": 62.1,
+      "unit": "per comment",
+      "batch_ms_per_comment": 2.4,
+      "single_p95_ms": 5.2,
+      "sample": "[('Ramesh Kumar', 'PERSON', 4, 16), ('DBMS', 'ORG', 25, 29), ('Hyderabad', 'GPE', 33, 42)]",
+      "status": "ok"
+    }
+  ]
+}

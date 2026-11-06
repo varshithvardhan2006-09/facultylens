@@ -1,0 +1,94 @@
+{
+ "total": 20,
+ "offset": 0,
+ "next": 3,
+ "data": [
+  {
+   "authorId": "2480033361",
+   "name": "Y. Bengio",
+   "affiliations": [],
+   "paperCount": 6,
+   "hIndex": 2,
+   "papers": [
+    {
+     "paperId": "9df84ebb42f344487f5e187c366bb614696efd93",
+     "title": "The Future of Machine Intelligence",
+     "year": 2016
+    },
+    {
+     "paperId": "17f6e8cc70685d21c513ce90e237d42a5011eed5",
+     "title": "Adaptive Boosting of Neural Networks for Character Recognition",
+     "year": 1997
+    },
+    {
+     "paperId": "8fd8f610af21b2d0243ed096aa8bb89e7da98eb1",
+     "title": "Diffusion of Context and Credit Information in Markovian Models",
+     "year": 1995
+    },
+    {
+     "paperId": "d72e6c675c70d2c1237b385975e8a41cf00ad831",
+     "title": "Recurrent Neural Networks for Adaptive TemporalProcessingYoshua Bengio",
+     "year": 1993
+    }
+   ]
+  },
+  {
+   "authorId": "2211024206",
+   "name": "Y. Bengio",
+   "affiliations": [],
+   "paperCount": 62,
+   "hIndex": 14,
+   "papers": [
+    {
+     "paperId": "0555c5b28534019a9e6be0b618c84df32b736a9d",
+     "title": "How to Verify Probabilistic Consistency of Predictive Models",
+     "year": 2026
+    },
+    {
+     "paperId": "16dd1dcf3dbf8b1e113abdf6fbdb5f2ed4f1f928",
+     "title": "When Benign Inputs Lead to Severe Harms: Eliciting Unsafe Unintended Behaviors of Computer-Use Agents",
+     "year": 2026
+    },
+    {
+     "paperId": "2fd6bc3defb719e6172ca300a4caa084b0ea1268",
+     "title": "Insuring AI: Incentivising Safe and Secure Deployment",
+     "year": 2026
+    },
+    {
+     "paperId": "317f9ebc01fea2a95b728e0ac30b66c814349249",
+     "title": "CIAware-Bench: Benchmarking Control Intervention Awareness Across Frontier LLMs",
+     "year": 2026
+    }
+   ]
+  },
+  {
+   "authorId": "1865800402",
+   "name": "Y. Bengio",
+   "affiliations": [],
+   "paperCount": 368,
+   "hIndex": 63,
+   "papers": [
+    {
+     "paperId": "1b37d201f5768337e70c75c6ae695b6c0650f57a",
+     "title": "Discrete Feynman-Kac Correctors",
+     "year": 2026
+    },
+    {
+     "paperId": "1f084dcc4326127346fa0f56b6be1af206056316",
+     "title": "Language models recognize dropout and Gaussian noise applied to their activations",
+     "year": 2026
+    },
+    {
+     "paperId": "2a6d7ed1d32ae61a66455b27dad41aaddef8d3f2",
+     "title": "Evaluating Predictor-Corrector Dependence in Hard-Constrained Climate Emulators",
+     "year": 2026
+    },
+    {
+     "paperId": "2c8761931889553d20940b514df9d365ac5a94c9",
+     "title": "Adaptive Order Policies for Masked Diffusion",
+     "year": 2026
+    }
+   ]
+  }
+ ]
+}

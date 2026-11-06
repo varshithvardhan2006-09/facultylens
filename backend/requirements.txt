@@ -1,0 +1,39 @@
+# Install CPU-only PyTorch FIRST (not listed here so pip can't pull a CUDA build):
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+# Then: pip install -r requirements.txt
+#       python -m spacy download en_core_web_sm
+
+# ---- API ----
+fastapi>=0.149,<1.0
+uvicorn[standard]>=0.54,<1.0
+pydantic-settings>=2.16,<3.0
+pymongo>=4.19,<5.0
+PyJWT>=2.15,<3.0
+pwdlib[bcrypt]>=0.3.1,<0.4
+slowapi>=0.1.10,<0.2
+httpx>=0.28,<1.0
+psutil>=7.2,<8.0
+python-multipart>=0.0.32,<0.1
+email-validator>=2.3,<3.0
+
+# ---- LLM ----
+groq>=1.7,<2.0
+
+# ---- NLP / ML (CPU) ----
+nltk>=3.10,<4.0
+transformers>=5.20,<6.0
+sentence-transformers>=6.1,<7.0
+sentencepiece>=0.2.2,<0.3
+protobuf>=7.36,<8.0
+spacy>=3.8.16,<3.9
+scikit-learn>=1.9,<2.0
+pandas>=3.0,<4.0
+numpy>=2.5,<3.0
+evaluate>=0.4.6,<0.5
+rouge-score>=0.1.2,<0.2
+bert-score>=0.3.13,<0.4
+
+# ---- Reports ----
+fpdf2>=2.8.9,<3.0
+python-docx>=1.2,<2.0
+matplotlib>=3.11,<4.0

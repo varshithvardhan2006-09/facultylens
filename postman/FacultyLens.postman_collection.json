@@ -1,0 +1,3121 @@
+{
+  "info": {
+    "name": "FacultyLens",
+    "description": "FacultyLens API. 1) Run auth > POST /auth/login (it stores {{token}}). 2) Every other request sends Bearer {{token}}. Set baseUrl, username and password in the collection variables. Accounts created by the admin get a temporary password and must call change-password first.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:8000/api"
+    },
+    {
+      "key": "username",
+      "value": "iqac@college.edu"
+    },
+    {
+      "key": "password",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "departmentId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "courseId",
+      "value": ""
+    },
+    {
+      "key": "facultyId",
+      "value": ""
+    },
+    {
+      "key": "pendingId",
+      "value": ""
+    },
+    {
+      "key": "cycleId",
+      "value": ""
+    },
+    {
+      "key": "formId",
+      "value": ""
+    },
+    {
+      "key": "jobId",
+      "value": ""
+    },
+    {
+      "key": "queueId",
+      "value": ""
+    },
+    {
+      "key": "profileVersion",
+      "value": "1"
+    },
+    {
+      "key": "evidenceIds",
+      "value": ""
+    },
+    {
+      "key": "actionId",
+      "value": ""
+    },
+    {
+      "key": "manualActionId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Pings MongoDB. 200 ok, 503 degraded. Loads no model.",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /health/models",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/health/models",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health",
+                "models"
+              ]
+            },
+            "description": "Which models are loaded, RAM, average latency. Loads nothing.",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "auth",
+      "item": [
+        {
+          "name": "POST /auth/login",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "username = email (staff) or roll number (students). Sets the httpOnly refresh cookie (path /api/auth). Rate limited by LOGIN_RATE_LIMIT (default 5/minute per IP).",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/refresh",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Uses the refresh cookie; rotates it and returns a new access token. 204 when there is no cookie (signed out); 401 when the token is expired, revoked or reused.",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/change-password",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/auth/change-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            },
+            "description": "Required after the first sign-in with a temporary password (other routes return 403 password_change_required until then). New password: at least 10 characters.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_password\": \"{{password}}\",\n  \"new_password\": \"choose-a-long-one-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"token\", pm.response.json().access_token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /auth/me",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /auth/logout",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revokes the refresh token and clears the cookie.",
+            "header": [],
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "departments",
+      "item": [
+        {
+          "name": "GET /departments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/departments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departments"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /departments (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/departments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departments"
+              ]
+            },
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Computer Science and Engineering\",\n  \"code\": \"CSE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"departmentId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /departments/:id (admin)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/departments/{{departmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "departments",
+                "{{departmentId}}"
+              ]
+            },
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Computer Science & Engineering\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "GET /users (admin, hod)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users?role=faculty&page=1&page_size=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "role",
+                  "value": "faculty"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "page_size",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Filters: role, department_id (admin only), q (name/email/roll number), include_inactive. A HoD always gets their own department.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Returns temp_password ONCE. Students need roll_no (ROLL_NO_REGEX); staff need email; gender is for faculty/HoD only and admin-only.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Anita Rao\",\n  \"role\": \"faculty\",\n  \"email\": \"anita.rao@college.edu\",\n  \"department_id\": \"{{departmentId}}\",\n  \"gender\": \"female\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"userId\", pm.response.json().user.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users/bulk (admin, JSON, dry run)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/users/bulk?dry_run=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "bulk"
+              ],
+              "query": [
+                {
+                  "key": "dry_run",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Validates every row: 422 bulk_invalid with per-row errors, or the number of valid rows. Without dry_run it creates all rows (all-or-nothing) and returns the credentials once.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"users\": [\n    {\n      \"name\": \"Meena K\",\n      \"role\": \"student\",\n      \"roll_no\": \"2451-24-733-011\",\n      \"department_code\": \"CSE\"\n    },\n    {\n      \"name\": \"Prakash V\",\n      \"role\": \"faculty\",\n      \"email\": \"prakash.v@college.edu\",\n      \"department_code\": \"CSE\",\n      \"gender\": \"male\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users/bulk (admin, CSV)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/users/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "bulk"
+              ]
+            },
+            "description": "CSV header: name,email,role,department_code,roll_no,gender (UTF-8, at most 1 MB and 1000 rows).",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PATCH /users/:id (admin)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Anita Rao (Prof.)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /users/:id/reset-password (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/reset-password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "reset-password"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /users/:id (admin, deactivate)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Soft delete: sets is_active=false and ends the user's sessions.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "courses",
+      "item": [
+        {
+          "name": "GET /courses",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses"
+              ]
+            },
+            "description": "Admin: all; HoD: own department; faculty: the offerings they teach; student: their enrolments.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /courses (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/courses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses"
+              ]
+            },
+            "description": "A course offering is unique per code + academic year + semester + section.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"CS501\",\n  \"name\": \"Compiler Design\",\n  \"department_id\": \"{{departmentId}}\",\n  \"academic_year\": \"2026-27\",\n  \"semester\": 5,\n  \"section\": \"A\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"courseId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /courses/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                "{{courseId}}"
+              ]
+            },
+            "description": "Student list only for admin and the department's HoD.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PATCH /courses/:id (admin)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                "{{courseId}}"
+              ]
+            },
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Compiler Design and Construction\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /courses/:id/enrol (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/courses/{{courseId}}/enrol",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "courses",
+                "{{courseId}}",
+                "enrol"
+              ]
+            },
+            "description": "Add or remove students by roll number; faculty_ids (optional) replaces the teacher list. Unknown roll numbers are reported back.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"add_roll_numbers\": [\n    \"2451-24-733-011\"\n  ],\n  \"remove_roll_numbers\": [],\n  \"faculty_ids\": [\n    \"{{userId}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "profiles",
+      "item": [
+        {
+          "name": "GET /faculty/:id/profile-data",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile-data",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile-data"
+              ]
+            },
+            "description": "Profile facts + pending imports + courses taught. Owner (faculty/HoD) and admin; a HoD can read their own department. can_edit tells the UI whether to show editing.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /faculty/:id/profile-data",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile-data",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile-data"
+              ]
+            },
+            "description": "Replaces the editable sections. Items without an id get one; keep ids when editing so later grounding stays stable.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"Assistant Professor\",\n  \"photo_url\": null,\n  \"interests\": [\n    \"Natural language processing\",\n    \"Information retrieval\"\n  ],\n  \"qualifications\": [\n    {\n      \"degree\": \"M.Tech\",\n      \"specialisation\": \"Computer Science\",\n      \"institution\": \"JNTU Hyderabad\",\n      \"year\": 2015\n    }\n  ],\n  \"experience\": [\n    {\n      \"role\": \"Assistant Professor\",\n      \"institution\": \"Demo College of Engineering\",\n      \"from_year\": 2016,\n      \"to_year\": null\n    }\n  ],\n  \"publications\": [\n    {\n      \"title\": \"Aspect-based sentiment of student feedback\",\n      \"venue\": \"IJERT\",\n      \"year\": 2024,\n      \"type\": \"journal\"\n    }\n  ],\n  \"achievements\": [\n    {\n      \"kind\": \"fdp\",\n      \"title\": \"AICTE FDP on Deep Learning\",\n      \"year\": 2023\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/import/orcid",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/import/orcid",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "import",
+                "orcid"
+              ]
+            },
+            "description": "Fetches works, employments, educations and keywords from the public ORCID record (iD or orcid.org link, checksum verified) into pending_imports. Duplicates of accepted, pending or rejected items are skipped. Limited to 10/minute.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orcid\": \"0000-0002-1825-0097\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"pendingId\", pm.response.json().profile.pending_imports[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/semantic-scholar/search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/semantic-scholar/search?q=Josiah%20Carberry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "semantic-scholar",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Josiah Carberry"
+                }
+              ]
+            },
+            "description": "Candidate authors (id, affiliations, paper count, sample titles) so the faculty member can pick the right one.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/import/semantic-scholar",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/import/semantic-scholar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "import",
+                "semantic-scholar"
+              ]
+            },
+            "description": "Author ID or profile link. Papers go to pending_imports; a paper already pending from ORCID gets its citations and TL;DR filled in instead. TL;DRs are best-effort without S2_API_KEY.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"author\": \"https://www.semanticscholar.org/author/1751762\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/imports/:item/accept",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/imports/{{pendingId}}/accept",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "imports",
+                "{{pendingId}}",
+                "accept"
+              ]
+            },
+            "description": "Moves one pending item into its section; optional data overrides fields before saving.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"data\": {\n    \"venue\": \"Journal of Psychoceramics\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/imports/:item/reject",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/imports/{{pendingId}}/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "imports",
+                "{{pendingId}}",
+                "reject"
+              ]
+            },
+            "description": "Drops a pending item and remembers it so re-imports don't suggest it again.",
+            "header": []
+          }
+        },
+        {
+          "name": "POST /faculty/:id/imports/bulk",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/imports/bulk",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "imports",
+                "bulk"
+              ]
+            },
+            "description": "Accept and reject many pending items in one call.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accept\": [],\n  \"reject\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cycles",
+      "item": [
+        {
+          "name": "GET /cycles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles"
+              ]
+            },
+            "description": "All cycles; admin also gets form, response and eligible counts.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cycles (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cycles",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles"
+              ]
+            },
+            "description": "Creates a draft. Odd term = semesters 1, 3, 5, 7.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"2026-27 Odd Sem\",\n  \"academic_year\": \"2026-27\",\n  \"term\": \"odd\",\n  \"opens_at\": \"2026-10-20T00:00:00Z\",\n  \"closes_at\": \"2026-11-30T23:59:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"cycleId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cycles/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cycles/:id/preview (admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "preview"
+              ]
+            },
+            "description": "What publishing would create, and offerings with no teacher.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cycles/:id/publish (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "publish"
+              ]
+            },
+            "description": "Creates one teaching form per offering x teacher and one curriculum form per offering; opens the cycle. Idempotent.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /cycles/:id/forms (admin, hod)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/forms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "forms"
+              ]
+            },
+            "description": "Forms with response counts (never response content). HoD: own department only.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"formId\", pm.response.json()[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /cycles/:id/close (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "close"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "forms (students)",
+      "item": [
+        {
+          "name": "GET /forms/my (student)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/forms/my",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "forms",
+                "my"
+              ]
+            },
+            "description": "Open forms for the student's enrolled offerings, with submitted: true/false.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"formId\", pm.response.json()[0]?.id || pm.collectionVariables.get('formId'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /forms/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/forms/{{formId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "forms",
+                "{{formId}}"
+              ]
+            },
+            "description": "Questions, course, teacher. Students: only if enrolled. Staff: within their scope.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /forms/:id/responses (student)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/forms/{{formId}}/responses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "forms",
+                "{{formId}}",
+                "responses"
+              ]
+            },
+            "description": "Teaching form shown; a curriculum form takes syllabus_relevance, outcomes_clarity, lab_adequacy, reference_material and texts.comment. One response per student per form: a second POST returns 409. Stores no student id, only a per-form HMAC code and the date.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"likert\": {\n    \"knowledge\": 5,\n    \"clarity\": 4,\n    \"punctuality\": 5,\n    \"interaction\": 4,\n    \"practical\": 3,\n    \"assessment\": 4,\n    \"behaviour\": 5,\n    \"pace\": 3\n  },\n  \"texts\": {\n    \"liked\": \"Explains every topic clearly.\",\n    \"improve\": \"The last unit felt rushed.\",\n    \"other\": \"\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "feedback",
+      "item": [
+        {
+          "name": "GET /feedback/faculty/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/feedback/faculty/{{facultyId}}?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "feedback",
+                "faculty",
+                "{{facultyId}}"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Per teaching form: responses, eligible, min_required, and rating averages only once responses >= MIN_RESPONSES_FOR_DISPLAY. Comments stay hidden until Phase 4 moderates and redacts them.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "analysis (admin)",
+      "item": [
+        {
+          "name": "GET /analysis/summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/summary?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Responses in the cycle, how many are analysed for the current model_version, and any active job.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /analysis/run",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/run?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "run"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Queues every unanalysed response in the cycle (202). Cached results are never re-scored; one active run per cycle.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 202\", () => pm.response.to.have.status(202));",
+                  "pm.collectionVariables.set(\"jobId\", pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analysis/status/:job",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/status/{{jobId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "status",
+                "{{jobId}}"
+              ]
+            },
+            "description": "done / total, counts of hidden, review, PII and sarcastic answers, timings.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analysis/jobs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/jobs?limit=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /analysis/summaries",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/analysis/summaries?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analysis",
+                "summaries"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Rebuilds every teaching-form summary in the cycle (202, a 'summaries' job). Summaries are otherwise rebuilt automatically when a form's aggregate changes.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 202\", () => pm.response.to.have.status(202));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "analytics",
+      "item": [
+        {
+          "name": "GET /analytics/faculty/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/faculty/{{facultyId}}?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "faculty",
+                "{{facultyId}}"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "A teacher's offerings in the cycle side by side (status, net score, rating, top strength and gap, sarcasm rate) plus all of them combined. The teacher, their HoD and admins.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/department/:id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/department/{{departmentId}}?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "department",
+                "{{departmentId}}"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Department overview: one row per teacher (never their gender), department aspects and totals. That department's HoD and admins. Without ?cycle the newest cycle with teaching forms is used.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/bias",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/bias?department={{departmentId}}&cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "bias"
+              ],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "{{departmentId}}"
+                },
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                }
+              ]
+            },
+            "description": "Bias & sarcasm panel for one department, groups only: gendered-language rates per 1,000 answers, rating gap per aspect with a 95% Welch interval over teacher averages, emotion mix, sarcasm rate. status 'too_small' (sizes only) unless each group has BIAS_MIN_GROUP_FACULTY teachers and BIAS_MIN_GROUP_ANSWERS answers.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/sarcasm (department)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sarcasm?department={{departmentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "sarcasm"
+              ],
+              "query": [
+                {
+                  "key": "department",
+                  "value": "{{departmentId}}"
+                }
+              ]
+            },
+            "description": "Possibly-sarcastic rate per teacher in the department (HoD, admin).",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /analytics/sarcasm (faculty)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/analytics/sarcasm?faculty={{facultyId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "analytics",
+                "sarcasm"
+              ],
+              "query": [
+                {
+                  "key": "faculty",
+                  "value": "{{facultyId}}"
+                }
+              ]
+            },
+            "description": "One teacher's possibly-sarcastic answer ids, for GET /faculty/:id/evidence.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "NAAC report (1.4)",
+      "item": [
+        {
+          "name": "POST /reports/naac/:cycle/draft (admin)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/draft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "draft"
+              ]
+            },
+            "description": "Drafts the Action Taken rows (department x aspect and department x curriculum item; no teacher named) from stored aggregates. Re-drafting replaces only untouched drafts and keeps edited or approved rows.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle/actions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions"
+              ]
+            },
+            "description": "All rows for the admin; a HoD gets their own department's rows.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"actionId\", pm.response.json()[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /reports/naac/:cycle/actions/:id",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{actionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions",
+                "{{actionId}}"
+              ]
+            },
+            "description": "Edit issue, action, responsible or timeline, and/or set status (draft | approved). An edit without status reopens an approved row. Admin, or the row's department HoD.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"Share a weekly coverage plan and pause for questions.\",\n  \"status\": \"approved\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /reports/naac/:cycle/actions",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions"
+              ]
+            },
+            "description": "Adds a manual row (admin, or HoD for their department).",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department_id\": \"{{departmentId}}\",\n  \"label\": \"Library\",\n  \"issue\": \"The library closes before evening classes end.\",\n  \"action\": \"Keep the library open until 7 pm on weekdays.\",\n  \"responsible\": \"Librarian\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"manualActionId\", pm.response.json().id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /reports/naac/:cycle/actions/:id (admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{manualActionId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions",
+                "{{manualActionId}}"
+              ]
+            },
+            "description": "Deletes a row (admin only). Drafted rows come back on the next re-draft if the data still supports them.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle/actions/:id/evidence",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{actionId}}/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "actions",
+                "{{actionId}}",
+                "evidence"
+              ]
+            },
+            "description": "The redacted, visible student sentences behind a row (no teacher named).",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle/status",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}",
+                "status"
+              ]
+            },
+            "description": "Readiness for the final export: responses analysed, actions approved.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle.pdf (draft preview)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}.pdf?draft=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}.pdf"
+              ],
+              "query": [
+                {
+                  "key": "draft",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Watermarked 'DRAFT – not for submission' preview, available any time (admin). Without ?draft the export returns 409 until every row is approved.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /reports/naac/:cycle.docx (draft preview)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}.docx?draft=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reports",
+                "naac",
+                "{{cycleId}}.docx"
+              ],
+              "query": [
+                {
+                  "key": "draft",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "The same report as Word, from the same content blocks as the PDF.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unified page & generated profile",
+      "item": [
+        {
+          "name": "POST /faculty/:id/profile/generate",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "generate"
+              ]
+            },
+            "description": "Creates a new draft from the accepted profile facts (Groq if configured, checked against the facts; otherwise a template). Owner or admin; 10/minute.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set(\"profileVersion\", pm.response.json().version);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/profile/versions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "versions"
+              ]
+            },
+            "description": "All drafts and approved versions, newest first. Owner, admin, and the department's HoD.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /faculty/:id/profile/versions/:v",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/versions/{{profileVersion}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "versions",
+                "{{profileVersion}}"
+              ]
+            },
+            "description": "Edits a draft (409 once approved). Owner or admin.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"headline\": \"Associate Professor, Computer Science and Engineering\",\n  \"bio_short\": \"Teaches compilers and works on program analysis.\",\n  \"bio_long\": \"Teaches compilers and works on program analysis and register allocation.\",\n  \"research_areas\": [\n    \"Compilers\",\n    \"Program analysis\"\n  ],\n  \"key_achievements\": [],\n  \"teaching_highlights\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /faculty/:id/profile/versions/:v/approve",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile/versions/{{profileVersion}}/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile",
+                "versions",
+                "{{profileVersion}}",
+                "approve"
+              ]
+            },
+            "description": "Only the faculty member can approve; the previous approved version becomes superseded.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "profile"
+              ]
+            },
+            "description": "The approved profile, readable by all staff (status 'none' until one is approved). Teaching highlights carry no evidence ids here.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/overview",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/overview?cycle={{cycleId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "cycle",
+                  "value": "{{cycleId}}"
+                },
+                {
+                  "key": "course",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "The unified page in one call. Everyone on staff gets the profile; the owner, their HoD and admins also get cycles, offerings and the selected offering's insights, summary and sarcastic answer ids (status: available | awaiting_analysis | below_minimum).",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"evidenceIds\", (pm.response.json().selected?.summary?.strengths?.[0]?.evidence_ids || []).join(','));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /faculty/:id/evidence",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/faculty/{{facultyId}}/evidence?ids={{evidenceIds}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "faculty",
+                "{{facultyId}}",
+                "evidence"
+              ],
+              "query": [
+                {
+                  "key": "ids",
+                  "value": "{{evidenceIds}}"
+                }
+              ]
+            },
+            "description": "Redacted, visible answers for up to 40 evidence ids, with the supporting sentence's offsets to highlight. Ids from other teachers, hidden answers or below-minimum forms are left out.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "moderation (admin)",
+      "item": [
+        {
+          "name": "GET /moderation/queue",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/moderation/queue?status=pending",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "queue"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            },
+            "description": "Answers the toxicity model hid (>= TOX_HIDE) or flagged for review (>= TOX_REVIEW), as redacted text with the flagged sentences.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"queueId\", pm.response.json().items[0]?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /moderation/:id/decision",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/moderation/{{queueId}}/decision",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "moderation",
+                "{{queueId}}",
+                "decision"
+              ]
+            },
+            "description": "approve (show it), hide (keep it from faculty), or redact with text (show an edited version). Audited; recomputes the form's aggregate.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"action\": \"approve\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "evaluation (labelling, results, survey)",
+      "item": [
+        {
+          "name": "PATCH /users/:id annotator (admin)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "Mark a staff account as 'annotator' (labels blind) or 'adjudicator' (settles disagreements); null clears it. Students can't be annotators.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"annotator\": \"annotator\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/next (annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/next",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "next"
+              ]
+            },
+            "description": "The next comment this annotator hasn't labelled, without anyone else's label. Faculty/HoD annotators get only the public dataset; admin annotators also get the app's own redacted comments.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"itemId\", pm.response.json().item?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels (annotator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels"
+              ]
+            },
+            "description": "Save or replace my label. Skip with skip_reason (not_english | not_about_teaching | unclear) instead of a sentiment.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_id\": \"{{itemId}}\",\n  \"sentiment\": \"negative\",\n  \"aspects\": [\n    {\n      \"key\": \"pace\",\n      \"polarity\": \"negative\"\n    }\n  ],\n  \"sarcastic\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/progress (admin or annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/progress",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "progress"
+              ]
+            },
+            "description": "Counts per annotator, live Cohen's kappa once 30 comments have two labels, gold and open disagreements, and reference/grounding progress.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/disagreements (adjudicator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/disagreements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "disagreements"
+              ]
+            },
+            "description": "Up to 20 comments the two annotators labelled differently, with both labels.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels/resolve (adjudicator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "resolve"
+              ]
+            },
+            "description": "The adjudicator's final label, which becomes the gold label.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"item_id\": \"{{itemId}}\",\n  \"sentiment\": \"negative\",\n  \"aspects\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/groups/next (annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/groups/next",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "groups",
+                "next"
+              ]
+            },
+            "description": "One teacher's redacted comments (public dataset) to write a reference summary for.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set(\"groupId\", pm.response.json().group?.id || '');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels/groups/:id/reference (annotator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels/groups/{{groupId}}/reference",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "groups",
+                "{{groupId}}",
+                "reference"
+              ]
+            },
+            "description": "1-4 strengths and 1-4 improvements; writing again replaces mine.",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"strengths\": [\n    \"Explains concepts clearly\"\n  ],\n  \"improvements\": [\n    \"Grades harshly with little feedback\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /labels/grounding/next (annotator)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/labels/grounding/next",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "grounding",
+                "next"
+              ]
+            },
+            "description": "A generated summary's bullets with the evidence each cites, to mark as supported or not.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /labels/grounding (annotator)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/labels/grounding",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "labels",
+                "grounding"
+              ]
+            },
+            "description": "",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"group_id\": \"{{groupId}}\",\n  \"checks\": [\n    {\n      \"index\": 0,\n      \"supported\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /evaluation/results (admin)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/evaluation/results",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "evaluation",
+                "results"
+              ]
+            },
+            "description": "ml/results/evaluation.json as written by `python -m ml.evaluate`, or status not_run.",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "POST /survey (faculty, HoD)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/survey",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "survey"
+              ]
+            },
+            "description": "The usefulness survey: four 1-5 answers and a comment, one per teacher (answering again replaces it).",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": {\n    \"usefulness\": 4,\n    \"accuracy\": 4,\n    \"fairness\": 3,\n    \"actionability\": 5\n  },\n  \"comment\": \"Helpful summaries.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /survey/mine (faculty, HoD)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/survey/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "survey",
+                "mine"
+              ]
+            },
+            "description": "",
+            "header": []
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

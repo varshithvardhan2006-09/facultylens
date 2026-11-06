@@ -1,0 +1,50 @@
+{"id": 1, "text": "You are the worst teacher, a complete idiot who should be fired.", "faculty": "Dr. Kavitha Reddy", "toxic": true, "pii": []}
+{"id": 2, "text": "This useless clown wastes our time every single class.", "faculty": "Mr. Arvind Sharma", "toxic": true, "pii": []}
+{"id": 3, "text": "Shut up and learn to teach, you pathetic loser.", "faculty": "Dr. Padma Rao", "toxic": true, "pii": []}
+{"id": 4, "text": "What a stupid moron, nobody can stand his lectures.", "faculty": "Mr. Rahul Verma", "toxic": true, "pii": []}
+{"id": 5, "text": "She is a dumb fool and her classes are garbage.", "faculty": "Dr. Sneha Patil", "toxic": true, "pii": []}
+{"id": 6, "text": "I hope someone slaps this arrogant idiot one day.", "faculty": "Mr. Imran Khan", "toxic": true, "pii": []}
+{"id": 7, "text": "Damn this guy is a total jerk to every student.", "faculty": "Dr. Venkat Rao", "toxic": true, "pii": []}
+{"id": 8, "text": "Absolute trash of a teacher, go to hell.", "faculty": "Mr. Naveen Kumar", "toxic": true, "pii": []}
+{"id": 9, "text": "He is an idiot, and Kumar sir knows nothing about operating systems.", "faculty": "Mr. Naveen Kumar", "toxic": true, "pii": ["FACULTY"]}
+{"id": 10, "text": "Disgusting behaviour, this idiot insults girls in class.", "faculty": "Dr. Lakshmi Narayanan", "toxic": true, "pii": []}
+{"id": 11, "text": "Answers questions without making us feel stupid.", "faculty": "Dr. Kavitha Reddy", "toxic": false, "pii": []}
+{"id": 12, "text": "The assignments are killing us, please reduce the load.", "faculty": "Mr. Arvind Sharma", "toxic": false, "pii": []}
+{"id": 13, "text": "I felt dumb at first but the examples really helped.", "faculty": "Dr. Padma Rao", "toxic": false, "pii": []}
+{"id": 14, "text": "The lab sessions are crazy hard but very useful.", "faculty": "Mr. Rahul Verma", "toxic": false, "pii": []}
+{"id": 15, "text": "Too fast, the explanations are confusing and the pace is brutal.", "faculty": "Dr. Sneha Patil", "toxic": false, "pii": []}
+{"id": 16, "text": "Internal marks are not fair and the feedback on tests is late.", "faculty": "Mr. Imran Khan", "toxic": false, "pii": []}
+{"id": 17, "text": "Oh great, another class where we copy slides for an hour.", "faculty": "Dr. Deepa Menon", "toxic": false, "pii": []}
+{"id": 18, "text": "Wow, she finished the syllabus in record time, too bad nobody understood it.", "faculty": "Dr. Deepa Menon", "toxic": false, "pii": []}
+{"id": 19, "text": "The topic of attacks on networks was explained well with examples.", "faculty": "Dr. Lakshmi Narayanan", "toxic": false, "pii": []}
+{"id": 20, "text": "Not engaging, but very informative and always on time.", "faculty": "Mr. Farhan Siddiqui", "toxic": false, "pii": []}
+{"id": 21, "text": "Kavitha mam explains automata with clear diagrams.", "faculty": "Dr. Kavitha Reddy", "toxic": false, "pii": ["FACULTY"]}
+{"id": 22, "text": "Dr. Reddy is always available after class.", "faculty": "Dr. Kavitha Reddy", "toxic": false, "pii": ["FACULTY"]}
+{"id": 23, "text": "Arvind sir comes late almost every Monday.", "faculty": "Mr. Arvind Sharma", "toxic": false, "pii": ["FACULTY"]}
+{"id": 24, "text": "Ravi Teja keeps talking in the last bench and disturbs everyone.", "faculty": "Mr. Rahul Verma", "toxic": false, "pii": ["NAME"]}
+{"id": 25, "text": "Please tell Priya Sharma to share the notes she promised.", "faculty": "Dr. Sneha Patil", "toxic": false, "pii": ["NAME"]}
+{"id": 26, "text": "Better than Prof. Ramesh who taught us last year.", "faculty": "Dr. Venkat Rao", "toxic": false, "pii": ["NAME"]}
+{"id": 27, "text": "Call me on 9848012345 if you want my notes.", "faculty": "Mr. Imran Khan", "toxic": false, "pii": ["PHONE"]}
+{"id": 28, "text": "My number is +91 98765 43210, please check my marks.", "faculty": "Dr. Padma Rao", "toxic": false, "pii": ["PHONE"]}
+{"id": 29, "text": "WhatsApp group admin is 91-9000012345.", "faculty": "Mr. Naveen Kumar", "toxic": false, "pii": ["PHONE"]}
+{"id": 30, "text": "Office landline 040 2345 6789 never picks up.", "faculty": "Dr. Lakshmi Narayanan", "toxic": false, "pii": ["PHONE"]}
+{"id": 31, "text": "I am 2451-24-733-017, my internal marks are missing.", "faculty": "Dr. Kavitha Reddy", "toxic": false, "pii": ["ROLL"]}
+{"id": 32, "text": "Roll no 2451-23-751-041 was marked absent wrongly.", "faculty": "Mr. Arvind Sharma", "toxic": false, "pii": ["ROLL"]}
+{"id": 33, "text": "Mail me at student.one@gmail.com for the lab record.", "faculty": "Dr. Deepa Menon", "toxic": false, "pii": ["EMAIL"]}
+{"id": 34, "text": "Her slides are at https://drive.google.com/folder/abc123 for everyone.", "faculty": "Dr. Sneha Patil", "toxic": false, "pii": ["URL"]}
+{"id": 35, "text": "See www.example.com/notes for the solved problems.", "faculty": "Mr. Farhan Siddiqui", "toxic": false, "pii": ["URL"]}
+{"id": 36, "text": "Taught here from 2016 - 2020 and the syllabus has not changed since.", "faculty": "Dr. Venkat Rao", "toxic": false, "pii": []}
+{"id": 37, "text": "Unit 3 covers chapters 4 to 7 and the exam is on 12-11-2026.", "faculty": "Mr. Rahul Verma", "toxic": false, "pii": []}
+{"id": 38, "text": "We solved 25 problems in 2 hours, which was too many.", "faculty": "Dr. Padma Rao", "toxic": false, "pii": []}
+{"id": 39, "text": "The course code U21PC501CS should have more lab hours.", "faculty": "Dr. Lakshmi Narayanan", "toxic": false, "pii": []}
+{"id": 40, "text": "Room 305 is too small for 72 students.", "faculty": "Mr. Imran Khan", "toxic": false, "pii": []}
+{"id": 41, "text": "Explains clearly and gives real-world examples from industry.", "faculty": "Dr. Kavitha Reddy", "toxic": false, "pii": []}
+{"id": 42, "text": "Very approachable and clears doubts patiently after class.", "faculty": "Mr. Farhan Siddiqui", "toxic": false, "pii": []}
+{"id": 43, "text": "The best teacher I have had, truly brilliant.", "faculty": "Dr. Venkat Rao", "toxic": false, "pii": []}
+{"id": 44, "text": "Sometimes cancels classes without telling us.", "faculty": "Mr. Naveen Kumar", "toxic": false, "pii": []}
+{"id": 45, "text": "Grading is harsh but the comments on answer sheets help.", "faculty": "Dr. Deepa Menon", "toxic": false, "pii": []}
+{"id": 46, "text": "Rao sir, please upload the question bank, my mail is ravi.k@mvsrec.edu.in.", "faculty": "Dr. Venkat Rao", "toxic": false, "pii": ["FACULTY", "EMAIL"]}
+{"id": 47, "text": "Siddiqui sir is strict, call 9123456780 for the timetable.", "faculty": "Mr. Farhan Siddiqui", "toxic": false, "pii": ["FACULTY", "PHONE"]}
+{"id": 48, "text": "This idiot Rahul from section B copied my record, roll 2451-24-733-022.", "faculty": "Mr. Rahul Verma", "toxic": true, "pii": ["NAME", "ROLL"], "note": "Rahul here is a classmate who shares the teacher's first name"}
+{"id": 49, "text": "Stupid rules about attendance, but Imran sir is fair.", "faculty": "Mr. Imran Khan", "toxic": false, "pii": ["FACULTY"]}
+{"id": 50, "text": "Honestly the most boring and useless lectures of my life.", "faculty": "Dr. Sneha Patil", "toxic": false, "pii": []}

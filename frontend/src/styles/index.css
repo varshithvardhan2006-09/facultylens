@@ -1,0 +1,479 @@
+@import "tailwindcss";
+@import "@fontsource-variable/figtree";
+@import "@fontsource/kalam/700.css";
+@import "./tokens.css";
+
+/* Map the raw tokens onto Tailwind's theme so utilities follow the active theme. */
+@theme inline {
+  --color-ground: var(--ground);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-active: var(--active);
+  --color-border: var(--border);
+  --color-rule: var(--rule);
+  --color-control: var(--control);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-secondary: var(--secondary);
+  --color-focus: var(--focus);
+  --color-chart-main: var(--chart-main);
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+  --color-warning: var(--warning);
+  --color-sent-positive: var(--sent-positive);
+  --color-sent-neutral: var(--sent-neutral);
+  --color-sent-negative: var(--sent-negative);
+  --color-board: var(--board);
+  --color-board-2: var(--board-2);
+  --color-board-rule: var(--board-rule);
+  --color-on-board: var(--on-board);
+  --color-on-board-muted: var(--on-board-muted);
+  --color-note-praise: var(--note-praise);
+  --color-note-criticism: var(--note-criticism);
+  --color-note-neutral: var(--note-neutral);
+  --color-edge-praise: var(--edge-praise);
+  --color-edge-criticism: var(--edge-criticism);
+  --color-edge-neutral: var(--edge-neutral);
+  --color-highlight: var(--highlight);
+  --color-highlight-ink: var(--highlight-ink);
+  --color-tape: var(--tape);
+
+  --font-sans: var(--ff-sans);
+  --font-marker: var(--ff-marker);
+  --font-mono: var(--ff-mono);
+
+  --radius-card: var(--r-card);
+  --radius-control: var(--r-control);
+  --radius-chip: var(--r-chip);
+  --radius-note: var(--r-note);
+  --radius-button: var(--r-button);
+
+  --shadow-paper: var(--shadow-paper);
+  --shadow-note: var(--shadow-note);
+  --shadow-lift: var(--shadow-lift);
+}
+
+/* Type scale (fixed rem, ratio ~1.2): 12 / 14 / 16 / 18 / 24 / 30. */
+@theme {
+  --text-small: 0.75rem;
+  --text-small--line-height: 1rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-section: 1rem;
+  --text-section--line-height: 1.5rem;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.625rem;
+  --text-title: 1.5rem;
+  --text-title--line-height: 2rem;
+  --text-kpi: 1.875rem;
+  --text-kpi--line-height: 2.25rem;
+  --text-marker: 1.75rem;
+  --text-marker--line-height: 2.125rem;
+}
+
+@layer base {
+  html {
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--ff-sans);
+    font-size: 100%;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    min-height: 100dvh;
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+  }
+  ::selection {
+    background: var(--selection);
+    color: var(--text);
+  }
+  input,
+  textarea {
+    caret-color: var(--edge-praise);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+  /* On the deep board the teal ring would vanish; the highlighter takes over. */
+  .bg-board :focus-visible,
+  .board :focus-visible {
+    outline-color: var(--highlight);
+  }
+  /* Links in running text are underlined, so they never rely on colour alone (WCAG 1.4.1). */
+  a {
+    color: inherit;
+    text-decoration-line: underline;
+    text-underline-offset: 3px;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+  * {
+    scrollbar-color: var(--control) transparent;
+    scrollbar-width: thin;
+  }
+  /* Marker headings: the hand-lettered voice of the wall. */
+  .font-marker {
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+}
+
+@layer components {
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Buttons: one 6px shape, ink primary, sage secondary, press feedback. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    height: var(--control-height);
+    padding: 0 1rem;
+    border-radius: var(--r-button);
+    font-size: var(--text-body);
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    text-decoration-line: none;
+    transition:
+      transform var(--dur-press) var(--ease-out),
+      background-color var(--dur-ui) ease,
+      box-shadow var(--dur-ui) ease,
+      opacity var(--dur-ui) ease;
+    user-select: none;
+  }
+  .btn:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--primary-ink);
+  }
+  .btn-secondary {
+    background: var(--secondary);
+    color: var(--text);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    /* Hover shifts the fill a step toward the surface; buttons never fade. */
+    .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--primary) 84%, var(--surface));
+    }
+    .btn-secondary:hover:not(:disabled),
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--active);
+    }
+  }
+
+  /* Pills: pale tint, dark ink of the same hue, only inside rows or beside a value. */
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    height: 1.375rem;
+    padding: 0 0.5rem;
+    border-radius: var(--r-chip);
+    font-size: var(--text-small);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .pill-positive {
+    background: var(--pill-positive-bg);
+    color: var(--pill-positive-ink);
+  }
+  .pill-negative {
+    background: var(--pill-negative-bg);
+    color: var(--pill-negative-ink);
+  }
+  .pill-warning {
+    background: var(--pill-warning-bg);
+    color: var(--pill-warning-ink);
+  }
+  .pill-neutral {
+    background: var(--pill-neutral-bg);
+    color: var(--pill-neutral-ink);
+  }
+
+  /* Paper pinned to the wall. */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-paper);
+  }
+
+  /* The deep board: headers and summary strips that sit behind the notes. */
+  .board {
+    background: var(--board);
+    color: var(--on-board);
+    border-radius: var(--r-card);
+    box-shadow: var(--shadow-paper);
+  }
+
+  /* Controls on the board invert, so they stay readable on the deep green. */
+  .board .btn-primary {
+    background: var(--on-board);
+    color: var(--board);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .board .btn-primary:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--on-board) 84%, var(--board));
+    }
+  }
+  .board .btn-secondary {
+    background: var(--board-2);
+    color: var(--on-board);
+  }
+  .board .btn-ghost {
+    color: var(--on-board);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .board .btn-secondary:hover:not(:disabled),
+    .board .btn-ghost:hover:not(:disabled) {
+      background: var(--board-rule);
+    }
+  }
+  .board a:not(.btn) {
+    color: var(--on-board);
+  }
+
+  /* A student comment as a sticky note: paper tinted by sentiment, a strip of tape. */
+  .note {
+    position: relative;
+    border-radius: var(--r-note);
+    box-shadow: var(--shadow-note);
+    background: var(--note-paper, var(--note-neutral));
+    color: var(--text);
+    transform: rotate(var(--tilt, 0deg));
+    transition:
+      transform var(--dur-ui) var(--ease-out),
+      box-shadow var(--dur-ui) var(--ease-out);
+  }
+  .note::before {
+    content: "";
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    width: 46px;
+    height: 14px;
+    translate: -50% 0;
+    rotate: var(--tape-tilt, -3deg);
+    background: color-mix(in srgb, var(--tape) 82%, transparent);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+  .note-praise {
+    --note-paper: var(--note-praise);
+  }
+  .note-criticism {
+    --note-paper: var(--note-criticism);
+  }
+  .note-neutral {
+    --note-paper: var(--note-neutral);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .note-lift:hover {
+      transform: rotate(0deg) translateY(-2px);
+      box-shadow: var(--shadow-lift);
+    }
+  }
+
+  /*
+   * The signature moment: notes fly in from scattered positions and settle into their
+   * clusters, once per load. --i staggers them 40ms apart; --dx/--dy/--r0 set the start.
+   */
+  .settle {
+    animation: note-settle var(--dur-settle) var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger));
+  }
+  @keyframes note-settle {
+    from {
+      opacity: 0;
+      transform: translate(var(--dx, 0px), var(--dy, 24px)) rotate(var(--r0, 0deg)) scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: rotate(var(--tilt, 0deg));
+    }
+  }
+
+  /* Marker lettering written in from the left, one line after another. */
+  .write-in {
+    animation: write-in 700ms var(--ease-out) both;
+    animation-delay: calc(var(--write-delay, 0ms) + 80ms);
+  }
+  @keyframes write-in {
+    from {
+      clip-path: inset(-0.2em 100% -0.3em 0);
+    }
+    to {
+      clip-path: inset(-0.2em -0.1em -0.3em 0);
+    }
+  }
+
+  /* A sorted note is taken off the wall: a quick lift up and away, faster than it arrived. */
+  .note-leave {
+    animation: note-leave 200ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+  @keyframes note-leave {
+    to {
+      opacity: 0;
+      transform: translate(56px, -28px) rotate(6deg) scale(0.96);
+    }
+  }
+
+  /* Inside a Reveal group, notes wait (at their first frame) until the group scrolls into view. */
+  [data-reveal]:not(.in-view) .settle,
+  [data-reveal]:not(.in-view) .marker-line {
+    animation-play-state: paused;
+  }
+
+  /* A marker stroke under a wall heading, drawn as its cluster settles. */
+  .marker-line {
+    stroke-dasharray: 1;
+    animation: marker-draw 520ms var(--ease-out) both;
+    animation-delay: calc(var(--i, 0) * var(--stagger) + 120ms);
+  }
+  @keyframes marker-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+  }
+
+  /* Highlighter for "where you are": the current nav item, the selected row. */
+  .here {
+    position: relative;
+    isolation: isolate;
+    color: var(--highlight-ink);
+  }
+  /* The highlighter is a layer behind the text, so it can be drawn on left to right. */
+  .here::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--highlight);
+    animation: highlight-in 320ms var(--ease-out) both;
+  }
+  @keyframes highlight-in {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  /* Bars grow out of the edge they are measured from, once. */
+  .grow-x {
+    transform-origin: left center;
+    animation: grow-x 560ms var(--ease-out) both;
+    animation-delay: var(--grow-delay, 120ms);
+  }
+  .grow-x-from-right {
+    transform-origin: right center;
+  }
+  @keyframes grow-x {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  /* A highlighter pass over marked words: the tint is swept in from the left, once. */
+  .swipe {
+    /* One flat colour; the gradient function only lets its width animate. */
+    background-image: linear-gradient(var(--swipe), var(--swipe)); /* taste-skill-ignore */
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    animation: swipe-in 480ms var(--ease-out) both;
+    animation-delay: var(--swipe-delay, 160ms);
+  }
+  @keyframes swipe-in {
+    from {
+      background-size: 0% 100%;
+    }
+  }
+
+  /* Phone menu sheet: a short rise and fade from where it will rest. */
+  .sheet[open] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-sheet) var(--ease-out),
+      transform var(--dur-sheet) var(--ease-out);
+  }
+  @starting-style {
+    .sheet[open] {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+
+  /* Evidence drawer: enters from the right edge it is pinned to. */
+  .drawer[open] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-sheet) var(--ease-out),
+      transform var(--dur-sheet) var(--ease-out);
+  }
+  @starting-style {
+    .drawer[open] {
+      opacity: 0;
+      transform: translateX(16px);
+    }
+  }
+
+  /* Loading placeholder: a flat bar at the real size of the value it replaces. No shimmer. */
+  .skeleton {
+    display: inline-block;
+    background: var(--active);
+    border-radius: 3px;
+    color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+  .btn:active:not(:disabled) {
+    transform: none;
+  }
+  /* Notes still arrive, but as a short fade in place: no travel. */
+  .settle {
+    animation: note-fade 150ms ease-out both !important;
+  }
+  .marker-line {
+    animation: none !important;
+  }
+}
+@keyframes note-fade {
+  from {
+    opacity: 0;
+  }
+}

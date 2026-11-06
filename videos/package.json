@@ -1,0 +1,18 @@
+{
+  "name": "facultylens-videos",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "studio": "remotion studio src/index.js",
+    "render:promo": "remotion render src/index.js Promo out/facultylens-promo.mp4",
+    "render:tech": "remotion render src/index.js Tech out/facultylens-how-it-works.mp4"
+  },
+  "dependencies": {
+    "@fontsource-variable/figtree": "^5.3.0",
+    "@fontsource/kalam": "^5.3.0",
+    "@remotion/cli": "^4.0.538",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.538"
+  }
+}

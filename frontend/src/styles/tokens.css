@@ -1,0 +1,211 @@
+/*
+ * FacultyLens design tokens: the "Affinity Wall". See docs/DESIGN.md for the reasoning.
+ * Student comments are paper notes on a pale sage wall, clustered under the teaching aspect
+ * they talk about. Sentiment lives on each note's left edge (teal praise, coral criticism,
+ * grey neutral) and always comes with words. The deep board green carries headers and the
+ * rail; highlighter yellow is reserved for "where you are".
+ *
+ * Raw values live here as CSS variables and swap per theme. `@theme inline` in index.css
+ * maps them to Tailwind utilities (bg-ground, text-muted, bg-note-praise, ...).
+ * Theme: OS setting by default; <html data-theme="light|dark"> overrides it both ways.
+ */
+
+:root {
+  color-scheme: light;
+  --ground: #dde5e1;
+  --surface: #ffffff;
+  --raised: #eef3f0;
+  --active: #cfdad5;
+  --border: #c3cfca;
+  --rule: #e2e9e6;
+  --control: #7f8c88;
+  --text: #16201e;
+  --muted: #46524f;
+  --faint: #56625f;
+  --primary: #16201e;
+  --primary-ink: #ffffff;
+  --secondary: #ccd8d3;
+  --focus: #0b6b5b;
+  --board: #183f3a;
+  --board-2: #22524b;
+  --board-rule: #2e5f57;
+  --on-board: #f3f7f5;
+  --on-board-muted: #b8cec7;
+  --note-praise: #cdf1e5;
+  --note-criticism: #ffd8cc;
+  --note-neutral: #eceeed;
+  --edge-praise: #0f7f6c;
+  --edge-criticism: #cf4b29;
+  --edge-neutral: #7c8582;
+  --highlight: #ffd84d;
+  --highlight-ink: #16201e;
+  --tape: #f4e7b8;
+  --chart-main: #0f7f6c;
+  --chart-ink: #16201e;
+  --chart-muted: #8c9895;
+  --grid: #dfe6e3;
+  --sent-positive: #0f7f6c;
+  --sent-neutral: #8c9592;
+  --sent-negative: #cf4b29;
+  --group-1: #2a78d6;
+  --group-2: #eb6834;
+  --positive: #0b6e5d;
+  --negative: #b23b1d;
+  --warning: #7a5600;
+  --pill-positive-bg: #cdf1e5;
+  --pill-positive-ink: #08483d;
+  --pill-negative-bg: #ffd8cc;
+  --pill-negative-ink: #7f2410;
+  --pill-warning-bg: #fff0b3;
+  --pill-warning-ink: #5f4300;
+  --pill-neutral-bg: #e2e9e6;
+  --pill-neutral-ink: #33403c;
+  --selection: #ffe78a;
+  --shadow-color: 22 32 30;
+
+  /* Shape and space (4px base). Paper and buttons are square-ish; only status labels are round. */
+  --r-card: 6px;
+  --r-note: 3px;
+  --r-control: 6px;
+  --r-button: 6px;
+  --r-chip: 999px;
+  --gap: 12px;
+  --card-pad: 20px;
+  --pad: 32px;
+  --sidebar-width: 248px;
+  --nav-row: 36px;
+  --control-height: 38px;
+  --row-height: 44px;
+
+  /* Depth: paper sits on the wall with a short offset shadow; notes lift a little more. */
+  --shadow-paper:
+    0 1px 2px rgb(var(--shadow-color) / 0.08), 0 3px 10px rgb(var(--shadow-color) / 0.05);
+  --shadow-note:
+    0 1px 1px rgb(var(--shadow-color) / 0.1), 0 6px 14px -4px rgb(var(--shadow-color) / 0.18);
+  --shadow-lift:
+    0 2px 4px rgb(var(--shadow-color) / 0.1), 0 14px 28px -8px rgb(var(--shadow-color) / 0.28);
+
+  /* Type: Figtree for the interface; Kalam (a marker hand) for headings written on the wall. */
+  --ff-sans: "Figtree Variable", "Segoe UI", system-ui, sans-serif;
+  --ff-marker: "Kalam", "Segoe Print", "Comic Sans MS", cursive;
+  --ff-mono: ui-monospace, "Cascadia Mono", Consolas, monospace; /* IDs and model keys only */
+
+  /* Motion: strong ease-out, short. The one authored moment is notes settling on the wall. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-press: 140ms;
+  --dur-ui: 180ms;
+  --dur-sheet: 240ms;
+  --dur-settle: 400ms;
+  --stagger: 40ms;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --ground: #0e1816;
+    --surface: #16221f;
+    --raised: #1c2a26;
+    --active: #26362f;
+    --border: #2a3a35;
+    --rule: #21302b;
+    --control: #6c7d77;
+    --text: #eef4f1;
+    --muted: #adbeb8;
+    --faint: #97aaa3;
+    --primary: #eef4f1;
+    --primary-ink: #0e1816;
+    --secondary: #26362f;
+    --focus: #5fd0b8;
+    --board: #12302c;
+    --board-2: #1a413b;
+    --board-rule: #28554d;
+    --on-board: #eef4f1;
+    --on-board-muted: #a9c4bc;
+    --note-praise: #173b33;
+    --note-criticism: #3f241b;
+    --note-neutral: #252d2a;
+    --edge-praise: #3fbfa2;
+    --edge-criticism: #f07a57;
+    --edge-neutral: #8f9a96;
+    --highlight: #ffd84d;
+    --highlight-ink: #16201e;
+    --tape: #5b5338;
+    --chart-main: #3fbfa2;
+    --chart-ink: #eef4f1;
+    --chart-muted: #7d8e88;
+    --grid: #26332f;
+    --sent-positive: #3fbfa2;
+    --sent-neutral: #9aa5a1;
+    --sent-negative: #f07a57;
+    --group-1: #3987e5;
+    --group-2: #d95926;
+    --positive: #52cfb1;
+    --negative: #ff9a7a;
+    --warning: #f2c94c;
+    --pill-positive-bg: #173b33;
+    --pill-positive-ink: #86e0c8;
+    --pill-negative-bg: #3f241b;
+    --pill-negative-ink: #ffb59c;
+    --pill-warning-bg: #3a3115;
+    --pill-warning-ink: #f5d36b;
+    --pill-neutral-bg: #26302d;
+    --pill-neutral-ink: #c9d4d0;
+    --selection: #5b4d12;
+    --shadow-color: 0 0 0;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0e1816;
+  --surface: #16221f;
+  --raised: #1c2a26;
+  --active: #26362f;
+  --border: #2a3a35;
+  --rule: #21302b;
+  --control: #6c7d77;
+  --text: #eef4f1;
+  --muted: #adbeb8;
+  --faint: #97aaa3;
+  --primary: #eef4f1;
+  --primary-ink: #0e1816;
+  --secondary: #26362f;
+  --focus: #5fd0b8;
+  --board: #12302c;
+  --board-2: #1a413b;
+  --board-rule: #28554d;
+  --on-board: #eef4f1;
+  --on-board-muted: #a9c4bc;
+  --note-praise: #173b33;
+  --note-criticism: #3f241b;
+  --note-neutral: #252d2a;
+  --edge-praise: #3fbfa2;
+  --edge-criticism: #f07a57;
+  --edge-neutral: #8f9a96;
+  --highlight: #ffd84d;
+  --highlight-ink: #16201e;
+  --tape: #5b5338;
+  --chart-main: #3fbfa2;
+  --chart-ink: #eef4f1;
+  --chart-muted: #7d8e88;
+  --grid: #26332f;
+  --sent-positive: #3fbfa2;
+  --sent-neutral: #9aa5a1;
+  --sent-negative: #f07a57;
+  --group-1: #3987e5;
+  --group-2: #d95926;
+  --positive: #52cfb1;
+  --negative: #ff9a7a;
+  --warning: #f2c94c;
+  --pill-positive-bg: #173b33;
+  --pill-positive-ink: #86e0c8;
+  --pill-negative-bg: #3f241b;
+  --pill-negative-ink: #ffb59c;
+  --pill-warning-bg: #3a3115;
+  --pill-warning-ink: #f5d36b;
+  --pill-neutral-bg: #26302d;
+  --pill-neutral-ink: #c9d4d0;
+  --selection: #5b4d12;
+  --shadow-color: 0 0 0;
+}

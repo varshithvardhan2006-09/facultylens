@@ -1,0 +1,6 @@
+node_modules/
+out/
+.tts/
+public/audio/
+public/sound/
+install.log

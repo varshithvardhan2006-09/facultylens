@@ -1,0 +1,477 @@
+{
+  "generated_at": "2026-10-21T06:03:01+00:00",
+  "model_version": "light-r1-912bb0b3",
+  "dataset": {
+    "name": "Big Data Set from RateMyProfessor.com for Professors' Teaching Evaluation",
+    "author": "Jibo He",
+    "doi": "10.17632/fvtfjyvw7d.2",
+    "licence": "CC BY 4.0",
+    "url": "https://data.mendeley.com/datasets/fvtfjyvw7d/2"
+  },
+  "data": {
+    "label_set": 300,
+    "gold": 0,
+    "benchmark": 2999,
+    "app_items": 0
+  },
+  "agreement": {
+    "pairs": 0,
+    "min_pairs": 30,
+    "status": "pending"
+  },
+  "sentiment": {
+    "benchmark": {
+      "status": "ok",
+      "n_train": 2388,
+      "n_test": 611,
+      "test_distribution": {
+        "positive": 371,
+        "neutral": 80,
+        "negative": 160
+      },
+      "models": {
+        "VADER": {
+          "n": 611,
+          "accuracy": 0.741,
+          "macro_f1": 0.517,
+          "per_class": {
+            "negative": {
+              "precision": 0.654,
+              "recall": 0.637,
+              "f1": 0.646,
+              "support": 160
+            },
+            "neutral": {
+              "precision": 0.118,
+              "recall": 0.025,
+              "f1": 0.041,
+              "support": 80
+            },
+            "positive": {
+              "precision": 0.797,
+              "recall": 0.941,
+              "f1": 0.863,
+              "support": 371
+            }
+          },
+          "confusion": {
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                102,
+                11,
+                47
+              ],
+              [
+                36,
+                2,
+                42
+              ],
+              [
+                18,
+                4,
+                349
+              ]
+            ]
+          },
+          "negation": {
+            "n": 318,
+            "accuracy": 0.673,
+            "macro_f1": 0.488
+          },
+          "seconds": 0.7
+        },
+        "TF-IDF + Logistic Regression": {
+          "n": 611,
+          "accuracy": 0.789,
+          "macro_f1": 0.671,
+          "per_class": {
+            "negative": {
+              "precision": 0.745,
+              "recall": 0.75,
+              "f1": 0.748,
+              "support": 160
+            },
+            "neutral": {
+              "precision": 0.443,
+              "recall": 0.338,
+              "f1": 0.383,
+              "support": 80
+            },
+            "positive": {
+              "precision": 0.861,
+              "recall": 0.903,
+              "f1": 0.882,
+              "support": 371
+            }
+          },
+          "confusion": {
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                120,
+                15,
+                25
+              ],
+              [
+                24,
+                27,
+                29
+              ],
+              [
+                17,
+                19,
+                335
+              ]
+            ]
+          },
+          "negation": {
+            "n": 318,
+            "accuracy": 0.748,
+            "macro_f1": 0.665
+          },
+          "seconds": 0.3
+        },
+        "TF-IDF + Random Forest": {
+          "n": 611,
+          "accuracy": 0.764,
+          "macro_f1": 0.552,
+          "per_class": {
+            "negative": {
+              "precision": 0.767,
+              "recall": 0.719,
+              "f1": 0.742,
+              "support": 160
+            },
+            "neutral": {
+              "precision": 0.375,
+              "recall": 0.037,
+              "f1": 0.068,
+              "support": 80
+            },
+            "positive": {
+              "precision": 0.77,
+              "recall": 0.941,
+              "f1": 0.847,
+              "support": 371
+            }
+          },
+          "confusion": {
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                115,
+                0,
+                45
+              ],
+              [
+                18,
+                3,
+                59
+              ],
+              [
+                17,
+                5,
+                349
+              ]
+            ]
+          },
+          "negation": {
+            "n": 318,
+            "accuracy": 0.711,
+            "macro_f1": 0.539
+          },
+          "seconds": 1.1
+        },
+        "Twitter-RoBERTa (pretrained, zero-shot)": {
+          "n": 611,
+          "accuracy": 0.815,
+          "macro_f1": 0.647,
+          "per_class": {
+            "negative": {
+              "precision": 0.714,
+              "recall": 0.919,
+              "f1": 0.803,
+              "support": 160
+            },
+            "neutral": {
+              "precision": 0.382,
+              "recall": 0.163,
+              "f1": 0.228,
+              "support": 80
+            },
+            "positive": {
+              "precision": 0.911,
+              "recall": 0.911,
+              "f1": 0.911,
+              "support": 371
+            }
+          },
+          "confusion": {
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                147,
+                4,
+                9
+              ],
+              [
+                43,
+                13,
+                24
+              ],
+              [
+                16,
+                17,
+                338
+              ]
+            ]
+          },
+          "negation": {
+            "n": 318,
+            "accuracy": 0.77,
+            "macro_f1": 0.653
+          },
+          "seconds": 57.9
+        },
+        "DistilBERT (fine-tuned on CPU)": {
+          "n": 611,
+          "accuracy": 0.807,
+          "macro_f1": 0.653,
+          "per_class": {
+            "negative": {
+              "precision": 0.786,
+              "recall": 0.781,
+              "f1": 0.784,
+              "support": 160
+            },
+            "neutral": {
+              "precision": 0.316,
+              "recall": 0.225,
+              "f1": 0.263,
+              "support": 80
+            },
+            "positive": {
+              "precision": 0.886,
+              "recall": 0.943,
+              "f1": 0.914,
+              "support": 371
+            }
+          },
+          "confusion": {
+            "labels": [
+              "negative",
+              "neutral",
+              "positive"
+            ],
+            "matrix": [
+              [
+                125,
+                23,
+                12
+              ],
+              [
+                29,
+                18,
+                33
+              ],
+              [
+                5,
+                16,
+                350
+              ]
+            ]
+          },
+          "negation": {
+            "n": 318,
+            "accuracy": 0.761,
+            "macro_f1": 0.643
+          },
+          "seconds": 857.7
+        }
+      }
+    },
+    "gold": {
+      "status": "pending",
+      "have": 0,
+      "need": 100,
+      "what": "gold-labelled comments"
+    }
+  },
+  "aspects": {
+    "status": "pending",
+    "have": 0,
+    "need": 100,
+    "what": "gold-labelled comments"
+  },
+  "moderation_pii": {
+    "status": "ok",
+    "moderation": {
+      "n": 50,
+      "toxic": 11,
+      "hide_threshold": 0.7,
+      "review_threshold": 0.4,
+      "hidden": {
+        "tp": 11,
+        "fp": 4,
+        "fn": 0,
+        "support": 11,
+        "precision": 0.733,
+        "recall": 1.0,
+        "f1": 0.846
+      },
+      "hidden_or_review": {
+        "tp": 11,
+        "fp": 4,
+        "fn": 0,
+        "support": 11,
+        "precision": 0.733,
+        "recall": 1.0,
+        "f1": 0.846
+      },
+      "false_alarms": [
+        11,
+        13,
+        49,
+        50
+      ],
+      "missed": []
+    },
+    "pii": {
+      "n": 50,
+      "per_kind": {
+        "EMAIL": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "support": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "FACULTY": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 0,
+          "support": 7,
+          "precision": 0.875,
+          "recall": 1.0,
+          "f1": 0.933
+        },
+        "NAME": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 1,
+          "support": 4,
+          "precision": 1.0,
+          "recall": 0.75,
+          "f1": 0.857
+        },
+        "PHONE": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 0,
+          "support": 5,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "ROLL": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0,
+          "support": 3,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "URL": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "support": 2,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "PERSON (name or teacher)": {
+          "tp": 11,
+          "fp": 0,
+          "fn": 0,
+          "support": 11,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        },
+        "ANY": {
+          "tp": 20,
+          "fp": 0,
+          "fn": 0,
+          "support": 20,
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1": 1.0
+        }
+      }
+    }
+  },
+  "summaries": {
+    "groups": 20,
+    "system_built_now": 0,
+    "engines": {
+      "fallback": 20
+    },
+    "grounding": {
+      "status": "pending",
+      "have": 0,
+      "need": 1,
+      "what": "grounding checks"
+    },
+    "llm": "not run: no GROQ_API_KEY",
+    "status": "pending",
+    "have": 0,
+    "need": 20,
+    "what": "groups with a human reference"
+  },
+  "survey": {
+    "status": "pending",
+    "have": 0,
+    "need": 5,
+    "what": "faculty survey answers"
+  },
+  "performance": {
+    "status": "ok",
+    "per_response_ms_mean": 310.6,
+    "per_response_ms_p95": 599.5,
+    "peak_rss_mb": 2820,
+    "responses": 553,
+    "all_models_rss_mb": 3884.9,
+    "machine": {
+      "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
+      "logical_cores": 12,
+      "ram_gb": 15.3
+    },
+    "measured_at": "2026-10-20T06:57:03+00:00"
+  },
+  "charts": [
+    "sentiment_benchmark_macro_f1.png",
+    "sentiment_benchmark_confusion.png"
+  ],
+  "seconds": 926.9
+}
