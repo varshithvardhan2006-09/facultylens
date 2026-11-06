@@ -249,7 +249,7 @@ export function UsersPage() {
             </p>
           ) : (
             <table className="w-full border-collapse text-body">
-              <thead className="max-md:sr-only">
+              <thead className="max-xl:sr-only">
                 <tr className="text-left text-small text-muted">
                   <th scope="col" className="h-10 px-[var(--card-pad)] font-medium">
                     Name
@@ -273,24 +273,24 @@ export function UsersPage() {
                   u ? (
                     <tr
                       key={u.id}
-                      className="border-t border-rule max-md:grid max-md:grid-cols-[1fr_auto] max-md:gap-x-3 max-md:gap-y-1 max-md:px-4 max-md:py-3"
+                      className="border-t border-rule max-xl:grid max-xl:grid-cols-[1fr_auto] max-xl:gap-x-3 max-xl:gap-y-1 max-xl:px-4 max-xl:py-3"
                     >
-                      <td className="h-[52px] px-[var(--card-pad)] max-md:h-auto max-md:p-0">
+                      <td className="h-[52px] px-[var(--card-pad)] max-xl:h-auto max-xl:p-0">
                         <div className="font-medium">{u.name}</div>
                         <div className="text-small text-muted">{u.email ?? u.roll_no}</div>
                       </td>
-                      <td className="px-3 max-md:hidden">{ROLE_LABELS[u.role]}</td>
-                      <td className="px-3 max-md:col-span-2 max-md:row-start-2 max-md:p-0 max-md:text-small max-md:text-muted">
-                        <span className="md:hidden">{ROLE_LABELS[u.role]} · </span>
+                      <td className="px-3 max-xl:hidden">{ROLE_LABELS[u.role]}</td>
+                      <td className="px-3 max-xl:col-span-2 max-xl:row-start-2 max-xl:p-0 max-xl:text-small max-xl:text-muted">
+                        <span className="xl:hidden">{ROLE_LABELS[u.role]} · </span>
                         {departments.byId[u.department_id]?.code ?? (
                           <span className="text-faint">–</span>
                         )}
                       </td>
-                      <td className="px-3 max-md:col-start-2 max-md:row-start-1 max-md:p-0">
+                      <td className="px-3 max-xl:col-start-2 max-xl:row-start-1 max-xl:p-0">
                         <StatusPill user={u} />
                       </td>
-                      <td className="px-[var(--card-pad)] text-right max-md:col-span-2 max-md:p-0 max-md:text-left">
-                        <div className="flex justify-end gap-1 max-md:justify-start max-md:-ml-2">
+                      <td className="px-[var(--card-pad)] text-right max-xl:col-span-2 max-xl:p-0 max-xl:text-left">
+                        <div className="flex justify-end gap-1 max-xl:justify-start max-xl:-ml-2">
                           {(u.role === "faculty" || u.role === "hod") && (
                             <Link
                               to={`/admin/faculty/${u.id}/profile`}

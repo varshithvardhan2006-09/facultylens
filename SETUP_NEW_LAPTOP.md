@@ -235,7 +235,7 @@ npm run build
 ```
 
 What "working" looks like:
-- **Tests:** all pass (582 at the last count).
+- **Tests:** all pass (590 at the last count).
 - **Lint:** nothing reported.
 - **Build:** succeeds.
 - **The app:** `http://localhost:5173` shows the landing page.

@@ -49,9 +49,8 @@ Quality at the last full check (2026-10-22):
 2. Then run `python -m ml.evaluate` and update `ml/results/RESULTS.md` and the README with **real numbers
    only**. Never invent labels or metrics.
 3. Loose ends:
-   - the README screenshots predate the latest design changes;
-   - `.impeccable/` is untracked;
-   - there is no LICENSE yet.
+   - `.impeccable/` is untracked on purpose;
+   - there is no LICENSE yet: the team decides, because it grants rights over everyone's code.
 
 ## Databases
 
