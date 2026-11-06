@@ -56,6 +56,20 @@ def _model_gone(exc: Exception) -> bool:
     return False
 
 
+# Things generated wording never contains, but a comment trying to steer the LLM might ask for.
+_STEERED = re.compile(
+    r"https?://|www\.|<[a-z/]|\b(system prompt|ignore (all|any|the|previous)|instructions?)\b"
+    r"|\b(should|must|ought to)\s+(be\s+)?(fired|dismissed|sacked|removed|suspended|terminated"
+    r"|replaced|punished|resign)\b|\b(fire|dismiss|sack|suspend|terminate)\s+(him|her|them|this)\b",
+    re.IGNORECASE,
+)
+
+
+def looks_steered(text: str | None) -> bool:
+    """A reasonable check, not a proof: the wording is rejected and the template used instead."""
+    return bool(_STEERED.search(text or ""))
+
+
 def _record(model: str | None, error: str | None) -> None:
     _status.update(last_model=model, last_error=error, last_at=now().isoformat())
     _status["calls"] += 1

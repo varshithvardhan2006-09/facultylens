@@ -334,6 +334,9 @@ def _names_in(text: str) -> set[str]:
     return names
 
 
+_NUMBER = r"(?<![\w.])\d+(?:\.\d+)?(?!\w)"
+
+
 def _blob(facts: dict[str, Any]) -> str:
     return json.dumps(facts, ensure_ascii=False).lower()
 
@@ -343,8 +346,10 @@ def problems(out: _Profile, facts: dict[str, Any]) -> list[str]:
     blob = _blob(facts)
     text = " ".join([out.headline, out.bio_short, out.bio_long, *out.key_achievements])
     found: list[str] = []
-    for number in set(re.findall(r"\d+(?:\.\d+)?", text)):
-        if number not in blob:
+    # Whole numbers only: "14 papers" must not pass because the facts mention the year 2014.
+    known = set(re.findall(_NUMBER, blob))
+    for number in set(re.findall(_NUMBER, text)):
+        if number not in known:
             found.append(f"the number {number} is not in the facts")
     for phrase in _names_in(text):
         if re.search(_VENUE_WORDS, phrase, re.I) and phrase.lower() not in blob:
@@ -373,7 +378,7 @@ def _clean(out: _Profile, facts: dict[str, Any]) -> dict[str, Any]:
         "teaching_highlights": [
             {"text": h.text.strip(), "evidence_ids": [i for i in h.evidence_ids if i in evidence]}
             for h in out.teaching_highlights
-            if any(i in evidence for i in h.evidence_ids)
+            if any(i in evidence for i in h.evidence_ids) and not llm.looks_steered(h.text)
         ],
         "sources": {k: [i for i in v if i in allowed_ids] for k, v in out.sources.items()},
     }

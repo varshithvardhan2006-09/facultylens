@@ -183,7 +183,7 @@ export function ProfileEditorPage() {
           title={ownPage ? "My profile" : u.name}
           actions={
             <>
-              <span className="text-small text-muted" role="status" aria-live="polite">
+              <span className="text-small text-on-board-muted" role="status" aria-live="polite">
                 {saving
                   ? "Saving…"
                   : dirty
@@ -211,12 +211,15 @@ export function ProfileEditorPage() {
             from. Only accepted, saved items are used.{" "}
             <Link
               to={ownPage ? "/profile/review" : `/admin/faculty/${facultyId}/profile/review`}
-              className="font-medium text-text"
+              className="font-medium text-on-board"
             >
               Generated profile <ArrowRightIcon />
             </Link>
             {" · "}
-            <Link to={ownPage ? "/me" : `/faculty/${facultyId}`} className="font-medium text-text">
+            <Link
+              to={ownPage ? "/me" : `/faculty/${facultyId}`}
+              className="font-medium text-on-board"
+            >
               {ownPage ? "My page" : "Their page"} <ArrowRightIcon />
             </Link>
           </span>

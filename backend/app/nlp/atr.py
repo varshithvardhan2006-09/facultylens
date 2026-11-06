@@ -200,7 +200,8 @@ def add_actions(rows: list[dict[str, Any]], departments: dict[Any, dict]) -> str
         return "template"
     used = 0
     for item in out.rows:
-        if item.row_id.isdigit() and int(item.row_id) < len(rows):
+        steered = llm.looks_steered(item.action) or llm.looks_steered(item.timeline)
+        if item.row_id.isdigit() and int(item.row_id) < len(rows) and not steered:
             row = rows[int(item.row_id)]
             row["action"] = item.action.strip()
             row["timeline"] = item.timeline.strip() or DEFAULT_TIMELINE

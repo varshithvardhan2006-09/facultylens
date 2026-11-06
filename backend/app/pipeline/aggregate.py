@@ -58,6 +58,7 @@ def compute_stats(rows: list[dict[str, Any]], form_type: str) -> dict[str, Any]:
     languages = Counter()
     emotion_sum: dict[str, float] = defaultdict(float)
     aspect_mentions: dict[str, Counter] = {k: Counter() for k in ASPECT_KEYS}
+    aspect_weights: dict[str, Counter] = {k: Counter() for k in ASPECT_KEYS}
     aspect_pairs: dict[str, list[tuple[float, float]]] = {k: [] for k in ASPECT_KEYS}
     evidence: dict[str, dict[str, list[dict]]] = {
         k: {"positive": [], "neutral": [], "negative": []} for k in ASPECT_KEYS
@@ -66,9 +67,14 @@ def compute_stats(rows: list[dict[str, Any]], form_type: str) -> dict[str, Any]:
 
     for row in analysed:
         analysis, response = row["analysis"], row["response"]
-        uncertain = any(f.get("sentiment_uncertain") for f in analysis["fields"])
         overall = analysis.get("overall_sentiment")
         if overall:
+            # Half weight only when the answer behind the overall label may be sarcastic: flagged
+            # "Great teacher." beside a long complaint must not halve the complaint.
+            uncertain = any(
+                f.get("sentiment_uncertain") and f["sentiment"]["label"] == overall["label"]
+                for f in analysis["fields"]
+            )
             weights[overall["label"]] += SARCASM_WEIGHT if uncertain else 1.0
         per_aspect_text: dict[str, list[float]] = defaultdict(list)
         for f in analysis["fields"]:
@@ -98,6 +104,9 @@ def compute_stats(rows: list[dict[str, Any]], form_type: str) -> dict[str, Any]:
                 for a in s.get("aspects", []):
                     polarity = a.get("polarity", "neutral")
                     aspect_mentions[a["key"]][polarity] += 1
+                    aspect_weights[a["key"]][polarity] += (
+                        SARCASM_WEIGHT if f.get("sentiment_uncertain") else 1.0
+                    )
                     per_aspect_text[a["key"]].append(POLARITY_SCORE[polarity])
                     evidence[a["key"]][polarity].append(
                         {
@@ -145,6 +154,9 @@ def compute_stats(rows: list[dict[str, Any]], form_type: str) -> dict[str, Any]:
                 "mentions": sum(aspect_mentions[key].values()),
                 "polarity": {
                     p: aspect_mentions[key][p] for p in ("positive", "neutral", "negative")
+                },
+                "weighted_polarity": {
+                    p: round(aspect_weights[key][p], 2) for p in ("positive", "negative")
                 },
                 "likert_mean": likert.get(key),
                 "agreement": {

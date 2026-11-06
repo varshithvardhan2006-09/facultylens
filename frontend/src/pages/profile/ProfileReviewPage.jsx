@@ -186,7 +186,7 @@ export function ProfileReviewPage() {
           actions={
             versions?.length > 0 && (
               <>
-                <span className="text-small text-muted" role="status" aria-live="polite">
+                <span className="text-small text-on-board-muted" role="status" aria-live="polite">
                   {busy === "generate"
                     ? "Writing a draft…"
                     : busy

@@ -96,6 +96,8 @@ def _aspect_rows(stats: dict[str, Any]) -> list[dict[str, Any]]:
                 "neutral": pol.get("neutral", 0),
                 "negative": pol.get("negative", 0),
                 "rating_out_of_5": a.get("likert_mean"),
+                # Possibly sarcastic mentions count half when choosing strengths and gaps.
+                "weighted": a.get("weighted_polarity") or pol,
             }
         )
     return rows
@@ -132,24 +134,27 @@ def choose_aspects(
     def has(r, polarity):
         return not need_evidence or bool(_ids(stats, r["aspect"], polarity))
 
+    def weight(r, polarity):
+        return r["weighted"].get(polarity, 0)
+
     def low(r):
         return r["rating_out_of_5"] is not None and r["rating_out_of_5"] < LOW_RATING
 
     strengths = [
         r
-        for r in sorted(rows, key=lambda r: (-r["positive"], -(r["rating_out_of_5"] or 0)))
-        if r["positive"] >= MIN_MENTIONS
-        and r["positive"] > r["negative"]
+        for r in sorted(rows, key=lambda r: (-weight(r, "positive"), -(r["rating_out_of_5"] or 0)))
+        if weight(r, "positive") >= MIN_MENTIONS
+        and weight(r, "positive") > weight(r, "negative")
         and not low(r)
         and has(r, "positive")
     ][:MAX_ITEMS]
     praised = {r["aspect"] for r in strengths}
     gaps = [
         r
-        for r in sorted(rows, key=lambda r: (-r["negative"], r["rating_out_of_5"] or 5))
-        if r["negative"] >= MIN_MENTIONS
+        for r in sorted(rows, key=lambda r: (-weight(r, "negative"), r["rating_out_of_5"] or 5))
+        if weight(r, "negative") >= MIN_MENTIONS
         and r["aspect"] not in praised
-        and (r["negative"] >= r["positive"] or low(r))
+        and (weight(r, "negative") >= weight(r, "positive") or low(r))
         and has(r, "negative")
     ][:MAX_ITEMS]
     return strengths, gaps
@@ -304,15 +309,7 @@ def ground(
     )
 
 
-# Things a feedback summary never contains, but a comment trying to steer the LLM might ask for.
-_STEERED = re.compile(
-    r"https?://|www\.|<[a-z/]|\b(system prompt|ignore (all|any|the|previous)|instructions?)\b",
-    re.IGNORECASE,
-)
-
-
-def _steered(text: str) -> bool:
-    return bool(_STEERED.search(text or ""))
+_steered = llm.looks_steered
 
 
 def _fill(written: list[dict], template: list[dict]) -> list[dict]:

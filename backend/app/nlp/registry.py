@@ -27,7 +27,7 @@ Kind = Literal["classifier", "pair_classifier", "embedder", "seq2seq", "spacy"]
 MAX_TOKENS = 256
 
 # Bump when pre/post-processing changes in a way that should invalidate cached analyses.
-PIPELINE_REVISION = 1
+PIPELINE_REVISION = 2
 
 
 @dataclass(frozen=True)
@@ -118,9 +118,12 @@ def model_id(task: str) -> str:
 
 
 def model_version() -> str:
-    """Tag stored on every analysis; changes when any model ID or the pipeline changes."""
+    """Tag stored on every analysis; changes with any model ID, threshold or pipeline change."""
     ids = json.dumps({t: model_id(t) for t in sorted(MODELS)}, sort_keys=True)
-    digest = hashlib.sha1(f"{PIPELINE_REVISION}:{ids}".encode()).hexdigest()[:8]
+    settings = get_settings()
+    # The thresholds decide what is hidden or flagged, so a change must not reuse old results.
+    limits = (settings.tox_hide, settings.tox_review, settings.sarc_flag, settings.aspect_sim)
+    digest = hashlib.sha1(f"{PIPELINE_REVISION}:{ids}:{limits}".encode()).hexdigest()[:8]
     return f"{get_settings().ml_mode}-r{PIPELINE_REVISION}-{digest}"
 
 

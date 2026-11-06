@@ -4,6 +4,7 @@ import pytest
 
 # Tests use their own database so they never touch demo data, and cheap bcrypt rounds.
 os.environ["MONGODB_DB"] = "facultylens_test"
+os.environ["LOGIN_RATE_LIMIT"] = "5/minute"  # reached quickly in the rate-limit test
 # Tests drop their database, so they never follow a cloud address in .env.
 os.environ["MONGODB_URI"] = os.environ.get("TEST_MONGODB_URI", "mongodb://127.0.0.1:27017")
 os.environ["BCRYPT_ROUNDS"] = "4"

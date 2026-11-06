@@ -155,8 +155,8 @@ function Confusion({ name, confusion }) {
                     key={j}
                     className="num h-10 w-16 rounded-chip text-center"
                     style={{
-                      background: `color-mix(in oklab, var(--chart-main) ${Math.round(share * 85)}%, var(--surface))`,
-                      color: share > 0.5 ? "var(--primary-ink)" : "var(--text)",
+                      background: `color-mix(in oklab, var(--chart-main) ${Math.round(share * 55)}%, var(--surface))`,
+                      color: "var(--text)", // readable at every shade in both themes
                     }}
                   >
                     {v}

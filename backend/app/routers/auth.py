@@ -6,6 +6,7 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse
+from slowapi.util import get_remote_address
 
 from app.auth.deps import Db, User, get_user_allow_pw_change
 from app.auth.security import (
@@ -57,7 +58,8 @@ async def _issue(db: Db, response: Response, user: User) -> TokenOut:
 
 
 REUSE_GRACE = timedelta(seconds=10)
-# The IP limit can't stop guessing from many addresses, so wrong passwords count per account.
+# Wrong passwords count per account and address: guessing is stopped, but a stranger can't lock
+# someone out of their account from elsewhere just by knowing a roll number.
 MAX_FAILURES = 10
 FAILURE_WINDOW = 900  # seconds
 _failures: dict[str, list[float]] = {}
@@ -71,6 +73,10 @@ def _recent_failures(username: str) -> list[float]:
     else:
         _failures.pop(username, None)
     return recent
+
+
+def _failure_key(request: Request, username: str) -> str:
+    return f"{get_remote_address(request)}|{username}"
 
 
 def reset_login_failures() -> None:
@@ -96,7 +102,7 @@ def _bad_login() -> HTTPException:
 @limiter.limit(lambda: get_settings().login_rate_limit)
 async def login(request: Request, response: Response, body: LoginIn, db: Db) -> TokenOut:
     username = body.username.strip()
-    account = username.lower()
+    account = _failure_key(request, username.lower())
     if len(_recent_failures(account)) >= MAX_FAILURES:
         raise HTTPException(
             status.HTTP_429_TOO_MANY_REQUESTS,

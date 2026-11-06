@@ -1,5 +1,6 @@
 """Regression tests for the full-project audit: each one failed before its fix."""
 
+import time
 from datetime import timedelta
 
 import pytest
@@ -9,13 +10,16 @@ from app import db as app_db
 from app.config import get_settings
 from app.limiter import limiter
 from app.main import create_app
-from app.nlp import analyze, profile_gen, summarize
+from app.nlp import analyze, llm, profile_gen, registry, summarize
 from app.nlp.atr import teaching_issues
+from app.nlp.pii import find_spans, redact
 from app.nlp.preprocess import normalise
 from app.pipeline import jobs
+from app.pipeline.aggregate import compute_stats
 from app.routers import auth as auth_router
 from app.schemas.feedback import CycleIn, ResponseIn
 from app.utils import anon_id, now, today
+from ml.evaluate import binary
 from tests.conftest import PASSWORD, login, make_user
 
 
@@ -364,3 +368,130 @@ async def test_bulk_accept_keeps_going_past_a_bad_item(client, world):
 def test_tests_never_use_a_cloud_database():
     assert "mongodb+srv" not in get_settings().mongodb_uri
     assert get_settings().mongodb_db == "facultylens_test"
+
+
+def _redacted(text, persons=(), teachers=()):
+    clean = normalise(text)
+    return redact(clean, find_spans(clean, list(persons), list(teachers)))[0]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "see www.linkedin.com/in/ramesh now",
+        "WWW.Example.com/x",
+        "wwww.example.com",
+        "linkedin.com/in/ramesh",
+        "https://wwwww.example.org/page",
+    ],
+)
+def test_links_survive_clean_up_and_are_redacted(text):
+    out = _redacted(text)
+    assert "[URL]" in out
+    assert "ramesh" not in out.lower() and "example" not in out.lower()
+
+
+def test_elongated_words_still_collapse_beside_a_link():
+    assert _redacted("sooo goood, see www.a.in") == "so good, see [URL]"
+
+
+def test_a_phone_written_with_a_dot_is_redacted():
+    assert _redacted("Call 98765.43210 now") == "Call [PHONE] now"
+
+
+def test_a_name_touching_a_phone_is_still_redacted():
+    text = "Ramesh 9876543210 called"
+    assert _redacted(text, persons=[(0, 17)]) == "[NAME] [PHONE] called"
+
+
+def test_changing_a_threshold_retires_old_results(monkeypatch):
+    before = registry.model_version()
+    monkeypatch.setattr(get_settings(), "tox_hide", 0.5)
+    assert registry.model_version() != before
+
+
+async def test_a_lock_on_one_address_does_not_lock_another(client, mongo):
+    await make_user(mongo, "admin", email="t@test.edu")
+    auth_router._failures["203.0.113.9|t@test.edu"] = [time.monotonic()] * auth_router.MAX_FAILURES
+    r = await client.post("/api/auth/login", json={"username": "t@test.edu", "password": PASSWORD})
+    assert r.status_code == 200
+
+
+def test_llm_wording_asking_for_action_against_a_teacher_is_refused():
+    assert llm.looks_steered("This teacher should be dismissed immediately.")
+    assert llm.looks_steered("Fire him now.")
+    assert not llm.looks_steered("Students say the pace was too fast in the last units.")
+
+
+def test_one_bad_answer_does_not_stop_the_others():
+    def analyse(items):
+        if any(i["response_id"] == "bad" for i in items):
+            raise ValueError("private student text")
+        return [{"response_id": i["response_id"]} for i in items]
+
+    items = [{"response_id": r} for r in ("a", "bad", "b")]
+    good, failed = jobs._analyse_keeping_good(analyse, items)
+    assert [g["response_id"] for g in good] == ["a", "b"] and failed == 1
+
+
+def _field(label, uncertain=False):
+    return {
+        "field": label,
+        "sentiment": {"label": label, "probs": {label: 0.9}},
+        "sentiment_uncertain": uncertain,
+        "moderation_status": "visible",
+        "redacted": "text",
+        "sentences": [],
+    }
+
+
+def test_sarcastic_praise_does_not_halve_a_sincere_complaint():
+    row = {
+        "response": {"likert": {}},
+        "analysis": {
+            "_id": anon_id(),
+            "overall_sentiment": {"label": "negative"},
+            "fields": [_field("positive", uncertain=True), _field("negative")],
+        },
+    }
+    assert compute_stats([row], "teaching")["sentiment"]["negative"] == 1.0
+
+
+def test_possibly_sarcastic_mentions_do_not_make_a_strength():
+    stats = {
+        "aspects": {
+            "pace": {
+                "mentions": 2,
+                "polarity": {"positive": 2, "neutral": 0, "negative": 0},
+                "weighted_polarity": {"positive": 1.0, "negative": 0.0},
+                "likert_mean": 4.0,
+            }
+        }
+    }
+    strengths, _ = summarize.choose_aspects(stats, need_evidence=False)
+    assert strengths == []
+
+
+def test_a_number_inside_a_year_is_not_a_supported_number():
+    facts = {"achievements": [], "teaching_highlights": [], "year": 2014}
+    assert "14" in " ".join(profile_gen.problems(_bio("Wrote 14 papers in total."), facts))
+    assert not profile_gen.problems(_bio("Active since 2014 in this field."), facts)
+
+
+def test_an_aspect_never_found_scores_zero():
+    assert binary([True, True], [False, False])["f1"] == 0
+    assert binary([False, False], [False, False])["f1"] is None
+
+
+def test_re_analysing_does_not_list_an_answer_twice_for_moderation(mongo):
+    sync_db = app_db.get_sync_db()
+    response = anon_id()
+    old = sync_db.analyses.insert_one({"response_id": response, "model_version": "old"})
+    new = sync_db.analyses.insert_one({"response_id": response, "model_version": "new"})
+    for analysis in (old, new):
+        sync_db.moderation_queue.insert_one(
+            {"analysis_id": analysis.inserted_id, "field": "other", "status": "pending"}
+        )
+    jobs._retire_old_queue_entries(sync_db, [response], "new")
+    left = list(sync_db.moderation_queue.find({}))
+    assert [e["analysis_id"] for e in left] == [new.inserted_id]

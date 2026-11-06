@@ -13,6 +13,10 @@ from app.utils import CONTROL_CHARS
 _SPACES = re.compile(r"[ \t ]+")
 _NEWLINES = re.compile(r"\s*\n\s*")
 _LONG_RUN = re.compile(r"([A-Za-z])\1{2,}")
+# Links and emails keep every letter: "www." collapsed to "ww." would slip past PII redaction.
+_LINK_OR_EMAIL = re.compile(
+    r"(?:https?://|\bw{3,}\.)\S+|[\w.+-]+@[\w-]+(?:\.[\w-]+)+", re.IGNORECASE
+)
 _PUNCT_RUN = re.compile(r"([!?])\1+|\.{4,}")
 # Elongations that collapse to a doubled letter but mean a single-letter word.
 _ELONGATED = {"soo": "so", "noo": "no", "yess": "yes", "okk": "ok", "hii": "hi", "verry": "very"}
@@ -28,6 +32,17 @@ def _fix_elongation(match: re.Match) -> str:
     return match.group(1) * 2
 
 
+def _collapse_long_runs(text: str) -> str:
+    """'sooo' -> 'soo' everywhere except inside links and email addresses."""
+    out, last = [], 0
+    for match in _LINK_OR_EMAIL.finditer(text):
+        out.append(_LONG_RUN.sub(_fix_elongation, text[last : match.start()]))
+        out.append(match.group(0))
+        last = match.end()
+    out.append(_LONG_RUN.sub(_fix_elongation, text[last:]))
+    return "".join(out)
+
+
 def _keep_case(original: str, replacement: str) -> str:
     return replacement.capitalize() if original[:1].isupper() else replacement
 
@@ -39,7 +54,7 @@ def normalise(text: str | None) -> str:
     text = CONTROL_CHARS.sub("", unicodedata.normalize("NFKC", text)).translate(_QUOTES)
     text = _NEWLINES.sub("\n", text.strip())
     text = _SPACES.sub(" ", text)
-    text = _LONG_RUN.sub(_fix_elongation, text)
+    text = _collapse_long_runs(text)
     text = re.sub(
         r"\b(" + "|".join(_ELONGATED) + r")\b",
         lambda m: _keep_case(m.group(1), _ELONGATED[m.group(1).lower()]),

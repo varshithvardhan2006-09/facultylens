@@ -14,10 +14,14 @@ from app.config import get_settings
 TITLES = {"dr", "mr", "mrs", "ms", "prof", "sir", "madam", "maam", "ma'am", "miss"}
 
 _EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b")
-_URL = re.compile(r"\b(?:https?://|www\.)\S+", re.IGNORECASE)
+_URL = re.compile(
+    r"\b(?:https?://|w{3,}\.)\S+"
+    r"|\b(?:[a-z0-9-]+\.)+(?:com|org|net|edu|io|co|in)\b(?:/\S*)?",  # linkedin.com/in/someone
+    re.IGNORECASE,
+)
 # Indian mobiles (+91 optional, 10 digits starting 6-9, spaced or not) and other 10-13 digit runs.
 _PHONE = re.compile(
-    r"(?<!\w)(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}(?!\w)|(?<!\w)\+?\d[\d\s-]{8,14}\d(?!\w)"
+    r"(?<!\w)(?:\+?91[\s-]?)?[6-9]\d{4}[\s.-]?\d{5}(?!\w)|(?<!\w)\+?\d[\d\s-]{8,14}\d(?!\w)"
 )
 PRIORITY = {"EMAIL": 0, "URL": 1, "ROLL": 2, "PHONE": 3, "FACULTY": 4, "NAME": 5}
 
@@ -30,6 +34,24 @@ def _roll_re(pattern: str) -> re.Pattern:
 def _name_tokens(name: str | None) -> set[str]:
     words = re.findall(r"[a-z]+", (name or "").lower())
     return {w for w in words if w not in TITLES and len(w) >= 3}
+
+
+def _uncovered(
+    text: str, span: tuple[int, int, str], chosen: list[tuple[int, int, str]]
+) -> list[tuple[int, int, str]]:
+    """What is left of a name once stronger spans are cut out ("Ramesh 98765..." keeps "Ramesh")."""
+    pieces, start = [], span[0]
+    for c_start, c_end, _ in sorted(c for c in chosen if c[0] < span[1] and c[1] > span[0]):
+        pieces.append((start, c_start))
+        start = max(start, c_end)
+    pieces.append((start, span[1]))
+    out = []
+    for a, b in pieces:
+        piece = text[a:b] if a < b else ""
+        if any(ch.isalpha() for ch in piece):
+            lead = len(piece) - len(piece.lstrip())
+            out.append((a + lead, a + len(piece.rstrip()), span[2]))
+    return out
 
 
 def find_spans(
@@ -75,6 +97,8 @@ def find_spans(
     for span in sorted(widened, key=lambda s: (PRIORITY[s[2]], -(s[1] - s[0]), s[0])):
         if all(span[1] <= c[0] or span[0] >= c[1] for c in chosen):
             chosen.append(span)
+        elif span[2] in ("FACULTY", "NAME"):
+            chosen.extend(_uncovered(text, span, chosen))
     # Merge adjacent FACULTY pieces ("Kavitha Reddy" found as two tokens) into one placeholder.
     chosen.sort()
     merged: list[tuple[int, int, str]] = []

@@ -85,11 +85,8 @@ def binary(truth: list[bool], predicted: list[bool]) -> dict[str, Any]:
     fn = sum(t and not p for t, p in zip(truth, predicted, strict=True))
     precision = tp / (tp + fp) if tp + fp else None
     recall = tp / (tp + fn) if tp + fn else None
-    f1 = (
-        2 * precision * recall / (precision + recall)
-        if precision is not None and recall is not None and precision + recall
-        else None
-    )
+    # A class that exists but is never found scores 0, so it still lowers the macro average.
+    f1 = None if not tp + fn else 2 * tp / (2 * tp + fp + fn)
     return {
         "tp": tp,
         "fp": fp,

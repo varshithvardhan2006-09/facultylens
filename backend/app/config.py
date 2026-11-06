@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     demo_password: str = Field(default="facultylens-demo", min_length=8)
 
     # ---- Auth ----
-    login_rate_limit: str = "5/minute"
+    login_rate_limit: str = "30/minute"  # per address; a campus shares one
     refresh_cookie_name: str = "fl_refresh"
     cookie_secure: bool = False  # set true when served over HTTPS
     bcrypt_rounds: int = Field(default=12, ge=4, le=15)

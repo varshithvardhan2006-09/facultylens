@@ -22,7 +22,7 @@ export function ThemeSwitch({ onBoard = false }) {
         {OPTIONS.map((o) => (
           <label
             key={o.value}
-            className={`flex h-7 cursor-pointer items-center justify-center rounded-button text-small font-semibold transition-colors duration-150 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-focus ${
+            className={`flex h-7 cursor-pointer items-center justify-center rounded-button text-small font-semibold transition-colors duration-150 has-[:focus-visible]:outline-2 ${onBoard ? "has-[:focus-visible]:outline-[var(--highlight)]" : "has-[:focus-visible]:outline-focus"} ${
               theme === o.value
                 ? "bg-surface text-text"
                 : onBoard

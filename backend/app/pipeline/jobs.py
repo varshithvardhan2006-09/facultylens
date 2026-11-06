@@ -118,6 +118,16 @@ def _queue_entries(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return entries
 
 
+def _retire_old_queue_entries(sync_db, response_ids: list[ObjectId], version: str) -> None:
+    """Re-analysed answers have new entries; the old ones would list each answer twice."""
+    old = sync_db.analyses.find(
+        {"response_id": {"$in": response_ids}, "model_version": {"$ne": version}}, {"_id": 1}
+    )
+    old_ids = [a["_id"] for a in old]
+    if old_ids:
+        sync_db.moderation_queue.delete_many({"analysis_id": {"$in": old_ids}})
+
+
 def _carry_decisions(sync_db, docs: list[dict[str, Any]]) -> None:
     """A person's moderation decision still holds when the models change and answers are redone."""
     earlier = sync_db.analyses.find(
@@ -141,6 +151,23 @@ def _carry_decisions(sync_db, docs: list[dict[str, Any]]) -> None:
 
 
 # --------------------------------------------------------------------------- running
+
+
+def _analyse_keeping_good(analyze_batch, items: list[dict]) -> tuple[list[dict], int]:
+    """Analyse a batch; if it fails, one by one, so one bad answer can't stop the whole run."""
+    try:
+        return analyze_batch(items), 0
+    except Exception as exc:
+        # The type only: an error message could quote a student's unredacted answer.
+        log.warning("analysis batch of %d failed (%s)", len(items), type(exc).__name__)
+    good, failed = [], 0
+    for item in items:
+        try:
+            good.extend(analyze_batch([item]))
+        except Exception as exc:
+            failed += 1
+            log.warning("response could not be analysed (%s)", type(exc).__name__)
+    return good, failed
 
 
 def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
@@ -182,10 +209,15 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
         batch_size = get_settings().nlp_batch_size
         touched_forms: set[ObjectId] = set()
         counts = {"hidden": 0, "review": 0, "pii": 0, "sarcastic": 0}
+        failed = 0
         for i in range(0, total, batch_size):
             ids = todo[i : i + batch_size]
             responses = list(sync_db.responses.find({"_id": {"$in": ids}}))
-            docs = [{"_id": anon_id(), **d} for d in analyze_batch(_items(sync_db, responses))]
+            analysed, failures = _analyse_keeping_good(analyze_batch, _items(sync_db, responses))
+            failed += failures
+            docs = [{"_id": anon_id(), **d} for d in analysed]
+            if not docs:
+                continue
             _carry_decisions(sync_db, docs)
             try:
                 result = sync_db.analyses.insert_many(docs, ordered=False)
@@ -205,6 +237,7 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
             if entries:
                 with contextlib.suppress(BulkWriteError):
                     sync_db.moderation_queue.insert_many(entries, ordered=False)
+            _retire_old_queue_entries(sync_db, [d["response_id"] for d in docs], version)
             for doc in docs:
                 touched_forms.add(doc["form_id"])
                 for f in doc["fields"]:
@@ -216,6 +249,8 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
                 {"_id": job_id}, {"$set": {"done": min(i + batch_size, total), "counts": counts}}
             )
 
+        if total and failed == total:
+            raise RuntimeError(f"All {total} responses failed analysis; see the server log.")
         if job["kind"] == "cycle":
             touched_forms |= set(form_ids)
         forms = list(sync_db.forms.find({"_id": {"$in": list(touched_forms)}}))
@@ -232,6 +267,7 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
             "per_response_ms": round(1000 * analysis_seconds / total, 1) if total else None,
             "summary_seconds": round(time.perf_counter() - started - analysis_seconds, 2),
             "counts": {**counts, "summaries_built": summary_counts.get("built", 0)},
+            "failed_responses": failed,  # still waiting: the next run tries them again
         }
         sync_db.analysis_jobs.update_one({"_id": job_id}, {"$set": final})
         return {**job, **final, "total": total}
