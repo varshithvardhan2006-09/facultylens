@@ -19,9 +19,9 @@ const RIGHT = [
 
 const STEPS = [
   "Students fill a short form for each course: a set of ratings from 1 to 5 and a few lines in their own words. It is stored without their name.",
-  "Every comment is checked first. Names, phone numbers and roll numbers are replaced, and abusive comments are held back for the IQAC coordinator.",
+  "Every comment is checked first. Names, phone numbers and roll numbers are replaced, and abusive comments are held back for the administrator.",
   "Language models running on the college's own computer read each sentence, work out which teaching aspect it talks about, and whether it is praise or criticism.",
-  "Each teacher sees their comments sorted by aspect, heads of department see their own department, and the IQAC office exports the NAAC Criterion 1.4 report.",
+  "Each teacher sees their comments sorted by aspect, heads of department see their own department, and the college office exports the feedback report.",
 ];
 
 function Cluster({ notes, side, offset }) {

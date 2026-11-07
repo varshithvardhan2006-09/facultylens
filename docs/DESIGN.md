@@ -76,7 +76,7 @@ All text pairs above were checked for WCAG AA in both themes when the tokens wer
 
 - **Faculty My page** (`pages/faculty/FacultyPage.jsx`, `Wall.jsx`): profile on a board header at the left; cycle and course pickers; a board strip with net sentiment, the split bar, responses and the best-rated aspect; then **the wall**: one cluster per aspect students wrote about, ordered by how often, each with a Kalam heading, a marker stroke in the verdict colour, the verdict in words with a drawn ▲/▼ icon, the note and rating counts, and up to five real redacted sentences as notes (two praise, two criticism, one neutral). "Read n notes in full" opens the evidence drawer, where each answer's highlight takes its own sentiment's tint. Aspects nobody wrote about are listed in one line. The written summary, next steps and emotion panels follow.
   - The API supplies note ids per aspect (`insights.aspects[k].note_ids`); the text still comes only from `/evidence`, so the moderation, redaction and minimum-response rules are unchanged.
-- **IQAC home** (`pages/admin/AdminHome.jsx`): the open cycle on a board header (responded, to moderate, analysed, actions approved), then its work sorted into four columns of task notes: Needs a decision, Ready to run, Waiting on people, Done. Every count comes from the cycles, analysis, moderation and NAAC status APIs.
+- **Admin home** (`pages/admin/AdminHome.jsx`): the open cycle on a board header (responded, to moderate, analysed, actions approved), then its work sorted into four columns of task notes: Needs a decision, Ready to run, Waiting on people, Done. Every count comes from the cycles, analysis, moderation and NAAC status APIs.
 - **Student form**: the course on a board header, the 1–5 scale with the chosen rating in highlighter, and the free-text answers written on blank neutral notes.
 
 - **Landing page** (`pages/LandingPage.jsx`, shown at `/` to signed-out visitors only): the hero pattern from the user's references (Rootline-style). A marker heading, one plain sentence, Sign in and "How privacy works", then a real screenshot of the faculty page (`public/landing-wall.jpg`, demo data, captioned as such) with notes naming real teaching aspects pinned over both edges and the board rising behind it. Deliberately without the references' glows, grain, eyebrow labels or pill buttons. The side notes appear from 1280px up.
@@ -84,7 +84,7 @@ All text pairs above were checked for WCAG AA in both themes when the tokens wer
 - **Tabs** (`components/Tabs.jsx`) are a row of 6px tabs on the wall; the current tab wears the highlighter, and the arrow keys move between tabs. Used on moderation, labelling and department insights. Tabs inside a card (the import review) keep the underline style.
 - **Moderation queue**: each flagged answer is a held note (neutral paper, the flagged sentence marked in coral) in a two-column wall, with its decision buttons under it. The main button follows the check: "Keep hidden" for answers it hid, "Show to faculty" for answers it only wants read. A decided note lifts and fades out in 160ms before the gap closes (instant under reduced motion).
 - **Labelling**: the comment is one large note on the left, sticky while you work. Its paper follows the sentiment you choose (mint, peach, grey), instantly and with no animation, because the 1/2/3 keys drive it. The form sits on paper to the right.
-- **List screens** (users, departments, courses, cycles, analysis, NAAC report, evaluation, system status) keep their tables and forms on paper under the board header. Tables are the right shape for that data; they take the new tokens.
+- **List screens** (users, departments, courses, cycles, analysis, Feedback report, evaluation, system status) keep their tables and forms on paper under the board header. Tables are the right shape for that data; they take the new tokens.
 
 ## History: page notes from Phases 1–8
 
@@ -234,7 +234,7 @@ These notes describe how each page was laid out when it was built. Their structu
 
 ### Phase 7 additions
 
-- **NAAC report builder** (`/admin/reports`): the cycle picker, then "Draft action items" (secondary; its title says edited and approved rows are never overwritten). Below that are two columns:
+- **Feedback report builder** (`/admin/reports`): the cycle picker, then "Draft action items" (secondary; its title says edited and approved rows are never overwritten). Below that are two columns:
   - **Left:** the Action Taken rows grouped by department in cards. Each card header shows "n of m approved" and a ghost "Add an action".
   - **Right (sticky):** "Ready to export?" as a checklist with small round marks (✓ in the positive tint when done; screen-reader text says "Done"/"Not yet"), then the Export card.
 - **Export card:**
@@ -277,7 +277,7 @@ These notes describe how each page was laid out when it was built. Their structu
 
 ## Motion
 
-- **One authored moment:** notes settle onto the wall. Each note starts from a scattered offset (`--dx`, `--dy`, `--r0`), slightly scaled down and transparent, and lands at its tilt in 400ms on the strong ease-out, staggered 40ms across the whole wall (`.settle`). The cluster's marker stroke draws itself as its notes land (`.marker-line`). It plays once per load: on the faculty page, the IQAC home board and the sign-in board.
+- **One authored moment:** notes settle onto the wall. Each note starts from a scattered offset (`--dx`, `--dy`, `--r0`), slightly scaled down and transparent, and lands at its tilt in 400ms on the strong ease-out, staggered 40ms across the whole wall (`.settle`). The cluster's marker stroke draws itself as its notes land (`.marker-line`). It plays once per load: on the faculty page, the Admin home board and the sign-in board.
 - **Notes wait until you can see them** (2026-10-23, at the user's request): every group of settling notes is wrapped in `components/Reveal.jsx`. A group that starts below the screen holds its notes at their first frame and lets them settle once it scrolls into view (15% visible); a wall cluster only starts watching after its notes have loaded. Groups already on screen settle at once. The landing page's side notes wait for the reader's first scroll (and until half of each group sits in the top 70% of the screen), because on a tall screen they are visible under the heading before anyone looks at them. This is the one scroll-linked behaviour allowed: it delays the existing note moment so it isn't missed, and never fades whole sections in.
 - **Supporting moments** (added 2026-10-22, the same scale as the notes: once, meaningful, under about 0.7s):
   - the highlighter (`.here`) is drawn on left to right wherever it appears: the current page, the current tab, the chosen rating;

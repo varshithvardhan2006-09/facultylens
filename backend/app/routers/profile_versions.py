@@ -1,6 +1,6 @@
 """Generated profiles: draft → edit → approve (SPEC §7), and the approved public profile.
 
-The owner or an IQAC admin can generate and edit drafts; only the owner can approve one, which
+The owner or an Admin can generate and edit drafts; only the owner can approve one, which
 supersedes the previously approved version. The approved profile is readable by all staff in
 the institution, without evidence ids (feedback detail stays on the feedback page).
 """

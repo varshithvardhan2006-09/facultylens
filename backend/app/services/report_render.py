@@ -1,5 +1,5 @@
 # ruff: noqa: E501  (report prose reads better unwrapped)
-"""NAAC Criterion 1.4 report: the same content blocks rendered to PDF (fpdf2) and DOCX.
+"""Feedback report: the same content blocks rendered to PDF (fpdf2) and DOCX.
 
 `blocks(data)` turns the report data into an ordered list of headings, paragraphs, tables
 and charts; `render_pdf` and `render_docx` only draw those blocks, so the two files always
@@ -44,7 +44,7 @@ def blocks(data: dict[str, Any]) -> list[Block]:
     out: list[Block] = [
         ("title", data["institution"]),
         ("subtitle", "Feedback Analysis and Action Taken Report"),
-        ("p", "NAAC Criterion 1.4: Feedback System (1.4.1 and 1.4.2)"),
+        ("p", "Student feedback summary"),
         (
             "kv",
             [
@@ -124,7 +124,7 @@ def blocks(data: dict[str, Any]) -> list[Block]:
             "Moderation and privacy. Before anyone reads a comment, names, phone numbers, e-mail "
             "addresses, roll numbers and links are replaced with placeholders such as [NAME] or "
             "[FACULTY]. An abuse check scores every sentence; answers scoring "
-            f"{th['tox_hide']:.2f} or more are hidden until the IQAC coordinator reviews them. "
+            f"{th['tox_hide']:.2f} or more are hidden until the administrator reviews them. "
             "All comments quoted in this report are moderated and redacted.",
         ),
         (
@@ -182,7 +182,7 @@ def blocks(data: dict[str, Any]) -> list[Block]:
                 out.append(("bullet", g["issue"]))
                 out += [("quote", q) for q in g["samples"]]
     # 4 ----------------------------------------------------------------------------------
-    out += [("pagebreak",), ("h1", "4. Curriculum feedback (1.4.1)")]
+    out += [("pagebreak",), ("h1", "4. Curriculum feedback")]
     for d in data["departments"]:
         cur = d["curriculum"]
         out.append(("h2", d["name"]))
@@ -218,7 +218,7 @@ def blocks(data: dict[str, Any]) -> list[Block]:
             "p",
             "Each issue below was raised in the feedback and is stated for a department as a "
             "whole. Actions were drafted from the feedback and then edited and approved by the "
-            f"Head of Department or the IQAC coordinator ({approved} of {len(data['actions'])} "
+            f"Head of Department or the administrator ({approved} of {len(data['actions'])} "
             "approved).",
         ),
     ]
@@ -251,14 +251,14 @@ def blocks(data: dict[str, Any]) -> list[Block]:
         ]
     # 6 ----------------------------------------------------------------------------------
     out += [
-        ("h1", "6. Statement for publication (1.4.2)"),
+        ("h1", "6. Statement for publication"),
         (
             "p",
             f"Feedback for {c['name']} was collected from students, analysed, and acted upon as "
             "described above. This feedback and the Action Taken Report are made available on "
             f"the website of {data['institution']}.",
         ),
-        ("signatures", ["IQAC Coordinator", "Principal"]),
+        ("signatures", ["Administrator", "Principal"]),
     ]
     return out
 
@@ -277,7 +277,7 @@ def render_pdf(data: dict[str, Any], charts: dict[str, bytes], draft: bool) -> b
     from fpdf.fonts import FontFace
 
     data = {**data, "_charts": charts}
-    title = f"{data['institution']} · NAAC 1.4 feedback report · {data['cycle']['name']}"
+    title = f"{data['institution']} · Feedback report · {data['cycle']['name']}"
 
     class Report(FPDF):
         def header(self):
@@ -306,7 +306,7 @@ def render_pdf(data: dict[str, Any], charts: dict[str, bytes], draft: bool) -> b
     pdf.add_font("DejaVu", "", os.path.join(fonts, "DejaVuSans.ttf"))
     pdf.add_font("DejaVu", "B", os.path.join(fonts, "DejaVuSans-Bold.ttf"))
     pdf.add_font("DejaVu", "I", os.path.join(fonts, "DejaVuSans-Oblique.ttf"))
-    pdf.set_title(f"NAAC 1.4 Feedback report, {data['cycle']['name']}")
+    pdf.set_title(f"Feedback report, {data['cycle']['name']}")
     pdf.set_author(data["institution"])
     pdf.add_page()
     width = pdf.epw
@@ -412,7 +412,7 @@ def render_docx(data: dict[str, Any], charts: dict[str, bytes], draft: bool) -> 
     head = section.header.paragraphs[0]
     head.text = (
         f"{DRAFT_MARK} · " if draft else ""
-    ) + f"{data['institution']} · NAAC 1.4 feedback report · {data['cycle']['name']}"
+    ) + f"{data['institution']} · Feedback report · {data['cycle']['name']}"
     head.runs[0].font.size = Pt(8)
     head.runs[0].font.color.rgb = (
         RGBColor(0xB4, 0x1E, 0x1E) if draft else RGBColor(0x5A, 0x60, 0x68)

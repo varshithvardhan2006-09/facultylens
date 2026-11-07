@@ -8,13 +8,13 @@
 
 One page per faculty member that joins two things no public system currently combines:
 1. **Auto-generated faculty profile** — written from qualifications, experience, research interests, publications and achievements (manual entry + optional ORCID / Semantic Scholar import).
-2. **Student feedback evaluation** — overall sentiment (positive / negative / neutral), **teaching-aspect sentiment with highlighted evidence**, strengths & areas-for-improvement summaries, **moderation + PII redaction before faculty see anything**, a **bias & sarcasm panel**, and a **NAAC Criterion 1.4 Feedback Analysis + Action Taken Report** export.
+2. **Student feedback evaluation** — overall sentiment (positive / negative / neutral), **teaching-aspect sentiment with highlighted evidence**, strengths & areas-for-improvement summaries, **moderation + PII redaction before faculty see anything**, a **bias & sarcasm panel**, and a **Feedback Analysis and Action Taken Report** export.
 
 ### In scope (build all of these)
 - F1 Unified faculty profile page (profile + feedback insights side by side)
 - F2 Aspect-based sentiment with evidence highlighting
 - F3 Moderation (toxicity) + PII redaction pipeline
-- F4 NAAC 1.4 report export (PDF + DOCX)
+- F4 feedback report export (PDF + DOCX)
 - F5 Bias & sarcasm panel (emotion mix, sarcasm flags, department-level gendered-language check)
 - F6 Evaluation module (baseline vs transformer, Cohen's kappa, ROUGE/BERTScore, faculty survey form)
 
@@ -52,7 +52,7 @@ facultylens/
 │   │   ├── schemas/     # Pydantic models
 │   │   ├── routers/     # auth, users, faculty, profiles, forms, feedback, analytics, reports, evaluation, health
 │   │   ├── nlp/         # preprocess, sentiment, aspects, summarize, moderation, emotion, sarcasm, bias, profile_gen, llm, registry
-│   │   ├── services/    # orcid.py, semantic_scholar.py, naac_report.py
+│   │   ├── services/    # orcid.py, semantic_scholar.py, report_render.py
 │   │   └── pipeline/    # background analysis jobs
 │   ├── ml/              # baseline.py, evaluate.py, data/, results/
 │   ├── tests/
@@ -81,7 +81,7 @@ facultylens/
 3. All LLM calls go through `app/nlp/llm.py`: Groq client with `GROQ_MODEL`, automatic fallback to `GROQ_FALLBACK_MODEL` on model-not-found/deprecation errors, retries with backoff, a timeout, and a **no-LLM fallback** (HF summariser + templates) when `GROQ_API_KEY` is empty or Groq is down. The app must never crash because the LLM is unavailable.
 4. LLM outputs must be **grounded**: pass only extracted facts/comments, ask for JSON, validate with Pydantic, and store the comment IDs that support every strength/improvement. Never invent publications or claims.
 5. **Privacy:** students are anonymous to faculty. Store only `sha256(student_id + SALT)` for one-response-per-form checks. Faculty and HoD see only **moderated + redacted** text. Hide comment-level detail when a form has fewer than `MIN_RESPONSES_FOR_DISPLAY` (default 5) responses.
-6. Roles: `admin` (IQAC), `hod`, `faculty`, `student`. Enforce on every endpoint via dependencies, and test the forbidden cases.
+6. Roles: `admin`, `hod`, `faculty`, `student`. Enforce on every endpoint via dependencies, and test the forbidden cases.
 7. Secrets only in `.env`; keep `.env.example` current. Never commit `.env`.
 8. Write pytest tests for every router and NLP function; mock heavy models in unit tests and keep one slow, marked integration test per model (`@pytest.mark.slow`).
 9. Use Context7 for current library docs (FastAPI, PyMongo Async, Recharts, Transformers, Groq SDK) rather than guessing APIs.

@@ -53,7 +53,7 @@ function columns({ cycle, analysis, moderation, report }) {
   if (report && report.actions > report.approved)
     cols.decide.push({
       title: `${n(report.actions - report.approved)} Action Taken row${report.actions - report.approved === 1 ? "" : "s"} to approve`,
-      body: "Department replies to the feedback, waiting for IQAC sign-off before the NAAC export.",
+      body: "Department replies to the feedback, waiting for admin sign-off before the report export.",
       to: "/admin/reports",
       action: "Review",
     });
@@ -96,7 +96,7 @@ function columns({ cycle, analysis, moderation, report }) {
 
   if (report?.ready)
     cols.done.push({
-      title: "NAAC 1.4 report is ready to export",
+      title: "Feedback report is ready to export",
       to: "/admin/reports",
       action: "Export",
     });
@@ -135,7 +135,7 @@ function Card({ card, index, done }) {
   );
 }
 
-/** IQAC's first screen: the current cycle, and its work sorted into columns. */
+/** The admin's first screen: the current cycle, and its work sorted into columns. */
 export function AdminHome() {
   const [state, setState] = useState({ data: null, error: null });
   const [retry, setRetry] = useState(0);

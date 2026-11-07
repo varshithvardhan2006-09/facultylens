@@ -8,19 +8,19 @@ This is the single source of truth for what to build. `CLAUDE.md` holds the work
 ---
 
 ## 1. Problem and goal
-Colleges collect student feedback every semester, but the free-text comments are read manually or not at all. Faculty profiles are maintained by hand in static pages. NAAC Criterion 1.4 asks institutions to show that feedback was *collected, analysed, acted on and published*.
+Colleges collect student feedback every semester, but the free-text comments are read manually or not at all. Faculty profiles are maintained by hand in static pages. feedback report asks institutions to show that feedback was *collected, analysed, acted on and published*.
 
 FacultyLens automates all of this:
 - It generates a structured, readable profile for each faculty member.
 - It analyses anonymous student feedback down to individual teaching aspects, protecting students (anonymity) and faculty (moderation, redaction).
-- It puts both on one page, and exports a NAAC-ready report.
+- It puts both on one page, and exports a ready-to-submit feedback report.
 
 ### Novelty (what must exist for the project's claims to be true)
 1. A **unified profile page**: LLM-written research and academic profile + aspect-level teaching insights for the same person.
 2. **Aspect sentiment with evidence**: every strength or improvement links to the redacted sentences that support it.
 3. **Moderation + PII redaction** before any faculty member sees a comment.
 4. A **bias & sarcasm panel** that flags unreliable signals instead of hiding them.
-5. A **NAAC 1.4 Feedback Analysis + Action Taken Report** export.
+5. A **Feedback Analysis + Action Taken Report** export.
 6. **Rigorous evaluation**: a classical baseline vs transformer, two-annotator Cohen's kappa, ROUGE/BERTScore, and a faculty usefulness survey.
 
 ---
@@ -28,7 +28,7 @@ FacultyLens automates all of this:
 ## 2. Users and roles
 | Role | Can do |
 |---|---|
-| **admin** (IQAC coordinator) | Manage departments, users, courses, feedback cycles and forms. See moderation queue (incl. hidden toxic comments with reasons). Run analysis and reports, view the bias panel institution-wide, run evaluation and labelling. |
+| **admin** (administrator) | Manage departments, users, courses, feedback cycles and forms. See moderation queue (incl. hidden toxic comments with reasons). Run analysis and reports, view the bias panel institution-wide, run evaluation and labelling. |
 | **hod** | View faculty pages, analytics and the bias panel for own department. Approve Action Taken entries. |
 | **faculty** | Edit own profile data, import from ORCID / Semantic Scholar, review and approve the generated profile. See only moderated + redacted feedback for own courses (once the minimum response count is reached). Respond to improvement areas. Fill the usefulness survey. |
 | **student** | Log in with roll number, see open feedback forms for enrolled courses, submit once per form. Never sees analysis. |
@@ -43,7 +43,7 @@ Authentication uses JWT access tokens (60 min) and refresh tokens (7 days), bcry
 3. **Student feedback:** student logs in → sees pending forms → answers Likert questions (1–5) for each teaching aspect and three free-text questions → submits (one response per student per form, enforced by a salted hash) → gets a thank-you screen. No analysis is visible to the student.
 4. **Analysis (automatic):** each submission is queued → background pipeline (§5) runs → results are cached in MongoDB. Admin can also re-run analysis for a cycle.
 5. **Faculty page:** after the cycle closes (or once responses ≥ minimum), faculty/HoD/admin open the unified page: profile on the left, feedback insights on the right.
-6. **NAAC report:** admin picks a cycle → system builds the Feedback Analysis report and drafts an Action Taken Report → admin and HoD edit actions → export PDF/DOCX.
+6. **Feedback report:** admin picks a cycle → system builds the Feedback Analysis report and drafts an Action Taken Report → admin and HoD edit actions → export PDF/DOCX.
 
 ---
 
@@ -64,7 +64,7 @@ Each **teaching-aspect** question has a Likert rating (1–5) and the aspect is 
 
 **Free-text questions:** (1) What did you like most about this course/teacher? (2) What should the teacher improve? (3) Any other comments?
 
-**Curriculum feedback form (for NAAC 1.4.1):** students also rate syllabus relevance, course outcomes clarity, lab/practical adequacy, and reference material (Likert), plus one comment box. The report states that only the *student* stakeholder group is collected in this version.
+**Curriculum feedback form (for the feedback report):** students also rate syllabus relevance, course outcomes clarity, lab/practical adequacy, and reference material (Likert), plus one comment box. The report states that only the *student* stakeholder group is collected in this version.
 
 ---
 
@@ -227,7 +227,7 @@ Notes:
 - **Demo seed:** each teacher also gets a few synthetic profile facts (qualifications, one current role, 2–4 publications, sometimes an award). Venues and awards are marked "(demo)". A separate RNG leaves the seeded responses unchanged.
 
 *Changed in Phase 6 (agreed with the user, 2026-10-20):*
-- **Bias panel scope:** the bias & sarcasm panel is computed for one department at a time. The IQAC admin picks any department; comparisons are never pooled across departments, because subjects differ. This is how the roles table's "institution-wide" reads for admins.
+- **Bias panel scope:** the bias & sarcasm panel is computed for one department at a time. The admin picks any department; comparisons are never pooled across departments, because subjects differ. This is how the roles table's "institution-wide" reads for admins.
 - **Thresholds:** `BIAS_MIN_GROUP_FACULTY` (default 3) and `BIAS_MIN_GROUP_ANSWERS` (default 30) per group. Below either, the API returns group sizes only.
   - Only teachers with "female" or "male" recorded form groups. Others are left out and counted.
   - The panel never returns names. The department table never returns gender.
@@ -244,10 +244,10 @@ Notes:
 - **`action_taken` collection:** `cycle_id, department_id, kind (teaching | curriculum | other), key, label, issue, evidence_count, evidence_ids, action, responsible, timeline, status (draft | approved), source, edited`. It is unique on cycle + department + kind + key.
   - Re-drafting replaces only untouched drafts. It never overwrites an edited or approved row.
   - An edit reopens an approved row.
-- **Export gate:** `GET /reports/naac/{cycle}.pdf|.docx` returns 409 until every row is approved. `?draft=true` gives a preview at any time, marked "DRAFT – not for submission" on every page. Exports are admin-only and audited.
+- **Export gate:** `GET /reports/feedback/{cycle}.pdf|.docx` returns 409 until every row is approved. `?draft=true` gives a preview at any time, marked "DRAFT – not for submission" on every page. Exports are admin-only and audited.
 - **Added endpoints:**
-  - `POST /reports/naac/{cycle}/actions` (manual row);
-  - `PUT /reports/naac/{cycle}/actions/{id}` (edit or approve; replaces the single `PUT …/actions`);
+  - `POST /reports/feedback/{cycle}/actions` (manual row);
+  - `PUT /reports/feedback/{cycle}/actions/{id}` (edit or approve; replaces the single `PUT …/actions`);
   - `DELETE …/actions/{id}` (admin);
   - `GET …/actions/{id}/evidence` (the redacted sentences behind a row, for the admin or the department's HoD);
   - `GET …/status` (readiness).
@@ -295,7 +295,7 @@ Notes:
 - **analytics:** `POST /analysis/run?cycle=`, `GET /analysis/status/{job}`, `GET /analytics/faculty/{id}?cycle=&course=`, `GET /analytics/department/{id}?cycle=`, `GET /analytics/bias?department=&cycle=`, `GET /analytics/sarcasm?faculty=&cycle=`
 - **unified page:** `GET /faculty/{id}/overview?cycle=` (approved profile + aggregates + summary in one call)
 - **moderation:** `GET /moderation/queue`, `POST /moderation/{id}/decision`
-- **NAAC:** `POST /reports/naac/{cycle}/draft`, `GET/PUT /reports/naac/{cycle}/actions`, `GET /reports/naac/{cycle}.pdf`, `GET /reports/naac/{cycle}.docx`
+- **Feedback report:** `POST /reports/feedback/{cycle}/draft`, `GET/PUT /reports/feedback/{cycle}/actions`, `GET /reports/feedback/{cycle}.pdf`, `GET /reports/feedback/{cycle}.docx`
 - **evaluation:** `GET /labels/next`, `POST /labels`, `GET /evaluation/results`, `POST /survey`
 - **health:** `GET /health`, `GET /health/models`
 
@@ -312,7 +312,7 @@ Notes:
    - **Right, bottom:** strengths and improvements cards. Clicking a card opens the evidence drawer with highlighted redacted sentences.
    - **Footer:** emotion mix bar and a "possibly sarcastic" count with a link to the list.
 5. **HoD:** department overview (faculty table with net sentiment, top strength and top improvement per person, sortable), bias & sarcasm panel, ATR approval
-6. **Admin:** setup (departments, users, courses, cycles, forms), analysis runner with progress, moderation queue, NAAC report builder (editable ATR table → export), labelling tool, evaluation results, model health
+6. **Admin:** setup (departments, users, courses, cycles, forms), analysis runner with progress, moderation queue, Feedback report builder (editable ATR table → export), labelling tool, evaluation results, model health
 7. **Bias & sarcasm panel:**
    - Gendered-language rates per 1,000 comments (e.g., *brilliant/genius/smart* vs *helpful/caring/organised*) by faculty gender group, at department level only, shown **only if each group has ≥ 3 faculty**.
    - Likert gap between groups with confidence intervals.
@@ -324,14 +324,14 @@ Charts must use accessible colours (not red/green only), have text labels and em
 
 ---
 
-## 12. NAAC Criterion 1.4 report (PDF + DOCX)
+## 12. Feedback report (PDF + DOCX)
 1. Cover: institution name (config), cycle, generated date
 2. Feedback collection summary: forms, responses, response rate per department and course; stakeholder coverage (students only in this version — stated honestly)
 3. Methodology: questionnaire, anonymity, NLP pipeline in plain language, models used, moderation
 4. Analysis: institution- and department-level sentiment, aspect scores (charts rendered as PNG via matplotlib for the export), top themes with anonymised sample comments (moderated + redacted only)
 5. Curriculum feedback analysis (1.4.1)
 6. **Action Taken Report** table: Issue | Aspect | Evidence (count) | Action | Responsible | Timeline | Status. The LLM drafts it from improvements; admin and HoD must edit or approve each row before export.
-7. Statement for website publication (1.4.2 option A: collected, analysed, action taken, available on website) + signature blocks for the IQAC Coordinator and Principal
+7. Statement for website publication (1.4.2 option A: collected, analysed, action taken, available on website) + signature blocks for the Administrator and Principal
 
 ---
 
@@ -355,13 +355,13 @@ Charts must use accessible colours (not red/green only), have text labels and em
 | **4 NLP pipeline** | Preprocess, PII, moderation + queue, sentiment, aspects + evidence, emotion, sarcasm, background jobs, aggregates | Seeded cycle analyses end to end on CPU within the budget; results cached |
 | **5 Summaries & profile generation** | `llm.py` (Groq + fallback), grounded summaries, profile generation + validation + approval, **unified faculty page** | Page renders profile + insights; evidence drawer highlights sentences; works with the Groq key removed |
 | **6 Analytics & bias panel** | Faculty/department dashboards, bias & sarcasm panel with thresholds and caveats | Charts read from the API; panel hides itself when groups are too small |
-| **7 NAAC report** | Draft ATR, editable table, PDF + DOCX export | Exported files open correctly and contain no unredacted text |
+| **7 Feedback report** | Draft ATR, editable table, PDF + DOCX export | Exported files open correctly and contain no unredacted text |
 | **8 Evaluation** | Labelling tool, kappa, baselines vs transformer, aspect/PII/summary metrics, survey, `RESULTS.md`, evaluation page | `python -m ml.evaluate` produces real results files |
 | **9 Polish** | Postman collection, README, screenshots, demo script (`docs/DEMO.md`, 5-minute walkthrough), coverage ≥ 70%, final CPU performance check | Fresh clone → setup → demo works by following the README |
 
 *Changed after Phase 9 (2026-10-21), found when the user added a Groq key:*
 - **Summary topics come from the counts.** With the key set, Groq listed a teacher's punctuality as a strength: it cited two real positive sentences, although 12 of 19 punctuality comments were critical. Each point cited a real sentence, but the overall picture was wrong.
-  - The counts rule (`summarize.choose_aspects`, shared with the template path, analytics and the NAAC report) now decides which aspects are strengths and which need work.
+  - The counts rule (`summarize.choose_aspects`, shared with the template path, analytics and the Feedback report) now decides which aspects are strengths and which need work.
   - The LLM sees only those aspects, each with its own evidence of the matching polarity, and only writes the wording.
   - Items about any other aspect, or citing evidence outside the aspect, are dropped. A chosen aspect the LLM skipped gets the template sentence (`filled_from_template`).
 - **Groq rate limits:** the free tier allows 8,000 tokens a minute. On a 429, `llm.py` waits as long as Groq asks, up to 30 s per call in total, before using the fallback.

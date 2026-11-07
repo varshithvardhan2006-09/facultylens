@@ -1,4 +1,4 @@
-"""Charts for the NAAC report as PNG bytes (matplotlib, Agg backend, CPU only).
+"""Charts for the Feedback report as PNG bytes (matplotlib, Agg backend, CPU only).
 
 They follow docs/DESIGN.md: the sentiment trio (blue / grey / red, never red-green) with text
 labels on every segment, one hue for a single series, no gridline clutter, values written on

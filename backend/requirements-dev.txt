@@ -3,4 +3,4 @@ pytest>=9.1,<10.0
 pytest-asyncio>=1.4,<2.0
 pytest-cov>=7.1,<8.0
 ruff>=0.17,<0.18
-pypdf>=6.0,<7.0  # reads exported NAAC PDFs back in tests (no unredacted text)
+pypdf>=6.0,<7.0  # reads exported report PDFs back in tests (no unredacted text)

@@ -1,6 +1,6 @@
 """Faculty profile data: manual editing plus ORCID / Semantic Scholar import with review.
 
-Access: the faculty member (or HoD) who owns the profile and IQAC admins can read and write;
+Access: the faculty member (or HoD) who owns the profile and admins can read and write;
 a HoD can read the profiles of their own department; everyone else gets 403.
 Imported items wait in `pending_imports` until the owner accepts or rejects each one.
 """

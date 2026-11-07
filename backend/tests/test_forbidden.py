@@ -22,7 +22,7 @@ CYCLE = {
     "term": "even",
     "opens_at": "2027-01-01T00:00:00Z",
     "closes_at": "2027-02-01T00:00:00Z",
-}  # the profile owner (world faculty) and IQAC admin
+}  # the profile owner (world faculty) and Admin
 
 PROFILE_FIELDS = {"headline": "H", "bio_short": "S", "bio_long": "L"}
 NO_ID = "000000000000000000000000"
@@ -85,13 +85,13 @@ ENDPOINTS = [
     ("GET", "/api/analytics/bias?department={dept}", {"admin", "hod"}, None),
     ("GET", "/api/analytics/sarcasm?department={dept}", {"admin", "hod"}, None),
     ("GET", "/api/analytics/sarcasm?faculty={user}", {"admin", "hod", "faculty"}, None),
-    # NAAC report: admin drafts and exports; the department's HoD reads, edits, approves.
-    ("POST", "/api/reports/naac/{cycle}/draft", {"admin"}, None),
-    ("GET", "/api/reports/naac/{cycle}/actions", {"admin", "hod"}, None),
-    ("GET", "/api/reports/naac/{cycle}/status", {"admin", "hod"}, None),
+    # Feedback report: admin drafts and exports; the department's HoD reads, edits, approves.
+    ("POST", "/api/reports/feedback/{cycle}/draft", {"admin"}, None),
+    ("GET", "/api/reports/feedback/{cycle}/actions", {"admin", "hod"}, None),
+    ("GET", "/api/reports/feedback/{cycle}/status", {"admin", "hod"}, None),
     (
         "POST",
-        "/api/reports/naac/{cycle}/actions",
+        "/api/reports/feedback/{cycle}/actions",
         {"admin", "hod"},
         {
             "department_id": "{dept}",
@@ -103,14 +103,14 @@ ENDPOINTS = [
     ),
     (
         "PUT",
-        f"/api/reports/naac/{{cycle}}/actions/{NO_ID}",
+        f"/api/reports/feedback/{{cycle}}/actions/{NO_ID}",
         {"admin", "hod"},
         {"status": "approved"},
     ),
-    ("DELETE", f"/api/reports/naac/{{cycle}}/actions/{NO_ID}", {"admin"}, None),
-    ("GET", f"/api/reports/naac/{{cycle}}/actions/{NO_ID}/evidence", {"admin", "hod"}, None),
-    ("GET", "/api/reports/naac/{cycle}.pdf?draft=true", {"admin"}, None),
-    ("GET", "/api/reports/naac/{cycle}.docx?draft=true", {"admin"}, None),
+    ("DELETE", f"/api/reports/feedback/{{cycle}}/actions/{NO_ID}", {"admin"}, None),
+    ("GET", f"/api/reports/feedback/{{cycle}}/actions/{NO_ID}/evidence", {"admin", "hod"}, None),
+    ("GET", "/api/reports/feedback/{cycle}.pdf?draft=true", {"admin"}, None),
+    ("GET", "/api/reports/feedback/{cycle}.docx?draft=true", {"admin"}, None),
     # Feedback collection: {cycle} is open with a teaching form {form} for the CSE offering.
     ("GET", "/api/cycles", STAFF, None),
     ("POST", "/api/cycles", {"admin"}, CYCLE),

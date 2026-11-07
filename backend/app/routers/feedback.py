@@ -1,4 +1,4 @@
-"""What faculty, their HoD and the IQAC admin may see about a faculty member's feedback.
+"""What faculty, their HoD and the admin may see about a faculty member's feedback.
 
 Phase 3: response counts, and rating averages once a form has MIN_RESPONSES_FOR_DISPLAY
 responses. Comment text stays hidden until Phase 4 has moderated and redacted it.

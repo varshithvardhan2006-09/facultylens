@@ -1,6 +1,6 @@
 import { api } from "./client";
 
-const base = (cycle) => `/reports/naac/${cycle}`;
+const base = (cycle) => `/reports/feedback/${cycle}`;
 
 export const reportsApi = {
   status: (cycle) => api.get(`${base(cycle)}/status`).then((r) => r.data),
@@ -19,7 +19,7 @@ export const reportsApi = {
       timeout: 120000,
     });
     const disposition = response.headers["content-disposition"] ?? "";
-    const name = /filename="([^"]+)"/.exec(disposition)?.[1] ?? `NAAC-report.${format}`;
+    const name = /filename="([^"]+)"/.exec(disposition)?.[1] ?? `Feedback-report.${format}`;
     const url = URL.createObjectURL(response.data);
     const link = document.createElement("a");
     link.href = url;

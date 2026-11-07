@@ -6,7 +6,7 @@ The institution, its 8 departments and the course codes and names are MVSR Engin
 College's (mvsrec.in and its R21 scheme). Every person is fictional, so no synthetic feedback
 sits under a real teacher's name.
 
-Shape: 8 departments (only CSE and ECE populated), 1 IQAC admin, 2 HoDs, 9 faculty, 144 students in two sections per
+Shape: 8 departments (only CSE and ECE populated), 1 Admin, 2 HoDs, 9 faculty, 144 students in two sections per
 department, 11 odd-semester offerings for 2026-27, one open cycle, and roughly 330 teaching
 responses plus curriculum responses, all from a fixed random seed. Counting HoDs, CSE has three
 women and three men teaching (enough for the bias panel to compare groups) and ECE two women and
@@ -584,7 +584,7 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
         }
 
     await database.users.insert_one(
-        user("IQAC Coordinator (demo)", "admin", email="iqac@demo.facultylens.in")
+        user("Administrator (demo)", "admin", email="admin@demo.facultylens.in")
     )
     teachers: dict[str, dict] = {}
     for name, gender, dept, role, designation, strong, weak, interests in FACULTY:
@@ -715,7 +715,7 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
         "curriculum_responses": counts["curriculum"],
         "cycle_id": str(cycle["_id"]),
         "sample_logins": {
-            "admin": "iqac@demo.facultylens.in",
+            "admin": "admin@demo.facultylens.in",
             "hod": "padma.rao@demo.facultylens.in",
             "faculty": "kavitha.reddy@demo.facultylens.in",
             "student": students[("CSE", "A")][0]["roll_no"],

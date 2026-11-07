@@ -308,7 +308,7 @@ export function FeedbackFormPage() {
               />
               <span>
                 I agree that my answers are stored without my name and used to improve teaching and
-                for NAAC reporting, as described in the{" "}
+                for feedback reports, as described in the{" "}
                 <Link to="/privacy" target="_blank" rel="noopener">
                   privacy notice
                   <span className="sr-only"> (opens in a new tab)</span>

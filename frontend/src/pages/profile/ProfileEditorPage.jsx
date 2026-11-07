@@ -241,7 +241,7 @@ export function ProfileEditorPage() {
           <Panel title="Courses taught">
             {profile.courses_taught.length === 0 ? (
               <p className="m-0 text-body text-muted">
-                No course offerings assigned yet. The IQAC coordinator assigns teachers to courses.
+                No course offerings assigned yet. The administrator assigns teachers to courses.
               </p>
             ) : (
               <ul className="m-0 flex list-none flex-col gap-2 p-0">

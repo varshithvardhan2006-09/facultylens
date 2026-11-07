@@ -126,7 +126,7 @@ function T3() {
 
 function T4() {
   const stack = ["Python 3.13", "FastAPI", "Pydantic", "Short-lived sign-in tokens", "bcrypt passwords", "Rate-limited sign-in"];
-  const roles = [["Student", "neutral"], ["Faculty", "praise"], ["Head of department", "praise"], ["IQAC admin", "criticism"]];
+  const roles = [["Student", "neutral"], ["Faculty", "praise"], ["Head of department", "praise"], ["Admin", "criticism"]];
   return (
     <Wall>
       <Title sub="The API">Backend</Title>

@@ -1,5 +1,5 @@
 # ruff: noqa: E501  (request bodies read better unwrapped)
-"""NAAC report endpoints: drafting, who may edit and approve, the export gate, no raw text."""
+"""Feedback report endpoints: drafting, who may edit and approve, the export gate, no raw text."""
 
 import io
 
@@ -92,7 +92,7 @@ async def test_draft_edit_approve_and_scope(client, analysed_world):
     world = analysed_world
     h = world["headers"]
     cycle = await _ready(client, world)
-    base = f"/api/reports/naac/{cycle['id']}"
+    base = f"/api/reports/feedback/{cycle['id']}"
 
     drafted = (await client.post(f"{base}/draft", headers=h["admin"])).json()
     assert drafted["added"] >= 1 and drafted["replaced"] == 0
@@ -174,7 +174,7 @@ async def test_export_gate_and_no_unredacted_text(client, analysed_world):
     world = analysed_world
     h = world["headers"]
     cycle = await _ready(client, world)
-    base = f"/api/reports/naac/{cycle['id']}"
+    base = f"/api/reports/feedback/{cycle['id']}"
     assert (
         await client.get(f"{base}.pdf", headers=h["admin"])
     ).status_code == 409  # nothing drafted

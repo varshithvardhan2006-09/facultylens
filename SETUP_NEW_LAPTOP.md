@@ -157,8 +157,9 @@ python -m app.seed
 Then, after Part 6, sign in as the admin, open **Analysis** and press **Analyse waiting responses**
 (about 3 minutes).
 
-**C. Use the shared Atlas database:** in `backend\.env`, swap which `MONGODB_URI` line is commented
-out. Atlas is switched off until you re-add network access in the Atlas website yourself.
+**C. Use the shared Atlas database:** set `MONGODB_URI` in `backend\.env` to the Atlas address, keep
+exactly one `MONGODB_URI` line active, and restart the API. Add your own IP under **Database & Network
+Access** in Atlas yourself. To fill an empty cluster, restore a backup as in option A.
 
 ---
 
@@ -191,7 +192,7 @@ Demo sign-ins (password: `DEMO_PASSWORD` in `.env.example`):
 
 | Role | Sign in with |
 |---|---|
-| IQAC admin | `iqac@demo.facultylens.in` |
+| Admin | `admin@demo.facultylens.in` |
 | Head of department | `padma.rao@demo.facultylens.in` |
 | Faculty | `kavitha.reddy@demo.facultylens.in` |
 | Student | `2451-24-733-002` |

@@ -1,6 +1,6 @@
 """Faculty and department analytics, and the bias & sarcasm panel (SPEC §10 analytics).
 
-Access: a department's analytics are for its HoD and IQAC admins; a teacher's are for the
+Access: a department's analytics are for its HoD and admins; a teacher's are for the
 teacher, their HoD and admins. Everything reads stored aggregates, summaries and moderated,
 redacted answers, and respects MIN_RESPONSES_FOR_DISPLAY per form.
 """
@@ -240,7 +240,7 @@ async def sarcasm(
         return {"faculty": str(target["_id"]), "answer_ids": ids, "count": len(ids)}
 
     if user["role"] == "faculty":
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only HoDs and IQAC see department rates.")
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only HoDs and admins see department rates.")
     head, forms, teachers = await _department_scope(db, user, department, cycle)
     usable = [f for f in forms if analytics.form_status(f, minimum) == "available"]
     data = await _answers(db, [f["form_id"] for f in usable])

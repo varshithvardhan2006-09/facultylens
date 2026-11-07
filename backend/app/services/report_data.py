@@ -1,4 +1,4 @@
-"""Everything the NAAC Criterion 1.4 report says, as one plain dict (SPEC §12).
+"""Everything the Feedback report says, as one plain dict (SPEC §12).
 
 Both the PDF and the DOCX are rendered from this dict, so they cannot disagree. It is built
 only from stored aggregates (which hold moderated, redacted text), course and department

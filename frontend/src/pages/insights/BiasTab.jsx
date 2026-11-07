@@ -378,7 +378,7 @@ export function BiasTab({ panel, sarcasm }) {
             <div className="mt-2 flex max-w-[72ch] flex-col gap-2 text-muted">
               <p className="m-0">
                 Only answers that passed moderation are counted, after names and other personal
-                details were removed. Teachers are grouped by the gender recorded by the IQAC
+                details were removed. Teachers are grouped by the gender recorded by the college
                 office; it is never shown next to a name.
                 {panel.excluded_teachers > 0 &&
                   ` ${panel.excluded_teachers} teacher(s) without a recorded gender are left out.`}

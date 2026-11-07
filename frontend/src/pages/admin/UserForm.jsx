@@ -73,7 +73,7 @@ export function UserForm({ departments, user, onSaved, onCancel }) {
             </Select>
           )}
         </Field>
-        <Field label="Department" hint={needsDept ? null : "Optional for IQAC admins."}>
+        <Field label="Department" hint={needsDept ? null : "Optional for admins."}>
           {(a) => (
             <Select {...a} value={form.department_id} onChange={set("department_id")}>
               <option value="">{needsDept ? "Choose a department" : "None"}</option>

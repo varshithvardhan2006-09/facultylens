@@ -75,7 +75,7 @@ MAX_TEXT: Final = 2000
 ASPECT_KEYS: Final = [a[0] for a in TEACHING_ASPECTS]
 ASPECT_LABELS: Final = {a[0]: a[1] for a in TEACHING_ASPECTS}
 
-# Templated next steps for the no-LLM summary (and the NAAC action-taken draft later).
+# Templated next steps for the no-LLM summary (and the action-taken draft later).
 SUGGESTED_ACTIONS: Final = {
     "knowledge": "Link each topic to the core concepts and share further reading for depth.",
     "clarity": "Break explanations into smaller steps and recap the key point before moving on.",
@@ -129,7 +129,7 @@ WARMTH_WORDS: Final = [
     "friendly",
 ]
 
-# Templated next steps for curriculum issues in the NAAC Action Taken Report (no-LLM path).
+# Templated next steps for curriculum issues in the Action Taken Report (no-LLM path).
 CURRICULUM_ACTIONS: Final = {
     "syllabus_relevance": "Review the syllabus with the Board of Studies and add current topics.",
     "outcomes_clarity": "State the course outcomes in the first class and map each unit to them.",

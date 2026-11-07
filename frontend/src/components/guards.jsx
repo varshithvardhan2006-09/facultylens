@@ -41,8 +41,7 @@ export function RequireRole({ roles }) {
   if (!roles.includes(user.role)) {
     return (
       <NotAllowed>
-        This page is for other roles. If you think you should have access, ask your IQAC
-        coordinator.
+        This page is for other roles. If you think you should have access, ask your administrator.
       </NotAllowed>
     );
   }
@@ -55,7 +54,7 @@ export function RequireAnnotator() {
   if (!user.annotator) {
     return (
       <NotAllowed>
-        Labelling is for the evaluation team. The IQAC coordinator can add you on the Users page.
+        Labelling is for the evaluation team. The administrator can add you on the Users page.
       </NotAllowed>
     );
   }

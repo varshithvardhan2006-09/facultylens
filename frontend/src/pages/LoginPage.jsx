@@ -12,7 +12,7 @@ const FACTS = [
   },
   {
     title: "Comments are screened before anyone reads them",
-    body: "Abusive language is held back for IQAC, and a filter removes names, phone and roll numbers.",
+    body: "Abusive language is held back for an admin, and a filter removes names, phone and roll numbers.",
   },
   {
     title: "Small classes stay private",
@@ -96,7 +96,7 @@ export function LoginPage() {
           {busy ? "Signing in…" : "Sign in"}
         </button>
         <p className="m-0 text-small text-muted">
-          Forgot your password? Ask your IQAC coordinator to reset it.
+          Forgot your password? Ask your administrator to reset it.
         </p>
       </form>
     </StandaloneLayout>

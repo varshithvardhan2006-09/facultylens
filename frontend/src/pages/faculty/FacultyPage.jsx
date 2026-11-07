@@ -219,7 +219,8 @@ export function FacultyPage() {
             />
           ) : (
             <Notice title="Student feedback is private">
-              Only {data.profile.name}, their head of department and the IQAC team can see feedback.{" "}
+              Only {data.profile.name}, their head of department and the admin team can see
+              feedback.{" "}
               <Link to="/" className="font-medium text-text">
                 Back to your courses
               </Link>

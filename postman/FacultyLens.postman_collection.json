@@ -21,7 +21,7 @@
     },
     {
       "key": "username",
-      "value": "iqac@college.edu"
+      "value": "admin@college.edu"
     },
     {
       "key": "password",
@@ -1980,20 +1980,20 @@
       ]
     },
     {
-      "name": "NAAC report (1.4)",
+      "name": "Feedback report (1.4)",
       "item": [
         {
-          "name": "POST /reports/naac/:cycle/draft (admin)",
+          "name": "POST /reports/feedback/:cycle/draft (admin)",
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/draft",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/draft",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "draft"
               ]
@@ -2014,17 +2014,17 @@
           ]
         },
         {
-          "name": "GET /reports/naac/:cycle/actions",
+          "name": "GET /reports/feedback/:cycle/actions",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/actions",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "actions"
               ]
@@ -2046,17 +2046,17 @@
           ]
         },
         {
-          "name": "PUT /reports/naac/:cycle/actions/:id",
+          "name": "PUT /reports/feedback/:cycle/actions/:id",
           "request": {
             "method": "PUT",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{actionId}}",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/actions/{{actionId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "actions",
                 "{{actionId}}"
@@ -2092,17 +2092,17 @@
           ]
         },
         {
-          "name": "POST /reports/naac/:cycle/actions",
+          "name": "POST /reports/feedback/:cycle/actions",
           "request": {
             "method": "POST",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/actions",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "actions"
               ]
@@ -2138,17 +2138,17 @@
           ]
         },
         {
-          "name": "DELETE /reports/naac/:cycle/actions/:id (admin)",
+          "name": "DELETE /reports/feedback/:cycle/actions/:id (admin)",
           "request": {
             "method": "DELETE",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{manualActionId}}",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/actions/{{manualActionId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "actions",
                 "{{manualActionId}}"
@@ -2170,17 +2170,17 @@
           ]
         },
         {
-          "name": "GET /reports/naac/:cycle/actions/:id/evidence",
+          "name": "GET /reports/feedback/:cycle/actions/:id/evidence",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/actions/{{actionId}}/evidence",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/actions/{{actionId}}/evidence",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "actions",
                 "{{actionId}}",
@@ -2203,17 +2203,17 @@
           ]
         },
         {
-          "name": "GET /reports/naac/:cycle/status",
+          "name": "GET /reports/feedback/:cycle/status",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}/status",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}/status",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}",
                 "status"
               ]
@@ -2234,17 +2234,17 @@
           ]
         },
         {
-          "name": "GET /reports/naac/:cycle.pdf (draft preview)",
+          "name": "GET /reports/feedback/:cycle.pdf (draft preview)",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}.pdf?draft=true",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}.pdf?draft=true",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}.pdf"
               ],
               "query": [
@@ -2270,17 +2270,17 @@
           ]
         },
         {
-          "name": "GET /reports/naac/:cycle.docx (draft preview)",
+          "name": "GET /reports/feedback/:cycle.docx (draft preview)",
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/reports/naac/{{cycleId}}.docx?draft=true",
+              "raw": "{{baseUrl}}/reports/feedback/{{cycleId}}.docx?draft=true",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "reports",
-                "naac",
+                "feedback",
                 "{{cycleId}}.docx"
               ],
               "query": [

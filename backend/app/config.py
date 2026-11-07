@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     app_version: str = "0.1.0"
     institution_name: str = "Maturi Venkata Subba Rao (MVSR) Engineering College"
     # Who students and staff write to about their data (shown on the privacy notice).
-    privacy_contact: str = "the IQAC office"
+    privacy_contact: str = "the college office"
     frontend_origin: str = "http://localhost:5173"
     api_docs: bool = True  # /docs and /openapi.json; set false on a public deployment
     jwt_secret: str = Field(default="change-me", min_length=8)

@@ -61,8 +61,6 @@ export function FontGate({ children }) {
 const WRITTEN = [
   [/Fast A P I/g, "FastAPI"],
   [/A P I/g, "API"],
-  [/I Q A C/g, "IQAC"],
-  [/N A A C/g, "NAAC"],
   [/M V S R/g, "MVSR"],
   [/Mongo D B/g, "MongoDB"],
   [/C P U/g, "CPU"],

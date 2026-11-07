@@ -59,7 +59,7 @@ function LabelTab() {
         <p className="m-0 text-body">
           {progress.total
             ? "You've labelled every comment in the set. Thank you."
-            : "There's nothing to label yet. The IQAC admin imports the comments first."}
+            : "There's nothing to label yet. The admin imports the comments first."}
         </p>
       </div>
     );

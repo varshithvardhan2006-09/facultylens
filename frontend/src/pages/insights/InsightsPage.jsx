@@ -21,7 +21,7 @@ const TABS = [
 ];
 
 /**
- * Department insights (SPEC §11.5, §11.7). A HoD sees their own department; the IQAC admin
+ * Department insights (SPEC §11.5, §11.7). A HoD sees their own department; the admin
  * picks one. The selection lives in the URL so a view can be shared and reloaded.
  */
 export function InsightsPage() {
@@ -30,7 +30,7 @@ export function InsightsPage() {
   const [params, setParams] = useSearchParams();
   const courses = useAsync(loadCourses);
   const requested = params.get("tab");
-  // "Action taken" is the HoD's place to approve their rows; the admin uses the NAAC report page.
+  // "Action taken" is the HoD's place to approve their rows; the admin uses the feedback report page.
   const tabs = user.role === "hod" ? TABS : TABS.slice(0, 2);
   const tab = tabs.some(([k]) => k === requested) ? requested : "overview";
   const cycle = params.get("cycle") ?? "";

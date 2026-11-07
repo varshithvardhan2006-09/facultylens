@@ -259,7 +259,7 @@ export function ActionTable({
       <section className="card p-[var(--card-pad)]">
         <h2 className="m-0 text-section font-medium">No actions yet</h2>
         <p className="m-0 mt-1 text-body text-muted">
-          The IQAC coordinator drafts the Action Taken Report from this cycle&apos;s feedback.
+          The administrator drafts the Action Taken Report from this cycle&apos;s feedback.
         </p>
       </section>
     );

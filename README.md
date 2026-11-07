@@ -19,12 +19,12 @@ FacultyLens gives each teacher one page that joins a generated profile with evid
 - **Privacy first:** personal details are redacted and abuse is held for review before a teacher reads anything.
 - **Anonymous by design:** students are stored only as a one-way code per form, and comment detail is hidden below 5 responses.
 - **Bias and sarcasm panel:** compares feedback across groups and flags answers that may be sarcastic.
-- **NAAC Criterion 1.4 report:** an Action Taken Report, exported as PDF and Word.
+- **Feedback report:** department findings and an Action Taken Report, exported as PDF and Word.
 - **Works without an LLM:** Groq writes better summaries, but the app falls back to templates without a key.
 
-| Evidence behind every point | Bias and sarcasm panel | NAAC report |
+| Evidence behind every point | Bias and sarcasm panel | Feedback report |
 |---|---|---|
-| ![Evidence drawer](docs/screenshots/04-evidence-drawer.png) | ![Bias panel](docs/screenshots/06-bias-panel.png) | ![NAAC report](docs/screenshots/08-naac-report.png) |
+| ![Evidence drawer](docs/screenshots/04-evidence-drawer.png) | ![Bias panel](docs/screenshots/06-bias-panel.png) | ![Feedback report](docs/screenshots/08-feedback-report.png) |
 
 ## Tech stack
 
@@ -109,7 +109,7 @@ flowchart LR
   JOBS --> NLP["CPU NLP models"]
   JOBS --> LLM["Groq, or templates"]
   JOBS --> DB
-  API --> REPORT["NAAC PDF and Word"]
+  API --> REPORT["report PDF and Word"]
 ```
 
 Each answer goes through normalising, PII redaction, abuse moderation, sentiment, aspect detection, emotion and irony. Results are cached per model version, so nothing is scored twice.
@@ -121,7 +121,7 @@ Each answer goes through normalising, PII redaction, abuse moderation, sentiment
 | Student | Gives anonymous feedback on teaching and the syllabus |
 | Faculty | Reads their feedback, and reviews and approves their profile |
 | Head of department | Sees department insights and the bias panel, and approves actions |
-| IQAC admin | Manages users, courses and cycles, moderates, and exports the NAAC report |
+| Admin | Manages users, courses and cycles, moderates, and exports the Feedback report |
 
 ## Evaluation
 

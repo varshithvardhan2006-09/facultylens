@@ -1,7 +1,7 @@
 """The unified faculty page in one call, and the evidence behind its strengths and improvements.
 
 Everyone on staff sees the approved profile. The feedback half (numbers, summary, evidence) is
-for the faculty member, their own department's HoD and IQAC admins only, and only for forms
+for the faculty member, their own department's HoD and admins only, and only for forms
 with at least MIN_RESPONSES_FOR_DISPLAY responses. Evidence is always moderated, redacted text.
 """
 

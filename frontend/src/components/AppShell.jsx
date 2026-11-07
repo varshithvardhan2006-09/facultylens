@@ -34,7 +34,7 @@ const NAV_BY_ROLE = {
     { to: "/insights", label: "Insights", icon: ChartIcon },
     { to: "/admin/analysis", label: "Analysis", icon: SparkIcon },
     { to: "/admin/moderation", label: "Moderation", icon: ShieldIcon, badge: "moderation" },
-    { to: "/admin/reports", label: "NAAC report", icon: DocumentIcon },
+    { to: "/admin/reports", label: "Feedback report", icon: DocumentIcon },
     { to: "/admin/evaluation", label: "Evaluation", icon: GaugeIcon },
     { to: "/admin/status", label: "System status", icon: PulseIcon },
   ],

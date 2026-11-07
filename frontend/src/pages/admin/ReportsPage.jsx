@@ -127,7 +127,7 @@ function AddAction({ cycleId, department, onDone, onCancel }) {
   );
 }
 
-/** The IQAC coordinator's NAAC Criterion 1.4 report builder (SPEC §11.6, §12). */
+/** The administrator's feedback report builder (SPEC §11.6, §12). */
 export function ReportsPage() {
   const cycles = useAsync(loadCycles);
   const departments = useDepartments();
@@ -205,10 +205,10 @@ export function ReportsPage() {
 
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-8">
-      <PageHeader title="NAAC report">
-        The Feedback Analysis and Action Taken Report for Criterion 1.4. It reports departments,
-        never individual teachers, because it is published on the college website. Every action must
-        be approved by you or the Head of Department before the final export.
+      <PageHeader title="Feedback report">
+        The Feedback Analysis and Action Taken Report. It reports departments, never individual
+        teachers, because it is published on the college website. Every action must be approved by
+        you or the Head of Department before the final export.
       </PageHeader>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">

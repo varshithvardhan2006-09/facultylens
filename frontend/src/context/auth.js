@@ -10,7 +10,7 @@ export function useAuth() {
 }
 
 export const ROLE_LABELS = {
-  admin: "IQAC admin",
+  admin: "Admin",
   hod: "Head of department",
   faculty: "Faculty",
   student: "Student",

@@ -5,7 +5,7 @@ import { ActionTable } from "../../components/ActionTable";
 import { EvidenceDrawer } from "../../components/EvidenceDrawer";
 import { FormError } from "../../components/forms";
 
-/** A HoD's own department's Action Taken rows for the NAAC report: edit and approve here. */
+/** A HoD's own department's Action Taken rows for the feedback report: edit and approve here. */
 export function ActionsTab({ cycleId, department }) {
   const [state, setState] = useState({ key: null, rows: null, error: null });
   const [reload, setReload] = useState(0);
@@ -33,9 +33,9 @@ export function ActionsTab({ cycleId, department }) {
   return (
     <div className="flex flex-col gap-[var(--gap)]">
       <p className="m-0 max-w-[72ch] text-body text-muted">
-        These are the issues from this cycle&apos;s feedback that go into the NAAC Action Taken
-        Report for your department. Edit the action so it is one your department will really take,
-        then approve it.{" "}
+        These are the issues from this cycle&apos;s feedback that go into the Action Taken Report
+        for your department. Edit the action so it is one your department will really take, then
+        approve it.{" "}
         {state.rows.length > 0 &&
           (pending
             ? `${pending} still need${pending === 1 ? "s" : ""} your approval.`

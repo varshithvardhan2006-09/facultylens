@@ -11,12 +11,12 @@ const COPY = {
   hod: {
     title: "Department courses",
     lead: "Every course offering in your department, with how many students have answered the open feedback cycle.",
-    empty: "No course offerings in your department yet. The IQAC coordinator creates them.",
+    empty: "No course offerings in your department yet. The administrator creates them.",
   },
   faculty: {
     title: "My courses",
     lead: "The course offerings you teach and how many students have answered so far. Ratings appear once enough students respond; comments appear after they are checked for abuse and personal details.",
-    empty: "No courses assigned to you yet. Your IQAC coordinator assigns teachers to offerings.",
+    empty: "No courses assigned to you yet. Your administrator assigns teachers to offerings.",
   },
   student: {
     title: "My courses",

@@ -1,6 +1,6 @@
 """Admin commands, run from backend/:
 
-    python -m app.cli create-admin --email iqac@college.edu --name "IQAC Office"
+    python -m app.cli create-admin --email admin@college.edu --name "College Office"
     python -m app.cli backup ../facultylens-backup
     python -m app.cli restore ../facultylens-backup [--replace]
 
@@ -145,9 +145,9 @@ async def restore(folder: str, replace: bool = False) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(prog="python -m app.cli")
     sub = parser.add_subparsers(dest="command", required=True)
-    admin = sub.add_parser("create-admin", help="create an IQAC admin account")
+    admin = sub.add_parser("create-admin", help="create an Admin account")
     admin.add_argument("--email", required=True)
-    admin.add_argument("--name", default="IQAC Coordinator")
+    admin.add_argument("--name", default="Administrator")
     dump = sub.add_parser("backup", help="write every collection to JSON files in a new folder")
     dump.add_argument("folder")
     load = sub.add_parser("restore", help="load a backup folder into the database")

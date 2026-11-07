@@ -63,8 +63,8 @@ export function DepartmentsPage() {
   return (
     <div className="mx-auto flex max-w-[1184px] flex-col gap-8">
       <PageHeader title="Departments">
-        Every user except IQAC admins belongs to one department. The short code is used in bulk
-        uploads and reports.
+        Every user except admins belongs to one department. The short code is used in bulk uploads
+        and reports.
       </PageHeader>
 
       <Panel title="Add a department">

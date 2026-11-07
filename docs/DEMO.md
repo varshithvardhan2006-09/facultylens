@@ -1,6 +1,6 @@
 # FacultyLens: 5-minute demo
 
-A walkthrough in role order: student, faculty, HoD, then the IQAC admin. Each stop has what to click and the one thing to say. All people in the demo data are fictional; the college, departments and course codes are MVSR Engineering College's real ones.
+A walkthrough in role order: student, faculty, HoD, then the admin. Each stop has what to click and the one thing to say. All people in the demo data are fictional; the college, departments and course codes are MVSR Engineering College's real ones.
 
 ## Before the demo (10–15 minutes, once)
 
@@ -11,10 +11,10 @@ A walkthrough in role order: student, faculty, HoD, then the IQAC admin. Each st
    python -m app.seed
    ```
 
-3. Start the API and the frontend (README, Getting started). Sign in as the admin (`iqac@demo.facultylens.in`).
+3. Start the API and the frontend (README, Getting started). Sign in as the admin (`admin@demo.facultylens.in`).
 4. Prepare the analysis and the report:
    - **Analysis**, then **Analyse waiting responses**. This takes about 3 minutes and loads every model.
-   - **NAAC report**, then **Draft action items**.
+   - **Feedback report**, then **Draft action items**.
 
    Both stay done, so do this before the audience arrives.
 5. Optional, for the Evaluation stop: run these once in `backend`.
@@ -35,11 +35,11 @@ A walkthrough in role order: student, faculty, HoD, then the IQAC admin. Each st
    | Student | `2451-24-733-006` (still has a form to fill) |
    | Faculty | `kavitha.reddy@demo.facultylens.in` |
    | HoD | `padma.rao@demo.facultylens.in` |
-   | Admin | `iqac@demo.facultylens.in` |
+   | Admin | `admin@demo.facultylens.in` |
 
 ## The walkthrough
 
-**0:00. The problem (20 s).** Colleges collect teaching feedback for NAAC, but it ends up as a spreadsheet nobody reads. Teachers never see what students actually meant, and a faculty profile lives somewhere else. FacultyLens joins the two and keeps students anonymous.
+**0:00. The problem (20 s).** Colleges collect teaching feedback, but it ends up as a spreadsheet nobody reads. Teachers never see what students actually meant, and a faculty profile lives somewhere else. FacultyLens joins the two and keeps students anonymous.
 
 **0:20. Student (40 s).** Open **Feedback forms**, then the Automata Languages and Computation form.
 - Show the 8 ratings, each with a number and a word, and the three short questions.
@@ -60,7 +60,7 @@ A walkthrough in role order: student, faculty, HoD, then the IQAC admin. Each st
 - Show a hidden answer with the flagged sentence marked, and one marked "may be a false alarm".
 - *Say:* "The model hid all the planted abuse, but also a compliment containing the word 'stupid'. That's why a person decides."
 
-**3:30. Admin: NAAC report (50 s).**
+**3:30. Admin: Feedback report (50 s).**
 - Show the Action Taken rows, grouped by department, with "raised in 4 of 6 CSE courses".
 - Approve one, then **Preview PDF**: the draft watermark, the charts and the anonymised comments.
 - *Say:* "The report is built for publication: departments only, no teacher named, and the final export unlocks only when every action is approved."

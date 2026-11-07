@@ -1,5 +1,5 @@
 # ruff: noqa: E501  (fixture data reads better unwrapped)
-"""NAAC report rendering: both files open, say the same things, and mark drafts."""
+"""Feedback report rendering: both files open, say the same things, and mark drafts."""
 
 import io
 from datetime import UTC, datetime
@@ -8,7 +8,7 @@ import pytest
 from docx import Document
 from pypdf import PdfReader
 
-from app.services import naac_charts, naac_render
+from app.services import report_charts, report_render
 
 
 def sample_data(actions=None):
@@ -116,7 +116,7 @@ def sample_data(actions=None):
 
 @pytest.fixture(scope="module")
 def charts():
-    return naac_charts.all_charts(sample_data())
+    return report_charts.all_charts(sample_data())
 
 
 def pdf_text(raw: bytes) -> str:
@@ -140,8 +140,8 @@ def test_charts_are_png(charts):
 @pytest.mark.parametrize("draft", [True, False])
 def test_pdf_and_docx_open_and_carry_every_section(charts, draft):
     data = sample_data()
-    pdf = naac_render.render_pdf(data, charts, draft=draft)
-    docx = naac_render.render_docx(data, charts, draft=draft)
+    pdf = report_render.render_pdf(data, charts, draft=draft)
+    docx = report_render.render_docx(data, charts, draft=draft)
     assert pdf.startswith(b"%PDF")
     texts = [pdf_text(pdf), docx_text(docx)]
     for text in texts:
@@ -151,12 +151,12 @@ def test_pdf_and_docx_open_and_carry_every_section(charts, draft):
             "1. Feedback collection",
             "2. Methodology",
             "3. Analysis of teaching feedback",
-            "4. Curriculum feedback (1.4.1)",
+            "4. Curriculum feedback",
             "5. Action Taken Report",
-            "6. Statement for publication (1.4.2)",
+            "6. Statement for publication",
             "Share a weekly coverage plan.",
             "The pace is too fast to follow.",
-            "IQAC Coordinator",
+            "Administrator",
         ):
             assert "".join(needle.split()) in squashed, needle
         assert ("DRAFT" in text) is draft
@@ -164,5 +164,5 @@ def test_pdf_and_docx_open_and_carry_every_section(charts, draft):
 
 
 def test_empty_action_table_still_renders(charts):
-    pdf = naac_render.render_pdf(sample_data(actions=[]), charts, draft=True)
+    pdf = report_render.render_pdf(sample_data(actions=[]), charts, draft=True)
     assert "No actions recorded yet." in " ".join(pdf_text(pdf).split())

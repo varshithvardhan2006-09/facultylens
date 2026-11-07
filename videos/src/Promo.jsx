@@ -69,7 +69,7 @@ function DemoLabel({ dark }) {
 /** Karaoke captions: the line builds word by word as it is spoken, the current word highlighted. */
 function Captions({ id, lead, dark }) {
   const frame = useCurrentFrame();
-  const words = say[id].replace(/I Q A C/g, "IQAC").replace(/N A A C/g, "NAAC").split(" ");
+  const words = say[id].split(" ");
   const start = lead * FPS;
   const total = words.reduce((n, w) => n + w.length + 1, 0);
   let at = start;
@@ -317,7 +317,7 @@ function Redact() {
         <div style={{ position: "absolute", left: -20, top: 260, width: 620, height: 250, borderRadius: 12,
           border: `3px dashed ${C.edgeCriticism}`, opacity: tray }}>
           <div style={{ position: "absolute", left: 22, bottom: 16, fontFamily: FONT, fontSize: 28, fontWeight: 700, color: C.edgeCriticism }}>
-            Held for IQAC review
+            Held for review
           </div>
         </div>
       </div>
@@ -520,32 +520,32 @@ function HeadOfDepartment() {
       </Browser>
       <Sfx name="click" at={BIAS} volume={0.45} />
       <Sfx name="click" at={ACTIONS} volume={0.45} />
-      {frame >= ACTIONS && <Callout x={1300} y={560} at={ACTIONS + 20}>Approved here, then into the NAAC report</Callout>}
+      {frame >= ACTIONS && <Callout x={1300} y={560} at={ACTIONS + 20}>Approved here, then into the Feedback report</Callout>}
       <DemoLabel />
       <Voice id="h1" lead={0.25} />
     </AbsoluteFill>
   );
 }
 
-/** q1: IQAC presses Download PDF and the real report page flies out. */
-function Iqac() {
+/** q1: the admin presses Download PDF and the real report page flies out. */
+function AdminExport() {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const PDF = 74;
   const pdf = spring({ frame: frame - PDF - 6, fps, config: { damping: 14, stiffness: 110 } });
   return (
     <AbsoluteFill style={{ background: C.wall }}>
-      <Role>IQAC office</Role>
-      <Browser src="naac">
+      <Role>college office</Role>
+      <Browser src="feedback-report">
         {frame < PDF + 26 && <Pointer clickAt={[PDF]} path={[[0, 900, 700], [12, 900, 700], [PDF - 4, 1414 * S, 519 * S + 4]]} />}
       </Browser>
       <Sfx name="click" at={PDF} volume={0.45} />
       {frame > PDF && (
         <div style={{ position: "absolute", left: 1350, top: 120, opacity: Math.min(1, pdf * 2),
           transform: `translate(${(1 - pdf) * -200}px, ${(1 - pdf) * 260}px) rotate(${4 * pdf - 8 * (1 - pdf)}deg) scale(${0.4 + 0.6 * pdf})` }}>
-          <Img src={staticFile("shots/naac-pdf.png")} style={{ width: 430, borderRadius: 4, border: "1px solid #c3cfca",
+          <Img src={staticFile("shots/feedback-report-pdf.png")} style={{ width: 430, borderRadius: 4, border: "1px solid #c3cfca",
             boxShadow: "0 30px 60px -16px rgba(22,32,30,0.6)" }} />
-          <div style={{ marginTop: 14, fontFamily: FONT, fontSize: 26, fontWeight: 700, color: C.ink, textAlign: "center" }}>NAAC 1.4 report.pdf</div>
+          <div style={{ marginTop: 14, fontFamily: FONT, fontSize: 26, fontWeight: 700, color: C.ink, textAlign: "center" }}>feedback report.pdf</div>
         </div>
       )}
       <Sfx name="swipe" at={PDF + 6} volume={0.3} />
@@ -577,7 +577,7 @@ function End() {
   );
 }
 
-const VIEWS = { p1: Hook, p2: Pile, p3: Snap, p4: Sort, p5: Redact, s1: Students, f1: TeacherPage, f2: Strengths, h1: HeadOfDepartment, q1: Iqac, p8: End };
+const VIEWS = { p1: Hook, p2: Pile, p3: Snap, p4: Sort, p5: Redact, s1: Students, f1: TeacherPage, f2: Strengths, h1: HeadOfDepartment, q1: AdminExport, p8: End };
 
 /** The beat, ducked under the voice so every word is clear, and faded out at the end. */
 function Beat() {

@@ -37,7 +37,7 @@ function List({ items }) {
 function LegalLayout({ title, children }) {
   const health = useAsync(getHealth);
   const institution = health.data?.institution ?? "the institution";
-  const contact = health.data?.privacy_contact ?? "the IQAC office";
+  const contact = health.data?.privacy_contact ?? "the college office";
   return (
     <div className="min-h-dvh bg-ground">
       <header className="bg-board text-on-board">
@@ -113,8 +113,8 @@ export function PrivacyPage() {
                 </>,
                 <>
                   <strong>Feedback you submit</strong> (1–5 ratings and optional written comments):
-                  to measure how teaching is going, and to produce the NAAC Criterion 1.4 feedback
-                  analysis and action-taken report.
+                  to measure how teaching is going, and to produce the feedback analysis and
+                  action-taken report.
                 </>,
                 <>
                   <strong>For faculty:</strong> profile details you enter or import (qualifications,
@@ -141,7 +141,7 @@ export function PrivacyPage() {
               items={[
                 "Responses are stored without your name, email or roll number. Only the date (not the time) is kept.",
                 "To stop a second submission, the system stores a one-way code made from your account and that one form with a secret key. The code is different for every form, so your answers to different forms cannot be linked to each other.",
-                "Before any teacher or head of department reads a comment, an automatic filter replaces names, phone numbers and roll numbers with placeholders, and comments with abusive language are held for the IQAC coordinator. The filter is good but not perfect, so please leave personal details out of what you write.",
+                "Before any teacher or head of department reads a comment, an automatic filter replaces names, phone numbers and roll numbers with placeholders, and comments with abusive language are held for the administrator. The filter is good but not perfect, so please leave personal details out of what you write.",
                 "Teachers see written comments only once enough students have answered that form (5 by default), so small groups are harder to single out.",
                 "What you write can still reveal who you are (for example, describing a private conversation). Write with that in mind.",
                 "People who run the server and hold the secret key could, with effort, test whether a particular student submitted a particular form. Access to the server is limited to the institution's administrators.",
@@ -154,7 +154,7 @@ export function PrivacyPage() {
               items={[
                 "Faculty see the moderated, redacted comments and the totals for their own courses, never who wrote them.",
                 "A head of department sees the same for teachers in their own department.",
-                "The IQAC coordinator administers the system, decides on held comments, and prepares the NAAC report.",
+                "The administrator runs the system, decides on held comments, and prepares the feedback report.",
                 "Approved faculty profiles are visible to signed-in staff.",
               ]}
             />
@@ -186,8 +186,8 @@ export function PrivacyPage() {
           <Section title="How long we keep it">
             <P>
               Feedback and reports are kept as accreditation records for as long as the institution
-              needs them for NAAC and internal quality review. The IQAC office decides when old
-              cycles are deleted. Sign-in sessions expire on their own (see the cookies page).
+              needs them for internal quality review. The college office decides when old cycles are
+              deleted. Sign-in sessions expire on their own (see the cookies page).
             </P>
           </Section>
 
@@ -246,8 +246,8 @@ export function TermsPage() {
           <Section title="Your account">
             <List
               items={[
-                "Accounts are created by the IQAC office. Keep your password to yourself and change the temporary one when asked.",
-                "Use only your own account. Tell the IQAC office if you think someone else has used it.",
+                "Accounts are created by the college office. Keep your password to yourself and change the temporary one when asked.",
+                "Use only your own account. Tell the college office if you think someone else has used it.",
               ]}
             />
           </Section>

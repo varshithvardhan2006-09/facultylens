@@ -115,7 +115,7 @@ Budget: 300 responses in under 10 minutes on a 4-core CPU (SPEC §13).
 
 Sarcasm flag (`SARC_FLAG=0.95`) against the seed's own sarcastic lines: 41 answers flagged, 23 of the 23 seeded sarcastic answers among them (precision 0.56, recall 1.0). The irony model is trained on tweets and scores short sincere praise almost as high as sarcasm (0.97-0.99 against 0.98-0.99), so no threshold separates them; at the earlier 0.70 it flagged 181 answers for 22 seeded ones (precision 0.12). Flags are shown as *possibly* sarcastic and only halve an answer's weight; Phase 8 measures this on hand-labelled comments.
 
-## NAAC report export (Phase 7)
+## Feedback report export (Phase 7)
 
 Measured on 2026-10-20 against the running API on the seeded cycle (614 responses, 12 approved actions), with no LLM key.
 
@@ -152,7 +152,7 @@ On an 8 GB machine, 3.9 GB for every model is within budget.
 | `GET /analytics/department/{CSE}` | 19.2 ms | 24.4 ms |
 | `GET /analytics/bias?department={CSE}` | 43.5 ms | 50.6 ms |
 | `GET /faculty/{id}/overview` | 19.8 ms | 24.6 ms |
-| `GET /reports/naac/{cycle}/status` | 20.5 ms | 30.5 ms |
+| `GET /reports/feedback/{cycle}/status` | 20.5 ms | 30.5 ms |
 | `GET /evaluation/results` | 5.0 ms | 5.7 ms |
 | `GET /labels/progress` | 9.5 ms | 11.5 ms |
 

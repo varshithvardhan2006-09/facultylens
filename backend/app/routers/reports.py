@@ -1,6 +1,6 @@
-"""NAAC Criterion 1.4: the Action Taken Report rows and the PDF / DOCX export (SPEC §12).
+"""feedback report: the Action Taken Report rows and the PDF / DOCX export (SPEC §12).
 
-The IQAC admin drafts, edits and exports; a HoD reads, edits and approves their own
+The admin drafts, edits and exports; a HoD reads, edits and approves their own
 department's rows. The final export needs every row approved; a draft preview, marked on
 every page, is always available to the admin.
 """
@@ -20,13 +20,13 @@ from app.config import get_settings
 from app.nlp import atr, registry
 from app.pipeline.aggregate import effective_field
 from app.routers.overview import _parse
-from app.services import naac_charts, naac_render
+from app.services import report_charts, report_render
 from app.services.audit import record
 from app.services.forms_data import form_rows, response_counts
-from app.services.naac_data import report_data
+from app.services.report_data import report_data
 from app.utils import CONTROL_CHARS, now, oid, to_jsonable
 
-router = APIRouter(prefix="/reports/naac", tags=["reports"])
+router = APIRouter(prefix="/reports/feedback", tags=["reports"])
 Leads = Annotated[User, Depends(require_roles("admin", "hod"))]
 TEXT_FIELDS = ("issue", "action", "responsible", "timeline")
 
@@ -99,7 +99,7 @@ async def draft_actions(cycle: str, db: Db, admin: AdminUser) -> dict:
     if removes:
         await db.action_taken.delete_many({"_id": {"$in": removes}})
     counts = {"added": len(inserts), "replaced": len(replaces), "removed": len(removes)}
-    await record(db, admin, "naac.draft", cycle, counts)
+    await record(db, admin, "report.draft", cycle, counts)
     return {**counts, "kept": kept, "issues": len(fresh)}
 
 
@@ -165,7 +165,7 @@ async def add_action(cycle: str, body: ActionIn, db: Db, user: Leads) -> dict:
         row["_id"] = (await db.action_taken.insert_one(row)).inserted_id
     except DuplicateKeyError as exc:  # pragma: no cover - uuid collision
         raise HTTPException(status.HTTP_409_CONFLICT, "Try again.") from exc
-    await record(db, user, "naac.action.add", str(row["_id"]))
+    await record(db, user, "report.action.add", str(row["_id"]))
     return _out(row)
 
 
@@ -188,7 +188,7 @@ async def edit_action(cycle: str, action_id: str, body: ActionEdit, db: Db, user
             update.update(approved_by=user["_id"], approved_at=now())
     await db.action_taken.update_one({"_id": row["_id"]}, {"$set": update})
     await record(
-        db, user, "naac.action.edit", action_id, {"fields": sorted(changes), "status": new_status}
+        db, user, "report.action.edit", action_id, {"fields": sorted(changes), "status": new_status}
     )
     return _out(await db.action_taken.find_one({"_id": row["_id"]}))
 
@@ -198,7 +198,7 @@ async def delete_action(cycle: str, action_id: str, db: Db, admin: AdminUser) ->
     doc = await _cycle(db, cycle)
     row = await _row(db, admin, doc["_id"], action_id)
     await db.action_taken.delete_one({"_id": row["_id"]})
-    await record(db, admin, "naac.action.delete", action_id, {"issue": row["issue"]})
+    await record(db, admin, "report.action.delete", action_id, {"issue": row["issue"]})
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -313,21 +313,21 @@ async def _export(cycle: str, fmt: str, draft: bool, db: Db, admin: User) -> Res
     data = _without_control_chars(await report_data(db, doc))
 
     def build() -> bytes:
-        with naac_charts.LOCK:
-            charts = naac_charts.all_charts(data)
-        render = naac_render.render_pdf if fmt == "pdf" else naac_render.render_docx
+        with report_charts.LOCK:
+            charts = report_charts.all_charts(data)
+        render = report_render.render_pdf if fmt == "pdf" else report_render.render_docx
         return render(data, charts, draft)
 
     content = await asyncio.to_thread(build)
     # Headers hold Latin-1 only, and a cycle may be called "2026–27 Odd Sem".
     cycle_name = re.sub(r"[^A-Za-z0-9._-]+", "-", doc["name"]).strip("-")
-    name = f"NAAC-1.4-{cycle_name}{'-DRAFT' if draft else ''}.{fmt}"
+    name = f"Feedback-report-{cycle_name}{'-DRAFT' if draft else ''}.{fmt}"
     media = (
         "application/pdf"
         if fmt == "pdf"
         else "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-    await record(db, admin, f"naac.export.{fmt}", cycle, {"draft": draft})
+    await record(db, admin, f"report.export.{fmt}", cycle, {"draft": draft})
     return Response(
         content, media_type=media, headers={"Content-Disposition": f'attachment; filename="{name}"'}
     )
