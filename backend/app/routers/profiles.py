@@ -24,6 +24,7 @@ from app.schemas.profiles import (
 )
 from app.services import orcid as orcid_service
 from app.services import semantic_scholar as s2_service
+from app.services.access import faculty_or_404
 from app.services.audit import record
 from app.services.http import ExternalServiceError
 from app.services.profile_items import (
@@ -32,7 +33,7 @@ from app.services.profile_items import (
     item_key,
     new_id,
 )
-from app.utils import now, oid, upsert_one
+from app.utils import now, upsert_one
 
 router = APIRouter(prefix="/faculty", tags=["profiles"])
 Staff = Annotated[User, Depends(require_roles("admin", "hod", "faculty"))]
@@ -44,9 +45,7 @@ SECTIONS = ("qualifications", "experience", "publications", "achievements")
 
 
 async def _faculty(db: Db, user: User, faculty_id: str, write: bool) -> dict[str, Any]:
-    target = await db.users.find_one({"_id": oid(faculty_id, "Faculty member")})
-    if not target or target["role"] not in ("faculty", "hod"):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Faculty member not found")
+    target = await faculty_or_404(db, faculty_id)
     if user["role"] == "admin" or user["_id"] == target["_id"]:
         return target
     same_dept = target.get("department_id") and target.get("department_id") == user.get(

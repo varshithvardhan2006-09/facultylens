@@ -82,7 +82,8 @@ INDEXES: dict[str, list[IndexModel]] = {
             [("faculty_id", ASCENDING), ("course_id", ASCENDING), ("cycle_id", ASCENDING)],
             unique=True,
             name="faculty_course_cycle",
-        )
+        ),
+        IndexModel([("form_id", ASCENDING), ("model_version", ASCENDING)], name="form_version"),
     ],
     "moderation_queue": [
         IndexModel([("status", ASCENDING), ("created_at", DESCENDING)], name="status_created"),

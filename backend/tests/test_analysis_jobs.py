@@ -207,7 +207,7 @@ async def test_interrupted_jobs_and_auto_queue(analysed_world, monkeypatch):
     jobs._auto.clear()
 
 
-async def test_second_student_auto_job_scores_only_new_response(client, analysed_world):
+async def test_auto_job_scores_every_waiting_answer_in_its_form(client, analysed_world):
     world = analysed_world
     await open_cycle(client, world)
     form_id = await submit_teaching(client, world, world["headers"]["student"], {"liked": "Clear."})
@@ -222,9 +222,11 @@ async def test_second_student_auto_job_scores_only_new_response(client, analysed
     )
     ids = [r["_id"] async for r in world["db"].responses.find({})]
     job = jobs.create_job_sync({"kind": "auto", "response_ids": ids[:1]})
-    assert jobs.run_job(job)["total"] == 1
+    # The form's other waiting answer is scored too: recomputing the form from one answer
+    # would replace its results with that answer alone.
+    assert jobs.run_job(job)["total"] == 2
     job2 = jobs.create_job_sync({"kind": "auto", "response_ids": ids})
-    assert jobs.run_job(job2)["total"] == 1  # the first is cached
+    assert jobs.run_job(job2)["total"] == 0  # both are cached
     assert await world["db"].analyses.count_documents({}) == 2
     assert form_id
 

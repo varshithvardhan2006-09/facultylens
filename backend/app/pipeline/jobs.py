@@ -119,13 +119,15 @@ def _queue_entries(docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _retire_old_queue_entries(sync_db, response_ids: list[ObjectId], version: str) -> None:
-    """Re-analysed answers have new entries; the old ones would list each answer twice."""
+    """Re-analysed answers replace their older versions: queue entries would list each answer
+    twice, and old analyses only take space (decisions were already carried forward)."""
     old = sync_db.analyses.find(
         {"response_id": {"$in": response_ids}, "model_version": {"$ne": version}}, {"_id": 1}
     )
     old_ids = [a["_id"] for a in old]
     if old_ids:
         sync_db.moderation_queue.delete_many({"analysis_id": {"$in": old_ids}})
+        sync_db.analyses.delete_many({"_id": {"$in": old_ids}})
 
 
 def _carry_decisions(sync_db, docs: list[dict[str, Any]]) -> None:
@@ -202,7 +204,8 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
                     }
                 ),
             )
-            todo = [r for r in todo if r in set(job["response_ids"])]
+            # Every pending answer in these forms, not only the new ones: after a model or
+            # threshold change, recomputing a form from one answer would wipe its results.
         total = len(todo)
         sync_db.analysis_jobs.update_one({"_id": job_id}, {"$set": {"total": total, "done": 0}})
 
@@ -217,6 +220,9 @@ def run_job(job_id: ObjectId, sync_db=None) -> dict[str, Any]:
             failed += failures
             docs = [{"_id": anon_id(), **d} for d in analysed]
             if not docs:
+                sync_db.analysis_jobs.update_one(
+                    {"_id": job_id}, {"$set": {"done": min(i + batch_size, total)}}
+                )
                 continue
             _carry_decisions(sync_db, docs)
             try:

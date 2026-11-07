@@ -59,10 +59,13 @@ def classification(y_true: list[str], y_pred: list[str], labels=None) -> dict[st
 
     labels = labels or SENTIMENTS
     p, r, f, s = precision_recall_fscore_support(y_true, y_pred, labels=labels, zero_division=0)
+    # A class with no true and no predicted items would score 0 and drag the average down.
+    seen = set(y_true) | set(y_pred)
+    present = [i for i, lab in enumerate(labels) if lab in seen]
     return {
         "n": len(y_true),
         "accuracy": round(float(accuracy_score(y_true, y_pred)), 3),
-        "macro_f1": round(float(sum(f) / len(labels)), 3),
+        "macro_f1": round(float(sum(f[i] for i in present) / len(present)), 3) if present else None,
         "per_class": {
             lab: {
                 "precision": round(float(p[i]), 3),

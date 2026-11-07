@@ -50,9 +50,11 @@ def teaching_issues(dept: dict[str, Any], forms: list[dict[str, Any]], minimum: 
         for gap in gaps:
             key = gap["aspect"]
             row = found.setdefault(
-                key, {"courses": 0, "mentions": 0, "evidence": [], "examples": []}
+                key,
+                {"courses": 0, "mentions": 0, "evidence": [], "examples": [], "teachers": set()},
             )
             row["courses"] += 1
+            row["teachers"].add(form.get("faculty_id"))
             row["mentions"] += gap["negative"]
             negative = (
                 ((stats.get("aspects") or {}).get(key) or {})
@@ -66,8 +68,8 @@ def teaching_issues(dept: dict[str, Any], forms: list[dict[str, Any]], minimum: 
     if len({f.get("faculty_id") for f in usable}) < MIN_TEACHERS:
         return rows
     for key, r in sorted(found.items(), key=lambda kv: (-kv[1]["courses"], -kv[1]["mentions"])):
-        if r["courses"] < MIN_COURSES:
-            continue
+        if r["courses"] < MIN_COURSES or len(r["teachers"]) < MIN_TEACHERS:
+            continue  # one teacher's courses alone would point at that person
         label = ASPECT_LABELS[key]
         rows.append(
             {

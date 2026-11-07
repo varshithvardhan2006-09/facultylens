@@ -49,7 +49,8 @@ async def my_forms(db: Db, student: Student) -> list[MyForm]:
     done = {
         r["form_id"]
         async for r in db.responses.find(
-            {"student_hash": {"$in": list(hashes.values())}}, {"form_id": 1}
+            {"form_id": {"$in": list(hashes)}, "student_hash": {"$in": list(hashes.values())}},
+            {"form_id": 1},
         )
     }
     cycles, courses, people = await lookups(db, forms)

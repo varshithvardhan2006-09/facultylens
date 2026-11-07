@@ -24,6 +24,7 @@ All demo accounts share the password in DEMO_PASSWORD (default in .env.example).
 import argparse
 import asyncio
 import random
+import re
 import sys
 from datetime import timedelta
 from typing import Any
@@ -556,7 +557,22 @@ async def reset(database) -> dict[str, int]:
     return removed
 
 
+def _refuse_public_password() -> None:
+    """The default demo password is public; it must not open accounts on a shared database."""
+    settings = get_settings()
+    default = type(settings).model_fields["demo_password"].default
+    local = re.match(r"mongodb://(localhost|127\.0\.0\.1|\[::1\])[:/]", settings.mongodb_uri)
+    if settings.demo_password == default and not local:
+        print(
+            "This database isn't on this computer, and DEMO_PASSWORD is still the public "
+            "default. Set DEMO_PASSWORD in backend/.env to a private value first.",
+            file=sys.stderr,
+        )
+        raise SystemExit(2)
+
+
 async def seed(database, force: bool = False) -> dict[str, Any]:
+    _refuse_public_password()
     await _refuse_if_real(database, force)
     await reset(database)
     await db.ensure_indexes(database)
@@ -568,9 +584,15 @@ async def seed(database, force: bool = False) -> dict[str, Any]:
 
     dept_ids = {}
     for code, name in DEPARTMENTS:
+        # With --force a real department may already use this code; reuse it.
+        existing = await database.departments.find_one({"code": code}, {"_id": 1})
         dept_ids[code] = (
-            await database.departments.insert_one({"code": code, "name": name, **common})
-        ).inserted_id
+            existing["_id"]
+            if existing
+            else (
+                await database.departments.insert_one({"code": code, "name": name, **common})
+            ).inserted_id
+        )
 
     def user(name, role, **extra):
         return {

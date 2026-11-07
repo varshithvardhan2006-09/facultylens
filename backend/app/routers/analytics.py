@@ -16,7 +16,7 @@ from app.config import get_settings
 from app.nlp import registry
 from app.pipeline import analytics
 from app.pipeline.aggregate import effective_field
-from app.routers.overview import _hod_forms, _sees_feedback, _target
+from app.services.access import faculty_or_404, hod_forms, sees_feedback
 from app.services.forms_data import cycle_brief, form_rows
 from app.utils import oid, to_jsonable
 
@@ -120,8 +120,8 @@ async def faculty_analytics(
     faculty_id: str, db: Db, user: Staff, cycle: Annotated[str | None, Query()] = None
 ) -> dict:
     """One teacher's offerings in a cycle, side by side, plus all of them combined."""
-    target = await _target(db, faculty_id)
-    if not await _sees_feedback(db, user, target):
+    target = await faculty_or_404(db, faculty_id)
+    if not await sees_feedback(db, user, target):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "You can't see this feedback.")
     cycles = await _cycles_for(db, {"faculty_id": target["_id"]})
     chosen = _pick_cycle(cycles, cycle)
@@ -141,7 +141,7 @@ async def faculty_analytics(
                     "faculty_id": target["_id"],
                     "cycle_id": chosen["_id"],
                     "type": "teaching",
-                    **await _hod_forms(db, user, target),
+                    **await hod_forms(db, user, target),
                 }
             ).to_list(),
         )
@@ -217,8 +217,8 @@ async def sarcasm(
         )
     minimum = get_settings().min_responses_for_display
     if faculty:
-        target = await _target(db, faculty)
-        if not await _sees_feedback(db, user, target):
+        target = await faculty_or_404(db, faculty)
+        if not await sees_feedback(db, user, target):
             raise HTTPException(status.HTTP_403_FORBIDDEN, "You can't see this feedback.")
         chosen = _pick_cycle(await _cycles_for(db, {"faculty_id": target["_id"]}), cycle)
         forms = await form_rows(
@@ -228,7 +228,7 @@ async def sarcasm(
                     "faculty_id": target["_id"],
                     "cycle_id": chosen["_id"],
                     "type": "teaching",
-                    **await _hod_forms(db, user, target),
+                    **await hod_forms(db, user, target),
                 }
             ).to_list()
             if chosen

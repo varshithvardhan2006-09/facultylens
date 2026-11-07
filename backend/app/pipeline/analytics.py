@@ -67,10 +67,17 @@ def combine(stats_list: list[dict[str, Any]]) -> dict[str, Any]:
         polarity = {
             p: sum(a["polarity"][p] for a, _ in parts) for p in ("positive", "neutral", "negative")
         }
+        weighted = {
+            p: round(
+                sum((a.get("weighted_polarity") or a["polarity"]).get(p, 0) for a, _ in parts), 2
+            )
+            for p in ("positive", "negative")
+        }
         aspects[key] = {
             "label": ASPECT_LABELS[key],
             "mentions": sum(polarity.values()),
             "polarity": polarity,
+            "weighted_polarity": weighted,
             "likert_mean": _weighted([(a.get("likert_mean"), s["responses"]) for a, s in parts]),
             "evidence": {},
         }

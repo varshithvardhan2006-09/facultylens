@@ -3,6 +3,7 @@
 Temporary passwords are generated here, returned once in the response and never stored in
 plain text. Users are deactivated rather than deleted so past records stay consistent."""
 
+import asyncio
 import csv
 import io
 import re
@@ -32,6 +33,7 @@ from app.services.audit import record
 from app.utils import conflict, now, oid, to_jsonable
 
 router = APIRouter(prefix="/users", tags=["users"])
+HASH_BATCH = 8
 
 MAX_CSV_BYTES = 1_000_000
 CSV_COLUMNS = ["name", "email", "role", "department_code", "roll_no", "gender"]
@@ -270,9 +272,13 @@ async def bulk_create(request: Request, db: Db, admin: AdminUser, dry_run: bool 
 
     credentials: list[Credential] = []
     docs = []
-    for item in still_valid:
-        temp = generate_temp_password()
-        docs.append(_new_user_doc(item["data"], await hash_password_async(temp)))
+    temps = [generate_temp_password() for _ in still_valid]
+    hashes: list[str] = []
+    for start in range(0, len(temps), HASH_BATCH):  # bcrypt is slow on purpose: a few at once
+        batch = temps[start : start + HASH_BATCH]
+        hashes += await asyncio.gather(*(hash_password_async(t) for t in batch))
+    for item, temp, hashed in zip(still_valid, temps, hashes, strict=True):
+        docs.append(_new_user_doc(item["data"], hashed))
         credentials.append(
             Credential(
                 name=item["data"]["name"],

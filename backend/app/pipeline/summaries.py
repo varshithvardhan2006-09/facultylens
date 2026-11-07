@@ -43,8 +43,13 @@ def refresh_form(sync_db, form: dict[str, Any], model_version: str, force: bool 
         return "removed" if removed else "skipped"
 
     print_ = fingerprint(stats, model_version)
-    existing = sync_db.summaries.find_one({"form_id": form["_id"]}, {"fingerprint": 1})
-    if existing and existing.get("fingerprint") == print_ and not force:
+    existing = sync_db.summaries.find_one({"form_id": form["_id"]}, {"fingerprint": 1, "engine": 1})
+    outage_template = (
+        existing is not None
+        and existing.get("engine") == "fallback"
+        and get_settings().llm_configured
+    )
+    if existing and existing.get("fingerprint") == print_ and not force and not outage_template:
         return "kept"
 
     started = time.perf_counter()

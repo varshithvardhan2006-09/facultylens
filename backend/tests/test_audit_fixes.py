@@ -560,3 +560,71 @@ def test_links_in_mixed_case_are_redacted(text):
 )
 def test_sentence_starts_after_a_missing_space_stay_text(text):
     assert "[URL]" not in _redacted(text)
+
+
+def test_seed_refuses_the_public_demo_password_on_a_shared_database(monkeypatch):
+    monkeypatch.setattr(get_settings(), "mongodb_uri", "mongodb+srv://u:p@cluster0.example.net/")
+    with pytest.raises(SystemExit):
+        seed_module._refuse_public_password()
+
+
+def test_seed_allows_the_demo_password_on_this_computer():
+    seed_module._refuse_public_password()  # tests use local MongoDB
+
+
+def test_a_malformed_teacher_id_is_invalid_input():
+    from pydantic import ValidationError
+
+    from app.schemas.org import EnrolIn
+
+    with pytest.raises(ValidationError):
+        EnrolIn(faculty_ids=["not-an-id"])
+    assert EnrolIn(faculty_ids=[str(ObjectId())]).faculty_ids
+
+
+def test_re_analysing_removes_the_superseded_analysis(mongo):
+    sync_db = app_db.get_sync_db()
+    response = anon_id()
+    sync_db.analyses.insert_one({"response_id": response, "model_version": "old"})
+    new = sync_db.analyses.insert_one({"response_id": response, "model_version": "new"})
+    jobs._retire_old_queue_entries(sync_db, [response], "new")
+    assert [a["_id"] for a in sync_db.analyses.find({})] == [new.inserted_id]
+
+
+def test_department_rows_weigh_possibly_sarcastic_praise_like_courses_do():
+    from app.pipeline.analytics import combine
+
+    aspect = {
+        "polarity": {"positive": 2, "neutral": 0, "negative": 0},
+        "weighted_polarity": {"positive": 1.0, "negative": 0.0},
+        "likert_mean": 4.0,
+    }
+    stats = {"responses": 5, "aspects": {"pace": aspect}, "sentiment": {}, "likert_means": {}}
+    assert combine([stats, stats])["aspects"]["pace"]["weighted_polarity"]["positive"] == 2.0
+
+
+def test_macro_f1_ignores_classes_that_never_occur():
+    from ml.evaluate import classification
+
+    report = classification(["positive", "negative"], ["positive", "negative"])
+    assert report["macro_f1"] == 1.0
+
+
+def test_a_template_summary_from_an_llm_outage_is_rebuilt(mongo, monkeypatch):
+    from app.pipeline import summaries
+
+    sync_db = app_db.get_sync_db()
+    form = {"_id": ObjectId(), "type": "teaching", "course_id": ObjectId(), "cycle_id": ObjectId()}
+    stats = {"responses": 9, "analysed": 9}
+    sync_db.aggregates.insert_one({"form_id": form["_id"], "model_version": "v", "stats": stats})
+    monkeypatch.setattr(get_settings(), "groq_api_key", "test-key")
+    sync_db.summaries.insert_one(
+        {
+            "form_id": form["_id"],
+            "fingerprint": summaries.fingerprint(stats, "v"),
+            "engine": "fallback",
+        }
+    )
+    monkeypatch.setattr(summarize, "summarise", lambda s: {"engine": "groq:test"})
+    assert summaries.refresh_form(sync_db, form, "v") == "built"
+    assert sync_db.summaries.find_one({"form_id": form["_id"]})["engine"] == "groq:test"

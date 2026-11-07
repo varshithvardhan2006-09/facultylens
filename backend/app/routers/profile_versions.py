@@ -16,8 +16,9 @@ from app.auth.deps import Db, User, require_roles
 from app.limiter import limiter
 from app.nlp import profile_gen
 from app.routers.profiles import _faculty, _profile
+from app.services.access import faculty_or_404
 from app.services.audit import record
-from app.utils import conflict, now, oid, to_jsonable
+from app.utils import conflict, now, to_jsonable
 
 router = APIRouter(prefix="/faculty", tags=["profiles"])
 Staff = Annotated[User, Depends(require_roles("admin", "hod", "faculty"))]
@@ -121,10 +122,12 @@ async def edit_version(
     target = await _faculty(db, user, faculty_id, write=True)
     doc = await _draft(db, target, version)
     fields = body.model_dump()
-    await db.profile_versions.update_one(
-        {"_id": doc["_id"]},
+    edited = await db.profile_versions.update_one(
+        {"_id": doc["_id"], "status": "draft"},
         {"$set": {"fields": fields, "edited": True, "edited_by": user["_id"], "edited_at": now()}},
     )
+    if not edited.matched_count:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Only a draft can be changed.")
     await record(db, user, "profile.edit", faculty_id, {"version": version})
     return _version_out(await db.profile_versions.find_one({"_id": doc["_id"]}))
 
@@ -138,11 +141,16 @@ async def approve_version(faculty_id: str, version: int, db: Db, user: Staff) ->
         )
     doc = await _draft(db, target, version)
     # In this order there is never a moment with no approved profile, and only one remains.
-    await db.profile_versions.update_one(
-        {"_id": doc["_id"]}, {"$set": {"status": "approved", "approved_at": now()}}
+    stamp = now()
+    approved = await db.profile_versions.update_one(
+        {"_id": doc["_id"], "status": "draft"},
+        {"$set": {"status": "approved", "approved_at": stamp}},
     )
+    if not approved.matched_count:  # approved or superseded by a request a moment earlier
+        raise HTTPException(status.HTTP_409_CONFLICT, "Only a draft can be changed.")
+    # Only older approvals step down, so two approvals at once still leave the newest one.
     await db.profile_versions.update_many(
-        {"user_id": target["_id"], "status": "approved", "_id": {"$ne": doc["_id"]}},
+        {"user_id": target["_id"], "status": "approved", "approved_at": {"$lt": stamp}},
         {"$set": {"status": "superseded", "superseded_at": now()}},
     )
     await record(db, user, "profile.approve", faculty_id, {"version": version})
@@ -190,7 +198,5 @@ async def public_profile(db: Db, target: dict[str, Any]) -> dict[str, Any]:
 
 @router.get("/{faculty_id}/profile")
 async def get_public_profile(faculty_id: str, db: Db, _user: Staff) -> dict:
-    target = await db.users.find_one({"_id": oid(faculty_id, "Faculty member")})
-    if not target or target["role"] not in ("faculty", "hod"):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Faculty member not found")
+    target = await faculty_or_404(db, faculty_id)
     return to_jsonable(await public_profile(db, target))

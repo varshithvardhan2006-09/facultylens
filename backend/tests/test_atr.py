@@ -168,3 +168,10 @@ def test_an_issue_from_one_course_is_not_a_department_row():
     forms = [teaching("a"), teaching("b", pace=(5, 1)), teaching("c", pace=(5, 1))]
     assert atr.teaching_issues(CSE, forms, minimum=5) == []  # 1 of 3 would single out a teacher
     assert atr.teaching_issues(CSE, [teaching("a")], minimum=5) == []  # one course, one teacher
+
+
+def test_one_teachers_courses_alone_are_not_a_department_issue():
+    first, second = teaching("a"), teaching("b")
+    second["faculty_id"] = "a"  # the same teacher teaches both courses that raise pace
+    other = teaching("c", pace=(5, 1))
+    assert atr.teaching_issues(CSE, [first, second, other], minimum=5) == []

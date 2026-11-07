@@ -214,7 +214,8 @@ async def resolve(body: ResolveIn, db: Db, user: Adjudicator) -> dict[str, Any]:
     item = await db.eval_items.find_one({**_scope(user), "_id": oid(body.item_id, "Item")})
     if not item:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Item not found")
-    await db.adjudications.update_one(
+    await upsert_one(
+        db.adjudications,
         {"item_id": item["_id"]},
         {
             "$set": {
@@ -224,7 +225,6 @@ async def resolve(body: ResolveIn, db: Db, user: Adjudicator) -> dict[str, Any]:
                 "at": now(),
             }
         },
-        upsert=True,
     )
     return {"saved": True}
 

@@ -17,45 +17,13 @@ from app.feedback_spec import ASPECT_KEYS, ASPECT_LABELS
 from app.nlp import registry
 from app.pipeline.aggregate import effective_field
 from app.routers.profile_versions import public_profile
+from app.services.access import faculty_or_404, hod_forms, sees_feedback
 from app.services.forms_data import course_brief, cycle_brief, lookups, response_counts
 from app.utils import oid, to_jsonable
 
 router = APIRouter(prefix="/faculty", tags=["overview"])
 Staff = Annotated[User, Depends(require_roles("admin", "hod", "faculty"))]
 MAX_EVIDENCE_IDS = 40
-
-
-async def _target(db: Db, faculty_id: str) -> dict[str, Any]:
-    target = await db.users.find_one({"_id": oid(faculty_id, "Faculty member")})
-    if not target or target["role"] not in ("faculty", "hod"):
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Faculty member not found")
-    return target
-
-
-async def _sees_feedback(db: Db, user: User, target: dict[str, Any]) -> bool:
-    if user["role"] == "admin" or user["_id"] == target["_id"]:
-        return True
-    if user["role"] != "hod":
-        return False
-    if target.get("department_id") and target.get("department_id") == user.get("department_id"):
-        return True
-    # A teacher from elsewhere who teaches a course in this HoD's department.
-    return bool(
-        await db.courses.find_one(
-            {"department_id": user.get("department_id"), "faculty_ids": target["_id"]}, {"_id": 1}
-        )
-    )
-
-
-async def _hod_forms(db: Db, user: User, target: dict[str, Any]) -> dict[str, Any]:
-    """A HoD reads other teachers' feedback for their own department's courses only."""
-    if user["role"] != "hod" or user["_id"] == target["_id"]:
-        return {}
-    return {
-        "course_id": {
-            "$in": await db.courses.distinct("_id", {"department_id": user.get("department_id")})
-        }
-    }
 
 
 def agreement_label(rho: float | None, n: int) -> str:
@@ -132,17 +100,17 @@ async def overview(
     cycle: Annotated[str | None, Query()] = None,
     course: Annotated[str | None, Query()] = None,
 ) -> dict:
-    target = await _target(db, faculty_id)
+    target = await faculty_or_404(db, faculty_id)
     out: dict[str, Any] = {
         "profile": await public_profile(db, target),
-        "feedback_access": await _sees_feedback(db, user, target),
+        "feedback_access": await sees_feedback(db, user, target),
         "is_owner": user["_id"] == target["_id"],
     }
     if not out["feedback_access"]:
         return to_jsonable(out)
 
     forms = await db.forms.find(
-        {"faculty_id": target["_id"], "type": "teaching", **await _hod_forms(db, user, target)}
+        {"faculty_id": target["_id"], "type": "teaching", **await hod_forms(db, user, target)}
     ).to_list()
     cycles, courses, _ = await lookups(db, forms)
     counts = await response_counts(db, [f["_id"] for f in forms])
@@ -246,8 +214,8 @@ async def evidence(
     Ids that are malformed, belong to another teacher, sit below the minimum responses or point
     at hidden text are left out rather than reported, so they reveal nothing.
     """
-    target = await _target(db, faculty_id)
-    if not await _sees_feedback(db, user, target):
+    target = await faculty_or_404(db, faculty_id)
+    if not await sees_feedback(db, user, target):
         raise HTTPException(status.HTTP_403_FORBIDDEN, "You can't see this feedback.")
     wanted = [p for p in (_parse(i) for i in ids.split(",")[:MAX_EVIDENCE_IDS]) if p]
     if not wanted:
@@ -269,7 +237,7 @@ async def evidence(
                 "_id": {"$in": form_ids},
                 "faculty_id": target["_id"],
                 "type": "teaching",
-                **await _hod_forms(db, user, target),
+                **await hod_forms(db, user, target),
             },
             {"_id": 1},
         )

@@ -4,6 +4,7 @@ The results are computed offline by `python -m ml.evaluate` (models and metrics 
 API) and read here from `ml/results/evaluation.json`.
 """
 
+import asyncio
 import json
 from pathlib import Path
 from typing import Annotated, Any
@@ -21,9 +22,14 @@ Teacher = Annotated[User, Depends(require_roles("faculty", "hod"))]
 
 @router.get("/evaluation/results")
 async def results(admin: AdminUser) -> dict[str, Any]:
+    results = await asyncio.to_thread(_read_results)
+    return {"status": "ok", **results} if results is not None else {"status": "not_run"}
+
+
+def _read_results() -> dict[str, Any] | None:
     if not RESULTS_FILE.exists():
-        return {"status": "not_run"}
-    return {"status": "ok", **json.loads(RESULTS_FILE.read_text(encoding="utf-8"))}
+        return None
+    return json.loads(RESULTS_FILE.read_text(encoding="utf-8"))
 
 
 class SurveyAnswers(BaseModel):

@@ -2,6 +2,7 @@
 
 import re
 
+from bson import ObjectId
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.users import normalise_roll_no
@@ -81,6 +82,13 @@ class EnrolIn(BaseModel):
     add_roll_numbers: list[str] = Field(default_factory=list, max_length=500)
     remove_roll_numbers: list[str] = Field(default_factory=list, max_length=500)
     faculty_ids: list[str] | None = Field(default=None, max_length=10)
+
+    @field_validator("faculty_ids")
+    @classmethod
+    def _ids(cls, v: list[str] | None) -> list[str] | None:
+        if v is not None and not all(ObjectId.is_valid(i) for i in v):
+            raise ValueError("Each teacher must be an id from the user list.")
+        return v
 
     @field_validator("add_roll_numbers", "remove_roll_numbers")
     @classmethod
