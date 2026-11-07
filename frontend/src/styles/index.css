@@ -17,14 +17,12 @@
   --color-faint: var(--faint);
   --color-primary: var(--primary);
   --color-primary-ink: var(--primary-ink);
-  --color-secondary: var(--secondary);
   --color-focus: var(--focus);
   --color-chart-main: var(--chart-main);
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-warning: var(--warning);
   --color-sent-positive: var(--sent-positive);
-  --color-sent-neutral: var(--sent-neutral);
   --color-sent-negative: var(--sent-negative);
   --color-board: var(--board);
   --color-board-2: var(--board-2);
@@ -36,10 +34,7 @@
   --color-note-neutral: var(--note-neutral);
   --color-edge-praise: var(--edge-praise);
   --color-edge-criticism: var(--edge-criticism);
-  --color-edge-neutral: var(--edge-neutral);
   --color-highlight: var(--highlight);
-  --color-highlight-ink: var(--highlight-ink);
-  --color-tape: var(--tape);
 
   --font-sans: var(--ff-sans);
   --font-marker: var(--ff-marker);
