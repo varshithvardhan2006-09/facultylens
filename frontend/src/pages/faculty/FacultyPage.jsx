@@ -6,6 +6,7 @@ import { EvidenceDrawer } from "../../components/EvidenceDrawer";
 import { FormError, Select } from "../../components/forms";
 import { useAuth } from "../../context/auth";
 import { AcrossCourses } from "./AcrossCourses";
+import { AllComments } from "./AllComments";
 import { Footer, Overall, Summary } from "./Insights";
 import { ProfileColumn } from "./ProfileColumn";
 import { Wall } from "./Wall";
@@ -105,6 +106,7 @@ function Feedback({ data, facultyId, onPick, onEvidence }) {
             insights={sel.insights}
             onEvidence={(request) => onEvidence(null, request)}
           />
+          <AllComments facultyId={facultyId} cycleId={sel.cycle.id} courseId={sel.course.id} />
           <Summary
             summary={sel.summary}
             aspects={sel.insights.aspects}
