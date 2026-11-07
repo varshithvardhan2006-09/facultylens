@@ -4,6 +4,7 @@ Phase 3: response counts, and rating averages once a form has MIN_RESPONSES_FOR_
 responses. Comment text stays hidden until Phase 4 has moderated and redacted it.
 """
 
+import random
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -42,7 +43,6 @@ async def _visible_comments(db, form_id) -> list[dict] | None:
                 continue
             comments.append(
                 {
-                    "id": f"{analysis['_id']}:{field['field']}",
                     "field": field["field"],
                     "text": text,
                     "sentiment": field["sentiment"]["label"],
@@ -56,7 +56,9 @@ async def _visible_comments(db, form_id) -> list[dict] | None:
                     ),
                 }
             )
-    return comments
+    # Opaque ids in random order: an analysis id would tie one student's answers together.
+    random.shuffle(comments)
+    return [{"id": f"c{i}", **c} for i, c in enumerate(comments)]
 
 
 @router.get("/faculty/{faculty_id}", response_model=list[FormStats])

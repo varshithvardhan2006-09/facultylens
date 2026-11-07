@@ -38,8 +38,8 @@ function columns({ cycle, analysis, moderation, report }) {
 
   if (moderation > 0)
     cols.decide.push({
-      title: `${n(moderation)} comment${moderation === 1 ? "" : "s"} to moderate`,
-      body: "Held back for abusive language or uncertainty. Teachers see none of them until you decide.",
+      title: `${n(moderation)} comment${moderation === 1 ? "" : "s"} to moderate, across all cycles`,
+      body: "Held back for abusive language or uncertainty. Hidden answers stay hidden from teachers until you decide.",
       to: "/admin/moderation",
       action: "Moderate",
     });
@@ -82,8 +82,8 @@ function columns({ cycle, analysis, moderation, report }) {
 
   if (cycle.status === "open" && eligible > responses)
     cols.waiting.push({
-      title: `${n(eligible - responses)} students yet to respond`,
-      body: `${n(responses)} of ${n(eligible)} have submitted while the cycle is open.`,
+      title: `${n(eligible - responses)} responses still due`,
+      body: `${n(responses)} of ${n(eligible)} responses are in while the cycle is open.`,
       to: `/admin/cycles/${cycle.id}`,
       action: "See forms",
     });

@@ -91,7 +91,7 @@ export function LoginPage() {
         <button
           type="submit"
           className="btn btn-primary h-10 w-full"
-          disabled={busy || !form.username.trim() || !form.password}
+          disabled={status === "loading" || busy || !form.username.trim() || !form.password}
         >
           {busy ? "Signing in…" : "Sign in"}
         </button>

@@ -99,7 +99,7 @@ function Note({ item, tone, order }) {
   );
 }
 
-function Cluster({ aspect, notes, index, firstOrder, onReadAll }) {
+function Cluster({ aspect, notes, failed, index, firstOrder, onReadAll }) {
   const kind = verdict(aspect.polarity);
   const v = VERDICT[kind];
   const headingId = `cluster-${aspect.key}`;
@@ -140,7 +140,9 @@ function Cluster({ aspect, notes, index, firstOrder, onReadAll }) {
           <span className="skeleton h-16 w-full" />
         </div>
       ) : notes.length === 0 ? (
-        <p className="m-0 text-small text-muted">These notes are no longer shown.</p>
+        <p className="m-0 text-small text-muted">
+          {failed ? "Couldn't load these notes." : "These notes are no longer shown."}
+        </p>
       ) : (
         <ul className="m-0 flex list-none flex-col gap-4 p-0 pt-1">
           {notes.map(({ item, tone }, i) => (
@@ -255,6 +257,7 @@ export function Wall({ facultyId, insights, onEvidence }) {
               key={aspect.key}
               aspect={aspect}
               notes={notes}
+              failed={Boolean(state.error)}
               index={i % 3}
               firstOrder={(i % 3) * 2}
               onReadAll={(a, allIds, tone) =>

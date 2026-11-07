@@ -7,13 +7,18 @@ import { useDepartments } from "../../hooks/useDepartments";
 function RenameRow({ department, onDone }) {
   const [name, setName] = useState(department.name);
   const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
   async function save(event) {
     event.preventDefault();
+    if (busy) return;
+    setBusy(true);
     try {
       await api.patch(`/departments/${department.id}`, { name: name.trim() });
       onDone(true);
     } catch (err) {
       setError(errorMessage(err));
+    } finally {
+      setBusy(false);
     }
   }
   return (
@@ -27,7 +32,11 @@ function RenameRow({ department, onDone }) {
           autoFocus
         />
       </div>
-      <button type="submit" className="btn btn-primary h-8" disabled={name.trim().length < 2}>
+      <button
+        type="submit"
+        className="btn btn-primary h-8"
+        disabled={busy || name.trim().length < 2}
+      >
         Save
       </button>
       <button type="button" className="btn btn-ghost h-8" onClick={() => onDone(false)}>

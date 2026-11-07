@@ -152,12 +152,15 @@ export function ReportsPage() {
     if (!cycleId) return undefined;
     let alive = true;
     Promise.all([reportsApi.status(cycleId), reportsApi.actions(cycleId)])
-      .then(([status, rows]) => alive && setState({ key, status, rows, error: null }))
+      .then(
+        ([status, rows]) => alive && setState({ key, cycle: cycleId, status, rows, error: null }),
+      )
       .catch(
         (err) =>
           alive &&
           setState({
             key,
+            cycle: cycleId,
             status: null,
             rows: null,
             error: errorMessage(err, "Couldn't load the report."),
@@ -169,7 +172,8 @@ export function ReportsPage() {
   }, [cycleId, key]);
 
   const refresh = () => setReload((n) => n + 1);
-  const loaded = state.key === key;
+  // After a save the rows stay on screen while they reload, so open edits aren't lost.
+  const loaded = state.cycle === cycleId && state.rows !== null;
   const s = state.status;
   const pending = s ? s.actions - s.approved : 0;
 
@@ -212,7 +216,14 @@ export function ReportsPage() {
       </PageHeader>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-        {!cycles.data ? (
+        {cycles.error && !cycles.data ? (
+          <p className="m-0 flex flex-wrap items-center gap-3 text-body" role="alert">
+            Couldn&apos;t load the cycles.
+            <button type="button" className="btn btn-secondary h-8" onClick={cycles.reload}>
+              Try again
+            </button>
+          </p>
+        ) : !cycles.data ? (
           <span className="skeleton h-10 w-full md:w-72" />
         ) : list.length > 1 ? (
           <label className="flex flex-col gap-1.5 md:w-72">

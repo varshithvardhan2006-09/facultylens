@@ -211,7 +211,10 @@ function Sentiment({ results }) {
 
 function SentimentResult({ section }) {
   const rows = Object.entries(section.models).map(([name, m]) => ({ name, f1: m.macro_f1, m }));
-  const best = rows.reduce((a, b) => (b.f1 > a.f1 ? b : a));
+  if (rows.length === 0) {
+    return <p className="m-0 text-body text-muted">No model results in this run.</p>;
+  }
+  const best = rows.reduce((a, b) => (b.f1 > a.f1 ? b : a), rows[0]);
   return (
     <>
       <p className="m-0 text-small text-muted">
