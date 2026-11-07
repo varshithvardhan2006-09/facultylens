@@ -541,7 +541,7 @@ async def reset(database) -> dict[str, int]:
     ]
     await database.refresh_tokens.delete_many({"user_id": {"$in": synthetic_users}})
     await database.profile_versions.delete_many({"user_id": {"$in": synthetic_users}})
-    await database.survey_responses.delete_many({"user_id": {"$in": synthetic_users}})
+    await database.survey_responses.delete_many({"faculty_id": {"$in": synthetic_users}})
     forms = await database.forms.distinct("_id", {"is_synthetic": True})
     cycles = await database.feedback_cycles.distinct("_id", {"is_synthetic": True})
     responses = await database.responses.distinct("_id", {"form_id": {"$in": forms}})

@@ -58,9 +58,11 @@ def _model_gone(exc: Exception) -> bool:
 
 # Things generated wording never contains, but a comment trying to steer the LLM might ask for.
 _STEERED = re.compile(
-    r"https?://|www\.|<[a-z/]|\b(system prompt|ignore (all|any|the|previous)|instructions?)\b"
-    r"|\b(should|must|ought to)\s+(be\s+)?(fired|dismissed|sacked|removed|suspended|terminated"
-    r"|replaced|punished|resign)\b|\b(fire|dismiss|sack|suspend|terminate)\s+(him|her|them|this)\b",
+    r"https?://|www\.|<[a-z/]|\b(system prompt|ignore (all|any|the|previous)"
+    r"|(your|these|previous|above|new|my|following) instructions?"
+    r"|(disregard|forget|override|bypass)\b[^.]{0,30}\binstructions?)\b"
+    r"|\b(should|must|ought to)\s+(be\s+)?(fired|dismissed|sacked|suspended|terminated"
+    r"|punished|resign)\b|\b(fire|dismiss|sack|suspend|terminate)\s+(him|her|them|this)\b",
     re.IGNORECASE,
 )
 

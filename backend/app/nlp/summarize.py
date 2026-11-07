@@ -294,7 +294,8 @@ def ground(
         for item in items:
             valid = {e["id"] for e in allowed[kind].get(item.aspect, [])}
             ids = [i for i in dict.fromkeys(item.evidence_ids) if i in valid]
-            if ids and item.aspect not in found and not _steered(item.text):
+            written = (item.text, *(getattr(item, k) for k in extra))
+            if ids and item.aspect not in found and not any(_steered(t) for t in written):
                 found[item.aspect] = {
                     "text": item.text.strip(),
                     "aspect": item.aspect,

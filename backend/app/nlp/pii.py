@@ -16,7 +16,9 @@ TITLES = {"dr", "mr", "mrs", "ms", "prof", "sir", "madam", "maam", "ma'am", "mis
 _EMAIL = re.compile(r"\b[\w.+-]+@[\w-]+(?:\.[\w-]+)+\b")
 _URL = re.compile(
     r"\b(?:https?://|w{3,}\.)\S+"
-    r"|\b(?:[a-z0-9-]+\.)+(?:com|org|net|edu|io|co|in)\b(?:/\S*)?",  # linkedin.com/in/someone
+    # linkedin.com/in/someone. "In" and "Co" also start sentences ("well.In labs"), so those two
+    # need one consistent case or a path; the other endings match in any case.
+    r"|\b(?:[a-z0-9-]+\.)+(?:(?:com|org|net|edu|io)\b|(?-i:co|in|CO|IN)\b|(?:co|in)(?=/))(?:/\S*)?",
     re.IGNORECASE,
 )
 # Indian mobiles (+91 optional, 10 digits starting 6-9, spaced or not) and other 10-13 digit runs.
