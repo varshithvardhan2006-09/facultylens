@@ -101,18 +101,16 @@ Open http://localhost:5173, sign in as the admin, and run **Analysis**. The firs
 
 ## How it works
 
-```mermaid
-flowchart LR
-  UI["React app"] -- "/api" --> API["FastAPI"]
-  API --> DB[("MongoDB")]
-  API --> JOBS["Background analysis"]
-  JOBS --> NLP["CPU NLP models"]
-  JOBS --> LLM["Groq, or templates"]
-  JOBS --> DB
-  API --> REPORT["report PDF and Word"]
-```
+![FacultyLens architecture: client, application, AI and data tiers](docs/architecture.png)
 
-Each answer goes through normalising, PII redaction, abuse moderation, sentiment, aspect detection, emotion and irony. Results are cached per model version, so nothing is scored twice.
+| Tier | What runs there |
+|---|---|
+| **Client** | A React 18 single-page app. Each role gets its own pages, and an Axios client refreshes the session token silently. |
+| **Application** | FastAPI on Uvicorn. Every request passes CORS, security headers, rate limiting, JWT authentication with a role check, and validation, then reaches one of 16 routers. Services handle access control, profile generation, the report builder and background jobs. |
+| **AI** | A background worker on CPU-only PyTorch. Each answer is normalised, cleared of personal details, moderated, then scored for sentiment, irony, emotion and the 8 teaching aspects; summaries come last. Models load once from the local Hugging Face cache. |
+| **Data** | MongoDB, either Atlas or a local server. Results are stored per model version, so nothing is scored twice. |
+
+Outside services are optional. Groq writes the summaries, falling back to a local DistilBART model when it is unavailable, and ORCID and Semantic Scholar supply publications for profiles.
 
 ## Who uses it
 
