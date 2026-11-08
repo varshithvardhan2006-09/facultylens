@@ -89,7 +89,7 @@ def test_failures_return_none(keyed, monkeypatch, kind):
         "ratelimit": _status_error(groq.RateLimitError, 429, "slow down"),
         "boom": RuntimeError("unexpected"),
     }[kind]
-    monkeypatch.setattr(llm.time, "sleep", lambda seconds: None)
+    monkeypatch.setattr(llm, "_sleep", lambda seconds: None)
     fake_chat(monkeypatch, [error] * (4 if kind == "ratelimit" else 1))
     out, meta = llm.complete_json("s", "u", Out)
     assert out is None and meta["engine"] == "fallback" and meta["error"]
@@ -106,7 +106,7 @@ def test_rate_limit_waits_then_succeeds(keyed, monkeypatch):
     import groq
 
     slept = []
-    monkeypatch.setattr(llm.time, "sleep", slept.append)
+    monkeypatch.setattr(llm, "_sleep", slept.append)
     limit = _status_error(groq.RateLimitError, 429, "Please try again in 3.825s.")
     calls = fake_chat(monkeypatch, [limit, '{"answer": "ok"}'])
     out, meta = llm.complete_json("s", "u", Out)
@@ -118,7 +118,7 @@ def test_rate_limit_gives_up_after_the_cap(keyed, monkeypatch):
     import groq
 
     slept = []
-    monkeypatch.setattr(llm.time, "sleep", slept.append)
+    monkeypatch.setattr(llm, "_sleep", slept.append)
     limits = [_status_error(groq.RateLimitError, 429, "slow down") for _ in range(5)]
     fake_chat(monkeypatch, limits)
     out, meta = llm.complete_json("s", "u", Out)

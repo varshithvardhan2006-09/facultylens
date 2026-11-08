@@ -80,6 +80,11 @@ def _record(model: str | None, error: str | None) -> None:
 MAX_RATE_LIMIT_WAIT = 30.0  # seconds in total per call, before using the no-LLM fallback
 
 
+def _sleep(seconds: float) -> None:
+    """The rate-limit pause; its own name so tests can replace it without touching time.sleep."""
+    time.sleep(seconds)
+
+
 def rate_limit_wait(message: str) -> float:
     """Seconds to wait from Groq's "Please try again in 3.825s" (or 1m2s); 10 s if absent."""
     match = re.search(r"try again in (?:(\d+)m)?([\d.]+)s", message)
@@ -123,7 +128,7 @@ def complete_json[T: BaseModel](
             pause = rate_limit_wait(str(exc))
             if waited + pause <= MAX_RATE_LIMIT_WAIT:
                 log.info("Groq rate limit; waiting %.1f s", pause)
-                time.sleep(pause)
+                _sleep(pause)
                 waited += pause
                 continue
             error = f"{type(exc).__name__}: {exc}"
