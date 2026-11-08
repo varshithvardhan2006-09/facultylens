@@ -218,19 +218,12 @@ npm run build
 ```
 
 What "working" looks like:
-- **Tests:** all pass (590 at the last count).
+- **Tests:** all pass (629 at the last count).
 - **Lint:** nothing reported.
 - **Build:** succeeds.
 - **The app:** `http://localhost:5173` shows the landing page.
 - **Signed in as the faculty demo:** My page shows the wall of notes.
 - **System status** (as admin): the API and database show as connected.
-
----
-
-## Part 8. Optional: the videos
-
-Only needed to change or re-render the promo or the technical video. See `videos/README.md`: it covers
-the Kokoro voice setup, the music, then `npm run render:promo` and `npm run render:tech`.
 
 ---
 
