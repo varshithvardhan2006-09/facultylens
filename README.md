@@ -47,6 +47,24 @@ npm run dev
 
 Open http://localhost:5173.
 
+## Screenshots
+
+| Student: anonymous feedback forms | Faculty: profile next to the feedback |
+|---|---|
+| ![Student feedback forms](docs/screenshots/01-student-forms.png) | ![Faculty page](docs/screenshots/03-faculty-page.png) |
+
+| Faculty: the sentences behind each point | Admin: home |
+|---|---|
+| ![Evidence drawer](docs/screenshots/04-evidence-drawer.png) | ![Admin home](docs/screenshots/02-admin-home.png) |
+
+| Admin: moderation queue | Admin and HoD: department insights |
+|---|---|
+| ![Moderation queue](docs/screenshots/05-moderation-queue.png) | ![Department insights](docs/screenshots/07-department-insights.png) |
+
+| HoD: bias and sarcasm panel | Admin: Feedback report |
+|---|---|
+| ![Bias panel](docs/screenshots/06-bias-panel.png) | ![Feedback report](docs/screenshots/08-feedback-report.png) |
+
 ## Architecture
 
 ![FacultyLens architecture](docs/architecture.png)
