@@ -140,6 +140,14 @@ npm run dev
 
 Open http://localhost:5173.
 
+**After the first setup**, start everything with one command from the project folder:
+
+```bash
+.\start.cmd
+```
+
+It checks the setup and the database, starts the API and the website in their own windows, and opens the site. Close those two windows to stop it.
+
 ## Future Enhancements
 
 - Trends across semesters, with alerts
