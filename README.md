@@ -78,20 +78,51 @@ Source: J. He, *Big Data Set from RateMyProfessor.com for Professors' Teaching E
 
 ## API, AI, ML & NLP
 
-| Task | Model or tool |
-|---|---|
-| Sentiment | cardiffnlp/twitter-roberta-base-sentiment-latest |
-| Teaching area matching | sentence-transformers/all-MiniLM-L6-v2 |
-| Sentiment per teaching area | yangheng/deberta-v3-base-absa-v1.1 |
-| Abuse detection | unitary/unbiased-toxic-roberta |
-| Emotion | j-hartmann/emotion-english-distilroberta-base |
-| Sarcasm | cardiffnlp/twitter-roberta-base-irony |
-| Personal details | spaCy named entities and patterns |
-| Sentence splitting | NLTK |
-| Summaries | Groq API (gpt-oss-120b), with a local DistilBART model and templates as fallback |
-| Baselines | VADER, TF-IDF with Logistic Regression and Random Forest (scikit-learn) |
+All four are used. NLP is what the project does with student comments, the ML models are how it does it, an LLM (AI) writes the summaries, and APIs connect everything.
 
-The REST API has 79 endpoints; see the [Postman collection](postman/FacultyLens.postman_collection.json).
+### API
+
+- **Our REST API:** a FastAPI backend with 79 endpoints in `backend/app/routers/` (login, users, courses, forms, feedback, analysis, profiles, reports, evaluation, health). The React website calls it through one Axios client. See the [Postman collection](postman/FacultyLens.postman_collection.json).
+- **Outside APIs:** Groq (LLM summaries), plus ORCID and Semantic Scholar (importing a teacher's publications). All three are optional; the app keeps working without them.
+
+### AI (large language model)
+
+- **Groq**, model `openai/gpt-oss-120b`, falling back to `openai/gpt-oss-20b` (`backend/app/nlp/llm.py`).
+- Writes the strengths and areas to improve for each form, drafts profile text, and drafts actions for the report (`summarize.py`, `profile_gen.py`, `atr.py`).
+- It only sees cleaned-up comments, must answer in JSON, and every point must cite real comment ids, so it cannot invent claims. Without a key, a local model and templates write the summaries instead.
+
+### Hugging Face models
+
+All models are downloaded once from Hugging Face (`python -m app.nlp.registry --download`) and run on the CPU with PyTorch. They are listed in one place, `backend/app/nlp/registry.py`, which loads each model only when it is first needed and keeps it in memory. Classifiers are loaded with `AutoTokenizer` and `AutoModelForSequenceClassification`, inputs are cut to 256 tokens, and batches run under `torch.inference_mode()`.
+
+| Model | What it does in FacultyLens | Used in |
+|---|---|---|
+| [cardiffnlp/twitter-roberta-base-sentiment-latest](https://huggingface.co/cardiffnlp/twitter-roberta-base-sentiment-latest) | Marks each answer and each sentence positive, negative or neutral | `nlp/analyze.py` |
+| [sentence-transformers/all-MiniLM-L6-v2](https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2) | Turns sentences into vectors and finds which of the 8 teaching areas a sentence is about (cosine similarity) | `nlp/aspects.py` |
+| [yangheng/deberta-v3-base-absa-v1.1](https://huggingface.co/yangheng/deberta-v3-base-absa-v1.1) | Says whether a sentence is positive or negative about that teaching area | `nlp/analyze.py` |
+| [unitary/unbiased-toxic-roberta](https://huggingface.co/unitary/unbiased-toxic-roberta) | Scores abuse per sentence: 0.70 or more is hidden, 0.40 or more goes to the admin | `nlp/analyze.py`, `nlp/scoring.py` |
+| [j-hartmann/emotion-english-distilroberta-base](https://huggingface.co/j-hartmann/emotion-english-distilroberta-base) | Gives the mix of 7 emotions in each answer | `nlp/analyze.py` |
+| [cardiffnlp/twitter-roberta-base-irony](https://huggingface.co/cardiffnlp/twitter-roberta-base-irony) | Flags answers that may be sarcastic | `nlp/analyze.py` |
+| [sshleifer/distilbart-cnn-12-6](https://huggingface.co/sshleifer/distilbart-cnn-12-6) | Writes summaries when Groq is not available | `nlp/summarize.py` |
+| [distilbert-base-uncased](https://huggingface.co/distilbert-base-uncased) | Fine-tuned on CPU for the accuracy comparison, and used to compute BERTScore (evaluation only) | `ml/finetune.py`, `ml/evaluate.py` |
+
+`ML_MODE=full` swaps in larger models for two tasks (`all-mpnet-base-v2` and `facebook/bart-large-cnn`); the default `light` mode uses the models above.
+
+### ML (machine learning)
+
+- **In the app:** the pretrained Hugging Face models above. They are used as they are, not trained by us.
+- **In the evaluation (`backend/ml/`):** we trained our own models and compared them with the pretrained one on public RateMyProfessors reviews: TF-IDF with Logistic Regression and with Random Forest (scikit-learn), and DistilBERT fine-tuned on CPU. Twitter-RoBERTa scored best (0.815 accuracy), so the app uses it. See [Dataset](#dataset).
+- TF-IDF is also used in the app to pick keywords for teacher profiles (`profile_gen.py`).
+
+### NLP (natural language processing)
+
+| Step | Tool | Where |
+|---|---|---|
+| Clean text and split it into sentences | NLTK | `nlp/preprocess.py` |
+| Remove names, phone numbers, emails, roll numbers and links | spaCy `en_core_web_sm` plus patterns | `nlp/pii.py` |
+| Sentiment, aspect sentiment, abuse, emotion, sarcasm | Hugging Face models above | `nlp/analyze.py` |
+| Summaries | Groq, or DistilBART and templates | `nlp/summarize.py` |
+| Word-list baseline | VADER | `ml/baseline.py` |
 
 ## Security
 
