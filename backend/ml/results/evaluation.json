@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-10-21T06:03:01+00:00",
-  "model_version": "light-r1-912bb0b3",
+  "generated_at": "2026-11-20T07:33:41+00:00",
+  "model_version": "light-r2-b820b5a3",
   "dataset": {
     "name": "Big Data Set from RateMyProfessor.com for Professors' Teaching Evaluation",
     "author": "Jibo He",
@@ -83,7 +83,7 @@
             "accuracy": 0.673,
             "macro_f1": 0.488
           },
-          "seconds": 0.7
+          "seconds": 3.0
         },
         "TF-IDF + Logistic Regression": {
           "n": 611,
@@ -138,7 +138,7 @@
             "accuracy": 0.748,
             "macro_f1": 0.665
           },
-          "seconds": 0.3
+          "seconds": 1.1
         },
         "TF-IDF + Random Forest": {
           "n": 611,
@@ -193,7 +193,7 @@
             "accuracy": 0.711,
             "macro_f1": 0.539
           },
-          "seconds": 1.1
+          "seconds": 3.1
         },
         "Twitter-RoBERTa (pretrained, zero-shot)": {
           "n": 611,
@@ -248,29 +248,29 @@
             "accuracy": 0.77,
             "macro_f1": 0.653
           },
-          "seconds": 57.9
+          "seconds": 183.6
         },
         "DistilBERT (fine-tuned on CPU)": {
           "n": 611,
-          "accuracy": 0.807,
-          "macro_f1": 0.653,
+          "accuracy": 0.804,
+          "macro_f1": 0.651,
           "per_class": {
             "negative": {
-              "precision": 0.786,
-              "recall": 0.781,
-              "f1": 0.784,
+              "precision": 0.785,
+              "recall": 0.775,
+              "f1": 0.78,
               "support": 160
             },
             "neutral": {
-              "precision": 0.316,
+              "precision": 0.31,
               "recall": 0.225,
-              "f1": 0.263,
+              "f1": 0.261,
               "support": 80
             },
             "positive": {
-              "precision": 0.886,
-              "recall": 0.943,
-              "f1": 0.914,
+              "precision": 0.884,
+              "recall": 0.941,
+              "f1": 0.911,
               "support": 371
             }
           },
@@ -282,9 +282,9 @@
             ],
             "matrix": [
               [
-                125,
+                124,
                 23,
-                12
+                13
               ],
               [
                 29,
@@ -293,17 +293,17 @@
               ],
               [
                 5,
-                16,
-                350
+                17,
+                349
               ]
             ]
           },
           "negation": {
             "n": 318,
-            "accuracy": 0.761,
-            "macro_f1": 0.643
+            "accuracy": 0.755,
+            "macro_f1": 0.639
           },
-          "seconds": 857.7
+          "seconds": 9967.5
         }
       }
     },
@@ -435,7 +435,7 @@
     "groups": 20,
     "system_built_now": 0,
     "engines": {
-      "fallback": 20
+      "groq:openai/gpt-oss-120b": 20
     },
     "grounding": {
       "status": "pending",
@@ -443,7 +443,7 @@
       "need": 1,
       "what": "grounding checks"
     },
-    "llm": "not run: no GROQ_API_KEY",
+    "llm": "see engines",
     "status": "pending",
     "have": 0,
     "need": 20,
@@ -457,21 +457,21 @@
   },
   "performance": {
     "status": "ok",
-    "per_response_ms_mean": 310.6,
-    "per_response_ms_p95": 599.5,
-    "peak_rss_mb": 2820,
-    "responses": 553,
+    "per_response_ms_mean": 366.9,
+    "per_response_ms_p95": 750.9,
+    "peak_rss_mb": 3938,
+    "responses": 614,
     "all_models_rss_mb": 3884.9,
     "machine": {
       "cpu": "AMD64 Family 25 Model 80 Stepping 0, AuthenticAMD",
       "logical_cores": 12,
       "ram_gb": 15.3
     },
-    "measured_at": "2026-10-20T06:57:03+00:00"
+    "measured_at": "2026-10-21T07:03:40+00:00"
   },
   "charts": [
     "sentiment_benchmark_macro_f1.png",
     "sentiment_benchmark_confusion.png"
   ],
-  "seconds": 926.9
+  "seconds": 10202.1
 }

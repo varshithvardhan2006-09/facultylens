@@ -55,7 +55,7 @@ Accuracy was measured on public RateMyProfessors reviews, using each student's s
 | TF-IDF + Logistic Regression | 0.789 | 0.671 |
 | TF-IDF + Random Forest | 0.764 | 0.552 |
 | Twitter-RoBERTa (used in the app) | 0.815 | 0.647 |
-| DistilBERT (fine-tuned on CPU) | 0.807 | 0.653 |
+| DistilBERT (fine-tuned on CPU) | 0.804 | 0.651 |
 
 Source: J. He, *Big Data Set from RateMyProfessor.com for Professors' Teaching Evaluation*, Mendeley Data, [doi:10.17632/fvtfjyvw7d.2](https://data.mendeley.com/datasets/fvtfjyvw7d/2), CC BY 4.0. The raw file is not included. Full results: [RESULTS.md](backend/ml/results/RESULTS.md).
 
