@@ -1,5 +1,7 @@
 from datetime import timedelta
 
+import pytest
+
 from app.config import get_settings
 from app.feedback_spec import ASPECT_KEYS, CURRICULUM_KEYS
 from app.services.anonymity import student_form_hash
@@ -198,6 +200,54 @@ async def test_not_enrolled_closed_and_not_open(client, world):
         f"/api/forms/{form_id}/responses", headers=world["headers"]["student"], json=TEACHING
     )
     assert r.status_code == 409 and "closed" in r.json()["detail"]
+
+
+async def test_admin_extends_a_passed_deadline_so_students_can_submit(client, world):
+    cycle = await open_cycle(client, world)
+    form_id = (await student_forms(client, world))[0]["id"]
+    await world["db"].feedback_cycles.update_many(
+        {}, {"$set": {"closes_at": now() - timedelta(hours=1)}}
+    )
+    url = f"/api/cycles/{cycle['id']}/dates"
+    h = world["headers"]["admin"]
+    dates = {
+        "opens_at": (now() - timedelta(days=2)).isoformat(),
+        "closes_at": (now() + timedelta(days=7)).isoformat(),
+    }
+    changed = await client.patch(url, headers=h, json=dates)
+    assert changed.status_code == 200 and changed.json()["status"] == "open"
+    r = await client.post(
+        f"/api/forms/{form_id}/responses", headers=world["headers"]["student"], json=TEACHING
+    )
+    assert r.status_code == 201
+    audit = await world["db"].audit_log.find_one({"action": "cycle.dates"})
+    assert audit and audit["target"] == cycle["id"]
+
+
+@pytest.mark.parametrize(
+    ("opens", "closes"),
+    [(1, -1), (-5, -1)],
+    ids=["closes before it opens", "closing date in the past"],
+)
+async def test_cycle_dates_must_make_sense(client, world, opens, closes):
+    cycle = await open_cycle(client, world)
+    body = {
+        "opens_at": (now() + timedelta(days=opens)).isoformat(),
+        "closes_at": (now() + timedelta(days=closes)).isoformat(),
+    }
+    r = await client.patch(
+        f"/api/cycles/{cycle['id']}/dates", headers=world["headers"]["admin"], json=body
+    )
+    assert r.status_code == 422
+
+
+async def test_a_closed_cycle_keeps_its_dates(client, world):
+    cycle = await open_cycle(client, world)
+    h = world["headers"]["admin"]
+    await client.post(f"/api/cycles/{cycle['id']}/close", headers=h)
+    body = {"opens_at": now().isoformat(), "closes_at": (now() + timedelta(days=3)).isoformat()}
+    r = await client.patch(f"/api/cycles/{cycle['id']}/dates", headers=h, json=body)
+    assert r.status_code == 409
 
 
 async def test_feedback_hidden_below_minimum_then_averages(client, world, monkeypatch):

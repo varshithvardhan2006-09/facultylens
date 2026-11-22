@@ -3,10 +3,91 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router";
 import { errorMessage } from "../../api/client";
 import { feedbackApi, formatDate } from "../../api/feedback";
-import { FormError } from "../../components/forms";
+import { Field, FormError, TextInput } from "../../components/forms";
 import { PageHeader, Panel } from "../../components/PageHeader";
 import { RateBar } from "../../components/RateBar";
 import { CycleStatus } from "../../components/CycleStatus";
+
+/** yyyy-mm-dd in the browser's own time zone, for a date input. */
+function toDateInput(value) {
+  const date = new Date(value);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function DatesPanel({ cycle, onChanged }) {
+  const [form, setForm] = useState({
+    opens_at: toDateInput(cycle.opens_at),
+    closes_at: toDateInput(cycle.closes_at),
+  });
+  const [error, setError] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const closedByDate = new Date(cycle.closes_at) <= new Date();
+  const set = (key) => (event) => {
+    setForm({ ...form, [key]: event.target.value });
+    setSaved(false);
+  };
+
+  async function submit(event) {
+    event.preventDefault();
+    if (!form.opens_at || !form.closes_at) {
+      setError("Choose both the opening and the closing date.");
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      onChanged(
+        await feedbackApi.changeDates(cycle.id, {
+          opens_at: new Date(`${form.opens_at}T00:00:00`).toISOString(),
+          closes_at: new Date(`${form.closes_at}T23:59:00`).toISOString(),
+        }),
+      );
+      setSaved(true);
+    } catch (err) {
+      setError(errorMessage(err, "Couldn't change the dates."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Panel title="Dates">
+      <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
+        {closedByDate && cycle.status === "open" && (
+          <p className="m-0 flex flex-wrap items-baseline gap-2 text-body">
+            <span className="pill pill-warning">Deadline passed</span>
+            <span>Students can&apos;t submit until you move the closing date later.</span>
+          </p>
+        )}
+        <div className="grid gap-4 sm:grid-cols-2 md:max-w-xl">
+          <Field label="Opens">
+            {(a) => (
+              <TextInput {...a} type="date" value={form.opens_at} onChange={set("opens_at")} />
+            )}
+          </Field>
+          <Field label="Closes" hint="End of that day">
+            {(a) => (
+              <TextInput {...a} type="date" value={form.closes_at} onChange={set("closes_at")} />
+            )}
+          </Field>
+        </div>
+        <FormError>{error}</FormError>
+        <div className="flex flex-wrap items-center gap-3">
+          <button type="submit" className="btn btn-primary" disabled={busy}>
+            {busy ? "Saving…" : "Save dates"}
+          </button>
+          {saved && (
+            <span className="text-small text-muted" role="status">
+              Dates saved.
+            </span>
+          )}
+        </div>
+      </form>
+    </Panel>
+  );
+}
 
 function PublishPanel({ cycle, onChanged }) {
   const [preview, setPreview] = useState(null);
@@ -183,6 +264,14 @@ export function CycleDetailPage() {
           <span className="text-small text-muted">Responses across all forms</span>
           <RateBar value={cycle.counts.responses} total={cycle.counts.eligible} />
         </div>
+      )}
+
+      {cycle && cycle.status !== "closed" && (
+        <DatesPanel
+          key={`${cycle.opens_at}|${cycle.closes_at}`}
+          cycle={cycle}
+          onChanged={setCycle}
+        />
       )}
 
       {cycle && cycle.status !== "closed" && (

@@ -10,6 +10,7 @@ export const feedbackApi = {
   preview: (id) => api.get(`/cycles/${id}/preview`).then((r) => r.data),
   publish: (id) => api.post(`/cycles/${id}/publish`).then((r) => r.data),
   close: (id) => api.post(`/cycles/${id}/close`).then((r) => r.data),
+  changeDates: (id, body) => api.patch(`/cycles/${id}/dates`, body).then((r) => r.data),
   cycleForms: (id) => api.get(`/cycles/${id}/forms`).then((r) => r.data),
   facultyFeedback: (facultyId, params) =>
     api.get(`/feedback/faculty/${facultyId}`, { params }).then((r) => r.data),

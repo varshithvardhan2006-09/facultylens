@@ -35,6 +35,26 @@ class CycleIn(BaseModel):
         return self
 
 
+class CycleDatesIn(BaseModel):
+    """New opening and closing dates for a draft or open cycle."""
+
+    opens_at: datetime
+    closes_at: datetime
+
+    @field_validator("opens_at", "closes_at")
+    @classmethod
+    def _with_timezone(cls, v: datetime) -> datetime:
+        return v if v.tzinfo else v.replace(tzinfo=UTC)
+
+    @model_validator(mode="after")
+    def _dates(self):
+        if self.closes_at <= self.opens_at:
+            raise ValueError("The closing date must be after the opening date.")
+        if self.closes_at <= datetime.now(UTC):
+            raise ValueError("The closing date must be in the future.")
+        return self
+
+
 class CycleCounts(BaseModel):
     teaching_forms: int
     curriculum_forms: int

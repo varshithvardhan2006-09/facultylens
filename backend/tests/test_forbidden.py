@@ -118,6 +118,12 @@ ENDPOINTS = [
     ("GET", "/api/cycles/{cycle}/preview", {"admin"}, None),
     ("POST", "/api/cycles/{cycle}/publish", {"admin"}, None),
     ("POST", "/api/cycles/{cycle}/close", {"admin"}, None),
+    (
+        "PATCH",
+        "/api/cycles/{cycle}/dates",
+        {"admin"},
+        {"opens_at": CYCLE["opens_at"], "closes_at": CYCLE["closes_at"]},
+    ),
     ("GET", "/api/cycles/{cycle}/forms", {"admin", "hod"}, None),
     ("GET", "/api/forms/my", {"student"}, None),
     ("GET", "/api/forms/{form}", ANY, None),

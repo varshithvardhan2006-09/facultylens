@@ -1465,6 +1465,50 @@
               }
             }
           ]
+        },
+        {
+          "name": "PATCH /cycles/:id/dates (admin)",
+          "request": {
+            "method": "PATCH",
+            "url": {
+              "raw": "{{baseUrl}}/cycles/{{cycleId}}/dates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cycles",
+                "{{cycleId}}",
+                "dates"
+              ]
+            },
+            "description": "Change a draft or open cycle's opening and closing dates, e.g. to extend a deadline. The closing date must be after the opening date and in the future; a closed cycle can't be changed (409).",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"opens_at\": \"2027-01-01T00:00:00Z\",\n  \"closes_at\": \"2027-02-01T00:00:00Z\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
         }
       ]
     },

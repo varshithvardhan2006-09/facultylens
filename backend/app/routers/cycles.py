@@ -9,7 +9,7 @@ from pymongo.errors import DuplicateKeyError
 
 from app.auth.deps import AdminUser, Db, User, require_roles
 from app.feedback_spec import questions
-from app.schemas.feedback import CycleIn, CycleOut, FormOut, PreviewOut
+from app.schemas.feedback import CycleDatesIn, CycleIn, CycleOut, FormOut, PreviewOut
 from app.services.audit import record
 from app.services.forms_data import course_brief, cycle_brief, lookups, response_counts
 from app.utils import now, oid
@@ -114,6 +114,27 @@ async def create_cycle(body: CycleIn, db: Db, admin: AdminUser) -> CycleOut:
 @router.get("/{cycle_id}", response_model=CycleOut)
 async def get_cycle(cycle_id: str, db: Db, user: Staff) -> CycleOut:
     return await _out(db, await _get(db, cycle_id), with_counts=user["role"] == "admin")
+
+
+@router.patch("/{cycle_id}/dates", response_model=CycleOut)
+async def change_dates(cycle_id: str, body: CycleDatesIn, db: Db, admin: AdminUser) -> CycleOut:
+    """Move the opening or closing date, e.g. to extend a deadline. A closed cycle stays closed."""
+    cycle = await _get(db, cycle_id)
+    if cycle["status"] == "closed":
+        raise HTTPException(
+            status.HTTP_409_CONFLICT, "This cycle is closed. Create a new one instead."
+        )
+    await db.feedback_cycles.update_one(
+        {"_id": cycle["_id"]}, {"$set": {"opens_at": body.opens_at, "closes_at": body.closes_at}}
+    )
+    await record(
+        db,
+        admin,
+        "cycle.dates",
+        cycle_id,
+        {"opens_at": body.opens_at.isoformat(), "closes_at": body.closes_at.isoformat()},
+    )
+    return await _out(db, await _get(db, cycle_id), with_counts=True)
 
 
 @router.get("/{cycle_id}/preview", response_model=PreviewOut)

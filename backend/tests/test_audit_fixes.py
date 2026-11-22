@@ -566,7 +566,9 @@ def test_seed_refuses_the_public_demo_password_on_a_shared_database(monkeypatch)
     settings = get_settings()
     monkeypatch.setattr(settings, "mongodb_uri", "mongodb+srv://u:p@cluster0.example.net/")
     # Use the public default even when backend/.env sets a private DEMO_PASSWORD.
-    monkeypatch.setattr(settings, "demo_password", type(settings).model_fields["demo_password"].default)
+    monkeypatch.setattr(
+        settings, "demo_password", type(settings).model_fields["demo_password"].default
+    )
     with pytest.raises(SystemExit):
         seed_module._refuse_public_password()
 
