@@ -82,7 +82,7 @@ All four are used. NLP is what the project does with student comments, the ML mo
 
 ### API
 
-- **Our REST API:** a FastAPI backend with 79 endpoints in `backend/app/routers/` (login, users, courses, forms, feedback, analysis, profiles, reports, evaluation, health). The React website calls it through one Axios client. See the [Postman collection](postman/FacultyLens.postman_collection.json).
+- **Our REST API:** a FastAPI backend with 80 endpoints in `backend/app/routers/` (login, users, courses, forms, feedback, analysis, profiles, reports, evaluation, health). The React website calls it through one Axios client. See the [Postman collection](postman/FacultyLens.postman_collection.json).
 - **Outside APIs:** Groq (LLM summaries), plus ORCID and Semantic Scholar (importing a teacher's publications). All three are optional; the app keeps working without them.
 
 ### AI (large language model)
