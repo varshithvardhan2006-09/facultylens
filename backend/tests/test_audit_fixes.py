@@ -563,7 +563,10 @@ def test_sentence_starts_after_a_missing_space_stay_text(text):
 
 
 def test_seed_refuses_the_public_demo_password_on_a_shared_database(monkeypatch):
-    monkeypatch.setattr(get_settings(), "mongodb_uri", "mongodb+srv://u:p@cluster0.example.net/")
+    settings = get_settings()
+    monkeypatch.setattr(settings, "mongodb_uri", "mongodb+srv://u:p@cluster0.example.net/")
+    # Use the public default even when backend/.env sets a private DEMO_PASSWORD.
+    monkeypatch.setattr(settings, "demo_password", type(settings).model_fields["demo_password"].default)
     with pytest.raises(SystemExit):
         seed_module._refuse_public_password()
 
